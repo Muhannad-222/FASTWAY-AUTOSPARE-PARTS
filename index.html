@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Auto Spare Parts Data Store</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .modal-backdrop { background: rgba(0,0,0,.45); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; }
+    #searchInput { 
+      background: linear-gradient(to right, #e0f2fe, #bae6fd); 
+      border: 1px solid #3b82f6;
+      transition: all 0.3s; 
+    }
+    #searchInput:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 5px rgba(37,99,235,0.5);
+    }
+    
+    /* Styles for the new landscape card layout */
+    .part-card {
+        background-color: white;
+        border-radius: 1.5rem; 
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+        padding: 1.25rem; 
+        margin-bottom: 2rem; 
+        
+        /* === LANDSCAPE STYLE CHANGES START === */
+        display: flex;
+        flex-direction: row; /* Horizontal layout for landscape */
+        justify-content: space-between;
+        align-items: stretch;
+        min-height: 180px; /* Ensures a minimum height */
+        /* === LANDSCAPE STYLE CHANGES END === */
+        
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; 
+    }
+    .part-card:hover {
+        transform: translateY(-5px); 
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
+    }
+    
+    /* Container for Zoren No. and Actions (Left side of the card) */
+    .card-header-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding-right: 1.5rem;
+        border-right: 2px solid #e5e7eb; /* Divider line */
+        min-width: 150px;
+    }
+    
+    .card-actions {
+        display: flex;
+        gap: 0.75rem; 
+        padding-top: 1rem;
+        justify-content: flex-start;
+    }
+    
+    /* Container for the details (Right side of the card) */
+    .card-details-container {
+        flex-grow: 1;
+        padding-left: 1.5rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Split details into two columns */
+        gap: 0.5rem 1.5rem; /* Vertical and horizontal gap */
+    }
+
+    .card-detail-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .card-zoren-no {
+        font-size: 2rem; 
+        font-weight: 800; 
+        color: #1e40af; 
+        word-break: break-all;
+    }
+    .card-label {
+        font-weight: 500; 
+        color: #4b5563; 
+        font-size: 0.875rem; 
+        margin-top: 0.75rem;
+    }
+    .card-value {
+        font-weight: 700; 
+        color: #1f2937; 
+        font-size: 1.125rem; 
+        line-height: 1.3;
+    }
+    .oem-tag {
+        display: inline-block;
+        background-color: #eff6ff; 
+        color: #1e40af; 
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px; 
+        font-size: 0.875rem; 
+        font-weight: 600; 
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Ensure the grid adapts to the wider cards */
+    #partsContainer {
+        gap: 2rem; 
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); /* Adjusted min-width for wider cards */
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen text-gray-800">
+
+<div class="max-w-6xl mx-auto p-6">
+  <header class="mb-6">
+    <h1 class="text-3xl font-semibold">Auto Spare Parts — Data Manager</h1>
+    <p class="text-sm text-gray-600">Add, edit, upload bulk JSON, export CSV/JSON, and search your spare parts.</p>
+  </header>
+
+  <section class="mb-4 flex flex-wrap gap-2 items-center">
+    <button id="btnAdd" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">+ Add Part</button>
+    <button id="btnBulk" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Bulk JSON Upload</button>
+    <input id="fileJson" type="file" accept=".json,application/json" class="hidden" />
+    <button id="btnDownloadJson" class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900">Download JSON</button>
+    <button id="btnExportCsv" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Export CSV</button>
+
+    <div class="ml-auto flex items-center gap-2">
+      <input id="searchInput" type="search" placeholder="Search Zoren / OEM / Car Maker / Applications" class="px-3 py-2 rounded border w-80" />
+      <select id="perPage" class="px-2 py-2 rounded border">
+        <option value="10">10 / page</option>
+        <option value="25">25 / page</option>
+        <option value="50">50 / page</option>
+        <option value="100">100 / page</option>
+      </select>
+    </div>
+  </section>
+
+  <section class="bg-white rounded shadow overflow-hidden">
+    <div id="partsContainer" class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      </div>
+
+    <div class="p-3 flex items-center justify-between">
+      <div class="text-sm text-gray-600" id="summaryText">0 records</div>
+      <div class="flex items-center gap-2">
+        <button id="prevPage" class="px-2 py-1 border rounded">Prev</button>
+        <span id="pageInfo" class="px-2"></span>
+        <button id="nextPage" class="px-2 py-1 border rounded">Next</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-6 bg-white p-4 rounded shadow">
+    <h2 class="font-medium mb-2">Quick JSON input (paste JSON array here)</h2>
+    <textarea id="jsonTextbox" rows="6" class="w-full border rounded p-2 mono" placeholder='[{"zoren":"ZRM0001001","oem":["31110-09000","E8678M"],"car_maker":"Hyundai","applications":"HYUNDAI SONATA"}]'></textarea>
+    <div class="mt-2 flex gap-2">
+      <button id="btnLoadFromTextarea" class="px-4 py-2 bg-indigo-600 text-white rounded">Load & Save</button>
+      <button id="btnClearTextarea" class="px-4 py-2 border rounded">Clear</button>
+      <div class="ml-auto text-sm text-gray-500">Fields: <span class="font-semibold">zoren</span>, <span class="font-semibold">oem</span>, <span class="font-semibold">car_maker</span>, <span class="font-semibold">applications</span>.</div>
+    </div>
+  </section>
+</div>
+
+<div id="modalAddEdit" class="hidden fixed inset-0 z-40 flex items-center justify-center">
+  <div class="modal-backdrop absolute inset-0"></div>
+  <div class="bg-white rounded shadow-lg z-50 w-full max-w-2xl p-5">
+    <h3 id="modalTitle" class="text-xl font-semibold mb-3">Add Part</h3>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-sm">ZOREN No.</label>
+        <input id="inpZoren" class="w-full px-3 py-2 border rounded" />
+      </div>
+      <div>
+        <label class="block text-sm">OEM No. (comma separated or JSON array)</label>
+        <input id="inpOem" class="w-full px-3 py-2 border rounded" placeholder="31110-09000, E8678M" />
+      </div>
+      <div>
+        <label class="block text-sm">Car Maker</label>
+        <input id="inpCarMaker" class="w-full px-3 py-2 border rounded" />
+      </div>
+      <div>
+        <label class="block text-sm">Applications</label>
+        <input id="inpApplications" class="w-full px-3 py-2 border rounded" />
+      </div>
+    </div>
+
+    <div class="mt-4 flex justify-end gap-2">
+      <button id="btnCancelModal" class="px-4 py-2 border rounded">Cancel</button>
+      <button id="btnSaveModal" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalBulk" class="hidden fixed inset-0 z-40 flex items-center justify-center">
+  <div class="modal-backdrop absolute inset-0"></div>
+  <div class="bg-white rounded shadow-lg z-50 w-full max-w-3xl p-5">
+    <h3 class="text-xl font-semibold mb-2">Bulk JSON Upload</h3>
+    <p class="text-sm text-gray-600 mb-3">Paste JSON array or upload a .json file.</p>
+
+    <div>
+      <label class="block text-sm mb-1">Paste JSON array</label>
+      <textarea id="bulkTextarea" rows="8" class="w-full border rounded p-2 mono" placeholder='[{"zoren":"ZRM...","oem":["..."],"car_maker":"...","applications":"..."}]'></textarea>
+    </div>
+
+    <div class="mt-3 flex items-center gap-3">
+      <input id="bulkFileInput" type="file" />
+      <button id="btnLoadBulk" class="px-3 py-2 bg-indigo-600 text-white rounded">Load & Merge</button>
+      <button id="btnReplaceBulk" class="px-3 py-2 bg-red-600 text-white rounded">Replace All</button>
+      <button id="btnCloseBulk" class="ml-auto px-3 py-2 border rounded">Close</button>
+    </div>
+
+    <div class="mt-3 text-sm text-gray-500">
+      <strong>Tip:</strong> If OEM is a string, it will be split by commas into an array.
+    </div>
+  </div>
+</div>
+
+<script>
+  let parts = [];
+  let editIndex = -1;
+  let page = 1;
+  let perPage = 10;
+  const partsContainer = document.getElementById('partsContainer'); 
+
+  function normalizeRecord(item) {
+    const zoren = (item.zoren ?? '').toString().trim();
+    let oem = item.oem ?? [];
+    if (typeof oem === 'string') oem = oem.split(',').map(s=>s.trim()).filter(Boolean);
+    if (!Array.isArray(oem)) oem = [String(oem)];
+    const car_maker = (item.car_maker ?? '').toString().trim();
+    const applications = (item.applications ?? '').toString().trim();
+    return { zoren, oem, car_maker, applications };
+  }
+
+  function saveToLocal() { localStorage.setItem('parts_data_v1', JSON.stringify(parts)); }
+  function loadFromLocal() { const raw = localStorage.getItem('parts_data_v1'); if(raw) { try { parts = JSON.parse(raw).map(normalizeRecord); } catch{} } }
+
+  function renderCards() { 
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    perPage = parseInt(document.getElementById('perPage').value, 10) || 10;
+
+    let filtered = parts.filter(item => {
+      if (!q) return true;
+      const text = (item.zoren+' '+item.oem.join(' ')+' '+item.car_maker+' '+item.applications).toLowerCase();
+      return text.includes(q);
+    });
+
+    filtered.sort((a,b)=>a.zoren.localeCompare(b.zoren, undefined, {numeric:true}));
+
+    const total = filtered.length;
+    const pages = Math.max(1, Math.ceil(total/perPage));
+    page = Math.min(page, pages);
+    const start = (page-1)*perPage;
+    const pageItems = filtered.slice(start, start+perPage);
+
+    partsContainer.innerHTML = ''; 
+    pageItems.forEach((item,i)=>{
+      const oemTags = item.oem.map(oem => `<span class="oem-tag">${escapeHtml(oem)}</span>`).join('');
+      const card = document.createElement('div');
+      card.className = 'part-card';
+      // Structure changed for landscape style
+      card.innerHTML = `
+        <div class="card-header-container">
+          <h3 class="card-zoren-no">${escapeHtml(item.zoren)}</h3>
+          <div class="card-actions">
+            <button class="editBtn text-gray-500 hover:text-blue-700" title="Edit" data-index="${start+i}">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-7-6l7-7m-7 7l-7 7" /></svg>
+            </button>
+            <button class="delBtn text-red-500 hover:text-red-700" title="Delete" data-index="${start+i}">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="card-details-container">
+          <div class="card-detail-group">
+            <div class="card-label">Car Maker:</div>
+            <div class="card-value">${escapeHtml(item.car_maker)}</div>
+          </div>
+          
+          <div class="card-detail-group">
+            <div class="card-label">Applications:</div>
+            <div class="card-value">${escapeHtml(item.applications)}</div>
+          </div>
+          
+          <div class="card-detail-group col-span-2">
+            <div class="card-label">OEM No.:</div>
+            <div class="flex flex-wrap pt-1 pb-2">${oemTags}</div>
+          </div>
+        </div>
+      `;
+      partsContainer.appendChild(card);
+    });
+
+    document.getElementById('summaryText').textContent = `${total} record${total===1?'':'s'}`;
+    document.getElementById('pageInfo').textContent = `Page ${page} / ${pages}`;
+    document.getElementById('prevPage').disabled = page<=1;
+    document.getElementById('nextPage').disabled = page>=pages;
+
+    Array.from(document.getElementsByClassName('editBtn')).forEach(b=>b.addEventListener('click', onEdit));
+    Array.from(document.getElementsByClassName('delBtn')).forEach(b=>b.addEventListener('click', onDelete));
+  }
+
+  function escapeHtml(s){ return s? String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') : ''; }
+
+  document.getElementById('prevPage').addEventListener('click', ()=>{ page=Math.max(1,page-1); renderCards(); });
+  document.getElementById('nextPage').addEventListener('click', ()=>{ page++; renderCards(); });
+  document.getElementById('searchInput').addEventListener('input', ()=>{ page=1; renderCards(); });
+  document.getElementById('perPage').addEventListener('change', ()=>{ page=1; renderCards(); });
+  
+  const modalAddEdit = document.getElementById('modalAddEdit');
+  document.getElementById('btnAdd').addEventListener('click', ()=>openAddModal());
+  document.getElementById('btnCancelModal').addEventListener('click', ()=>modalAddEdit.classList.add('hidden'));
+  document.getElementById('btnSaveModal').addEventListener('click', ()=>{
+    const zoren = document.getElementById('inpZoren').value.trim();
+    if(!zoren){ alert('ZOREN No. is required'); return; }
+    let oemRaw=document.getElementById('inpOem').value.trim();
+    let oemArr=[];
+    if(oemRaw){ try{ oemArr=oemRaw.startsWith('[')?JSON.parse(oemRaw):oemRaw.split(',').map(s=>s.trim()).filter(Boolean);}catch{ oemArr=oemRaw.split(',').map(s=>s.trim()).filter(Boolean); } }
+    const car_maker=document.getElementById('inpCarMaker').value.trim();
+    const applications=document.getElementById('inpApplications').value.trim();
+    const record={zoren,oem:oemArr,car_maker,applications};
+    if(editIndex>=0) parts[editIndex]=normalizeRecord(record); else parts.push(normalizeRecord(record));
+    saveToLocal(); modalAddEdit.classList.add('hidden'); renderCards(); 
+  });
+
+  function openAddModal(item=null,index=-1){
+    editIndex=index;
+    document.getElementById('modalTitle').textContent=item?'Edit Part':'Add Part';
+    document.getElementById('inpZoren').value=item?item.zoren:'';
+    document.getElementById('inpOem').value=item?item.oem.join(', '):'';
+    document.getElementById('inpCarMaker').value=item?item.car_maker:'';
+    document.getElementById('inpApplications').value=item?item.applications:'';
+    modalAddEdit.classList.remove('hidden');
+  }
+
+  function onEdit(e){ const idx=parseInt(e.currentTarget.getAttribute('data-index'),10); if(!Number.isFinite(idx)) return; openAddModal(parts[idx],idx);}
+  function onDelete(e){ const idx=parseInt(e.currentTarget.getAttribute('data-index'),10); if(!Number.isFinite(idx)) return; if(!confirm('Delete this record?')) return; parts.splice(idx,1); saveToLocal(); renderCards(); } 
+
+  document.getElementById('btnLoadFromTextarea').addEventListener('click',()=>{
+    const txt=document.getElementById('jsonTextbox').value.trim();
+    if(!txt){ alert('Textarea empty'); return; }
+    try{ const parsed=JSON.parse(txt); if(!Array.isArray(parsed)){ alert('JSON must be an array'); return; }
+      const newRecords=parsed.map(normalizeRecord); parts=parts.concat(newRecords); saveToLocal(); document.getElementById('jsonTextbox').value=''; renderCards(); alert('Loaded '+newRecords.length+' records.'); 
+    }catch(err){ alert('Invalid JSON: '+err.message); }
+  });
+  document.getElementById('btnClearTextarea').addEventListener('click',()=>document.getElementById('jsonTextbox').value='');
+
+  const modalBulk=document.getElementById('modalBulk');
+  document.getElementById('btnBulk').addEventListener('click',()=>modalBulk.classList.remove('hidden'));
+  document.getElementById('btnCloseBulk').addEventListener('click',()=>modalBulk.classList.add('hidden'));
+  document.getElementById('bulkFileInput').addEventListener('change',ev=>{
+    const f=ev.target.files[0]; if(!f) return; const reader=new FileReader();
+    reader.onload=e=>document.getElementById('bulkTextarea').value=e.target.result; reader.readAsText(f);
+  });
+  document.getElementById('btnLoadBulk').addEventListener('click',()=>{
+    const txt=document.getElementById('bulkTextarea').value.trim(); if(!txt){ alert('Bulk textarea empty'); return; }
+    try{ const parsed=JSON.parse(txt); if(!Array.isArray(parsed)){ alert('JSON must be an array'); return; }
+      const newRecords=parsed.map(normalizeRecord); parts=parts.concat(newRecords); saveToLocal(); document.getElementById('bulkTextarea').value=''; modalBulk.classList.add('hidden'); renderCards(); alert('Merged '+newRecords.length+' records.'); 
+    }catch(err){ alert('Invalid JSON: '+err.message); }
+  });
+  document.getElementById('btnReplaceBulk').addEventListener('click',()=>{
+    const txt=document.getElementById('bulkTextarea').value.trim(); try{ const parsed=txt?JSON.parse(txt):[]; if(!Array.isArray(parsed)){ alert('JSON must be an array'); return; }
+      parts=parsed.map(normalizeRecord); saveToLocal(); document.getElementById('bulkTextarea').value=''; modalBulk.classList.add('hidden'); renderCards(); alert('Replaced all records. Total: '+parts.length); 
+    }catch(err){ alert('Invalid JSON: '+err.message); }
+  });
+
+  document.getElementById('fileJson').addEventListener('change',ev=>{
+    const f=ev.target.files[0]; if(!f) return;
+    const reader=new FileReader();
+    reader.onload=e=>{
+      try{ const parsed=JSON.parse(e.target.result); if(!Array.isArray(parsed)){ alert('JSON must be an array'); return; }
+        parts=parts.concat(parsed.map(normalizeRecord)); saveToLocal(); renderCards(); alert('Loaded file with '+parsed.length+' records.'); 
+      }catch(err){ alert('Invalid JSON file: '+err.message); }
+    };
+    reader.readAsText(f);
+  });
+
+  function download(filename, content, mime='application/json'){ const blob=new Blob([content],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);}
+  document.getElementById('btnDownloadJson').addEventListener('click',()=>download('parts-data.json',JSON.stringify(parts,null,2)));
+  document.getElementById('btnExportCsv').addEventListener('click',()=>{
+    if(!parts.length) return alert('No records to export');
+    const header=['zoren','oem','car_maker','applications'];
+    const rows=parts.map(r=>[csvEscape(r.zoren),csvEscape(r.oem.join('; ')),csvEscape(r.car_maker),csvEscape(r.applications)]);
+    download('parts-data.csv',[header.join(','),...rows.map(r=>r.join(','))].join('\n'),'text/csv;charset=utf-8;');
+  });
+  function csvEscape(s){ if(s==null) return ''; s=String(s).replaceAll('"','""'); if(s.includes(',')||s.includes('"')||s.includes('\n')) s=`"${s}"`; return s; }
+
+  loadFromLocal();
+  if(!parts.length){ 
+    parts=[
+      { zoren: "ZRM0001001", oem: ["31110-09000","E8678M"], car_maker:"Hyundai", applications:"HYUNDAI SONATA" },
+      { zoren: "ZRM1501121", oem: ["LR065349", "FKT2-9H307-BB", "J9C3-9H307-BA"], car_maker:"Land Rover", applications:"LAND ROVER DISCOVERY SPORT 2.0L L4 2015-" },
+      { zoren: "ZRM0004013", oem: ["7L6919087"], car_maker:"VW", applications:"2004-2006 Volkswagen Touareg V6, 2004-2007 Volkswagen Touareg V8 left" },
+      { zoren: "ZRM1063004", oem: ["16117173503", "16117173735", "7373503"], car_maker:"BMW", applications:"BMW 5 E60 525i 525xi 528i 530i 530xi 2006-2010" }
+    ]; 
+    saveToLocal(); 
+  }
+  renderCards(); 
+</script>
+
+</body>
+</html>
