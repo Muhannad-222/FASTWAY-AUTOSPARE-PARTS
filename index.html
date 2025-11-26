@@ -1,46 +1,32 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDMG67OjTem-QRCS8NNM50weeezhZlGLW0",
-    authDomain: "fastway-autospare-parts-shibi.firebaseapp.com",
-    projectId: "fastway-autospare-parts-shibi",
-    storageBucket: "fastway-autospare-parts-shibi.appspot.com", // Corrected the storageBucket URL format
-    messagingSenderId: "129701229596",
-    appId: "1:129701229596:web:ff12c4d0ed2c87ee2d9bd9",
-    measurementId: "G-JV6NF5FWRJ"
-  };
-  
-  // Initialize Firebase and Firestore
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-
-  // Console log for verification
-  console.log("Firebase v8 initialized. Firestore ready.");
-</script>
-<style>
-  /* ... Your CSS styles ... */
-</style>
-  
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
-  
-  // Initialize Firebase and Firestore
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-</script>
-  
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Auto Spare Parts Data Store</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDMG67OjTem-QRCS8NNM50weeezhZlGLW0",
+      authDomain: "fastway-autospare-parts-shibi.firebaseapp.com",
+      projectId: "fastway-autospare-parts-shibi",
+      storageBucket: "fastway-autospare-parts-shibi.appspot.com",
+      messagingSenderId: "129701229596",
+      appId: "1:129701229596:web:ff12c4d0ed2c87ee2d9bd9",
+      measurementId: "G-JV6NF5FWRJ"
+    };
+    
+    // Initialize Firebase and Firestore (This is the *only* execution of this logic)
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    console.log("Firebase initialized successfully. Firestore instance ready.");
+  </script>
   <style>
     .modal-backdrop { background: rgba(0,0,0,.45); }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; }
@@ -62,15 +48,11 @@
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
         padding: 1.25rem; 
         margin-bottom: 2rem; 
-        
-        /* === LANDSCAPE STYLE CHANGES START === */
         display: flex;
-        flex-direction: row; /* Horizontal layout for landscape */
+        flex-direction: row; 
         justify-content: space-between;
         align-items: stretch;
-        min-height: 180px; /* Ensures a minimum height */
-        /* === LANDSCAPE STYLE CHANGES END === */
-        
+        min-height: 180px; 
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; 
     }
     .part-card:hover {
@@ -84,7 +66,7 @@
         flex-direction: column;
         justify-content: space-between;
         padding-right: 1.5rem;
-        border-right: 2px solid #e5e7eb; /* Divider line */
+        border-right: 2px solid #e5e7eb; 
         min-width: 150px;
     }
     
@@ -100,8 +82,8 @@
         flex-grow: 1;
         padding-left: 1.5rem;
         display: grid;
-        grid-template-columns: 1fr 1fr; /* Split details into two columns */
-        gap: 0.5rem 1.5rem; /* Vertical and horizontal gap */
+        grid-template-columns: 1fr 1fr; 
+        gap: 0.5rem 1.5rem; 
     }
 
     .card-detail-group {
@@ -142,7 +124,7 @@
     /* Ensure the grid adapts to the wider cards */
     #partsContainer {
         gap: 2rem; 
-        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); /* Adjusted min-width for wider cards */
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); 
     }
   </style>
 </head>
@@ -548,4 +530,5 @@
 </body>
 
 </html>
+
 
