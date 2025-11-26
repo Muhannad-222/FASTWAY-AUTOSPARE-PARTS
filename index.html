@@ -312,7 +312,6 @@
     </div>
 </div>
 
-whe
 <script type="module">
     // --- FIREBASE IMPORTS (Modern Modular SDK v11.6.1) ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -354,16 +353,64 @@ whe
         }
     }
 
-    updateConnectionStatus("Attempting Firebase initialization...");
-    try {
-        app = initializeApp(firebaseConfig);
-        auth = getAuth(app);
-        db = getFirestore(app);
-        updateConnectionStatus("Services initialized. Starting authentication...");
-    } catch (error) {
-        updateConnectionStatus("FATAL: Initialization failed.", true);
-        console.error("Firebase Initialization Error:", error);
+    // --- Core Initialization Function ---
+    async function initApp() {
+        updateConnectionStatus("Attempting Firebase initialization...");
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            updateConnectionStatus("Services initialized. Starting authentication check...");
+            
+            let authResolved = false;
+            
+            // Set up a promise to resolve when auth state changes (success or fail)
+            const authPromise = new Promise(resolve => {
+                const unsubscribe = onAuthStateChanged(auth, (user) => {
+                    unsubscribe(); // Stop listening after the first state change
+                    authResolved = true;
+                    resolve(user);
+                });
+            });
+
+            // Set a timeout to resolve the promise if it takes too long
+            const timeoutPromise = new Promise(resolve => 
+                setTimeout(() => {
+                    if (!authResolved) {
+                        updateConnectionStatus("Authentication timed out (5s). Forcing UI visible with error message.", true);
+                        resolve(null); // Resolve with null to trigger fallback
+                    }
+                }, 5000)
+            );
+
+            const user = await Promise.race([authPromise, timeoutPromise]);
+
+            if (user) {
+                currentUser = user;
+                getEl('authStatus').textContent = `UID: ${user.uid.substring(0, 8)}... (Authenticated)`;
+                getEl('appContent').classList.remove('hidden');
+                getEl('btnManageCategories').classList.remove('hidden');
+                updateConnectionStatus("Authentication successful. Loading inventory...");
+                await loadCategories();
+                loadAndRenderParts(); 
+            } else {
+                // Initial sign-in attempt if no user was found (or timed out)
+                await signInUser();
+
+                // If sign-in fails or still times out, display a non-functional state
+                if (!currentUser) {
+                    getEl('authStatus').textContent = `AUTH FAIL`;
+                    getEl('appContent').classList.remove('hidden');
+                    getEl('partsContainer').innerHTML = '<p class="text-center text-red-400 p-8 text-xl font-bold">FATAL ERROR: Could not authenticate or load data. Check console.</p>';
+                }
+            }
+        } catch (error) {
+            updateConnectionStatus("FATAL: Initialization failed. See console.", true);
+            console.error("Firebase Initialization/Startup Error:", error);
+        }
     }
+
+    // --- Remaining functions (signInUser, loadCategories, etc.) remain below... ---
 
     // --- APP STATE ---
     let parts = [];
@@ -509,40 +556,37 @@ whe
 
 
     // --- AUTHENTICATION & INITIALIZATION ---
-
-    onAuthStateChanged(auth, async (user) => {
-        currentUser = user;
-        const authStatus = document.getElementById('authStatus');
-        const appContent = document.getElementById('appContent');
-        const btnManageCategories = document.getElementById('btnManageCategories');
-
-        if (user) {
-            authStatus.textContent = `UID: ${user.uid.substring(0, 8)}... (Authenticated)`;
-            updateConnectionStatus("Authentication successful. Loading inventory...");
-            appContent.classList.remove('hidden');
-            btnManageCategories.classList.remove('hidden');
-            await loadCategories();
-            loadAndRenderParts(); 
-        } else {
-            authStatus.textContent = 'PENDING SIGN-IN...';
-            btnManageCategories.classList.add('hidden');
-            updateConnectionStatus("Attempting anonymous sign-in...");
-            await signInUser();
-        }
-    });
+    // Note: The onAuthStateChanged listener is now primarily used within initApp for the initial status check.
+    // This separate function handles the actual sign-in if needed during the startup process.
 
     async function signInUser() {
+        getEl('authStatus').textContent = 'PENDING SIGN-IN...';
+        updateConnectionStatus("Attempting anonymous sign-in...");
         try {
             if (initialAuthToken) {
-                await signInWithCustomToken(auth, initialAuthToken);
+                const credential = await signInWithCustomToken(auth, initialAuthToken);
+                currentUser = credential.user;
             } else {
-                await signInAnonymously(auth);
+                const credential = await signInAnonymously(auth);
+                currentUser = credential.user;
             }
+            // Once signed in, the rest of the app logic (loadCategories, loadAndRenderParts) will execute
+            // via the logic flow within initApp, ensuring UI elements are revealed only after success.
+            if (currentUser) {
+                getEl('authStatus').textContent = `UID: ${currentUser.uid.substring(0, 8)}... (Authenticated)`;
+                getEl('appContent').classList.remove('hidden');
+                getEl('btnManageCategories').classList.remove('hidden');
+                updateConnectionStatus("Sign-in successful. Proceeding to load data.");
+                await loadCategories();
+                loadAndRenderParts();
+            }
+
         } catch (error) {
             updateConnectionStatus(`AUTH FAIL: ${error.code}`, true);
             console.error("Authentication Error:", error);
-            document.getElementById('authStatus').textContent = `AUTH FAIL`;
-            document.getElementById('appContent').innerHTML = '<p class="text-center text-red-400 p-8 text-xl">FATAL ERROR: Could not authenticate user. Check console for details.</p>';
+            getEl('authStatus').textContent = `AUTH FAIL`;
+            getEl('appContent').classList.remove('hidden');
+            getEl('partsContainer').innerHTML = '<p class="text-center text-red-400 p-8 text-xl font-bold">FATAL ERROR: Could not authenticate user. Check console for details.</p>';
         }
     }
 
@@ -968,11 +1012,10 @@ whe
         showConfirm('Export Complete', 'Inventory data successfully exported as CSV.', true);
     });
 
-    // Initialize perPage dropdown
-    document.addEventListener('DOMContentLoaded', () => {
-        // Since the select is populated directly in HTML, just set the default value.
-        // The event listener is attached above.
-    });
+    // --- Start App Initialization ---
+    // We call initApp once the document structure is loaded but before all imports are processed.
+    document.addEventListener('DOMContentLoaded', initApp);
+    // --------------------------------
 </script>
 
 </body>
