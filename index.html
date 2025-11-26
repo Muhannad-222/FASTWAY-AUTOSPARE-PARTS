@@ -1,6 +1,41 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDMG67OjTem-QRCS8NNM50weeezhZlGLW0",
+    authDomain: "fastway-autospare-parts-shibi.firebaseapp.com",
+    projectId: "fastway-autospare-parts-shibi",
+    storageBucket: "fastway-autospare-parts-shibi.appspot.com", // Corrected the storageBucket URL format
+    messagingSenderId: "129701229596",
+    appId: "1:129701229596:web:ff12c4d0ed2c87ee2d9bd9",
+    measurementId: "G-JV6NF5FWRJ"
+  };
+  
+  // Initialize Firebase and Firestore
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // Console log for verification
+  console.log("Firebase v8 initialized. Firestore ready.");
+</script>
+<style>
+  /* ... Your CSS styles ... */
+</style>
+  
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+  
+  // Initialize Firebase and Firestore
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
   
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -221,7 +256,9 @@
   let editIndex = -1;
   let page = 1;
   let perPage = 10;
-  const partsContainer = document.getElementById('partsContainer'); 
+  const partsContainer = document.getElementById('partsContainer');
+  
+  // NOTE: The 'db' object is initialized in the <head> now.
 
   function normalizeRecord(item) {
     const zoren = (item.zoren ?? '').toString().trim();
@@ -232,10 +269,38 @@
     const applications = (item.applications ?? '').toString().trim();
     return { zoren, oem, car_maker, applications };
   }
+  
+  function escapeHtml(s){ return s? String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') : ''; }
 
-  function saveToLocal() { localStorage.setItem('parts_data_v1', JSON.stringify(parts)); }
-  function loadFromLocal() { const raw = localStorage.getItem('parts_data_v1'); if(raw) { try { parts = JSON.parse(raw).map(normalizeRecord); } catch{} } }
 
+  // 1. READ (Load Data from Firestore)
+  async function loadAndRenderParts() {
+    partsContainer.innerHTML = '<div><p class="text-lg text-center p-8">Loading data from shared database...</p></div>';
+    
+    try {
+      // Get all documents from the 'parts' collection
+      const snapshot = await db.collection("parts").get();
+      parts = []; 
+
+      snapshot.forEach(doc => {
+        // Add the unique Firestore ID to the part object
+        const part = normalizeRecord(doc.data());
+        part.id = doc.id; // Store the unique ID for updating/deleting
+        parts.push(part);
+      });
+      
+      // Now render the fetched data to the cards
+      renderCards(); 
+      if (parts.length === 0) {
+          partsContainer.innerHTML = '<div><p class="text-lg text-center p-8 text-gray-500">No parts found. Click "+ Add Part" to add the first record.</p></div>';
+      }
+    } catch (error) {
+      console.error("Error fetching documents: ", error);
+      partsContainer.innerHTML = '<div><p class="text-lg text-center p-8 text-red-600">ERROR: Could not connect to the database. Check console for details.</p></div>';
+    }
+  }
+
+  // Helper to render the cards (Unchanged logic, just uses the 'parts' array)
   function renderCards() { 
     const q = document.getElementById('searchInput').value.trim().toLowerCase();
     perPage = parseInt(document.getElementById('perPage').value, 10) || 10;
@@ -259,7 +324,6 @@
       const oemTags = item.oem.map(oem => `<span class="oem-tag">${escapeHtml(oem)}</span>`).join('');
       const card = document.createElement('div');
       card.className = 'part-card';
-      // Structure changed for landscape style
       card.innerHTML = `
         <div class="card-header-container">
           <h3 class="card-zoren-no">${escapeHtml(item.zoren)}</h3>
@@ -272,18 +336,15 @@
             </button>
           </div>
         </div>
-
         <div class="card-details-container">
           <div class="card-detail-group">
             <div class="card-label">Car Maker:</div>
             <div class="card-value">${escapeHtml(item.car_maker)}</div>
           </div>
-          
           <div class="card-detail-group">
             <div class="card-label">Applications:</div>
             <div class="card-value">${escapeHtml(item.applications)}</div>
           </div>
-          
           <div class="card-detail-group col-span-2">
             <div class="card-label">OEM No.:</div>
             <div class="flex flex-wrap pt-1 pb-2">${oemTags}</div>
@@ -293,26 +354,25 @@
       partsContainer.appendChild(card);
     });
 
-    document.getElementById('summaryText').textContent = `${total} record${total===1?'':'s'}`;
+    document.getElementById('summaryText').textContent = `${total} record${total===1?'':'s'} (from shared database)`;
     document.getElementById('pageInfo').textContent = `Page ${page} / ${pages}`;
-    document.getElementById('prevPage').disabled = page<=1;
-    document.getElementById('nextPage').disabled = page>=pages;
 
     Array.from(document.getElementsByClassName('editBtn')).forEach(b=>b.addEventListener('click', onEdit));
     Array.from(document.getElementsByClassName('delBtn')).forEach(b=>b.addEventListener('click', onDelete));
   }
 
-  function escapeHtml(s){ return s? String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') : ''; }
-
+  // Event Listeners (Pagination/Search)
   document.getElementById('prevPage').addEventListener('click', ()=>{ page=Math.max(1,page-1); renderCards(); });
   document.getElementById('nextPage').addEventListener('click', ()=>{ page++; renderCards(); });
   document.getElementById('searchInput').addEventListener('input', ()=>{ page=1; renderCards(); });
   document.getElementById('perPage').addEventListener('change', ()=>{ page=1; renderCards(); });
   
+  // 2. CREATE / UPDATE (Save to Firestore)
   const modalAddEdit = document.getElementById('modalAddEdit');
   document.getElementById('btnAdd').addEventListener('click', ()=>openAddModal());
   document.getElementById('btnCancelModal').addEventListener('click', ()=>modalAddEdit.classList.add('hidden'));
-  document.getElementById('btnSaveModal').addEventListener('click', ()=>{
+
+  document.getElementById('btnSaveModal').addEventListener('click', async ()=>{
     const zoren = document.getElementById('inpZoren').value.trim();
     if(!zoren){ alert('ZOREN No. is required'); return; }
     let oemRaw=document.getElementById('inpOem').value.trim();
@@ -320,9 +380,26 @@
     if(oemRaw){ try{ oemArr=oemRaw.startsWith('[')?JSON.parse(oemRaw):oemRaw.split(',').map(s=>s.trim()).filter(Boolean);}catch{ oemArr=oemRaw.split(',').map(s=>s.trim()).filter(Boolean); } }
     const car_maker=document.getElementById('inpCarMaker').value.trim();
     const applications=document.getElementById('inpApplications').value.trim();
-    const record={zoren,oem:oemArr,car_maker,applications};
-    if(editIndex>=0) parts[editIndex]=normalizeRecord(record); else parts.push(normalizeRecord(record));
-    saveToLocal(); modalAddEdit.classList.add('hidden'); renderCards(); 
+    
+    // Prepare data object for Firestore
+    const dataToSave = { zoren, oem: oemArr, car_maker, applications };
+
+    try {
+        if (editIndex >= 0) {
+            // Update existing record using the Firestore ID
+            const partToUpdate = parts[editIndex];
+            await db.collection("parts").doc(partToUpdate.id).set(dataToSave);
+        } else {
+            // Add new record
+            await db.collection("parts").add(dataToSave);
+        }
+        modalAddEdit.classList.add('hidden'); 
+        // Reload all data from the database to reflect changes
+        loadAndRenderParts(); 
+    } catch (error) {
+        alert("Error saving data: " + error.message);
+        console.error("Error saving document: ", error);
+    }
   });
 
   function openAddModal(item=null,index=-1){
@@ -336,17 +413,51 @@
   }
 
   function onEdit(e){ const idx=parseInt(e.currentTarget.getAttribute('data-index'),10); if(!Number.isFinite(idx)) return; openAddModal(parts[idx],idx);}
-  function onDelete(e){ const idx=parseInt(e.currentTarget.getAttribute('data-index'),10); if(!Number.isFinite(idx)) return; if(!confirm('Delete this record?')) return; parts.splice(idx,1); saveToLocal(); renderCards(); } 
+  
+  // 3. DELETE (Delete from Firestore)
+  async function onDelete(e){ 
+    const idx=parseInt(e.currentTarget.getAttribute('data-index'),10); 
+    if(!Number.isFinite(idx)) return; 
 
-  document.getElementById('btnLoadFromTextarea').addEventListener('click',()=>{
+    const partToDelete = parts[idx];
+
+    if(!confirm(`Delete ZOREN No. ${partToDelete.zoren} permanently? This change is public.`)) return; 
+
+    try {
+        await db.collection("parts").doc(partToDelete.id).delete();
+        // Reload data to update the view
+        loadAndRenderParts(); 
+    } catch (error) {
+        alert("Error deleting record: " + error.message);
+        console.error("Error deleting document: ", error);
+    }
+  } 
+
+  // 4. Bulk/Textarea operations need updating too (using simple replace for brevity, can be optimized)
+  document.getElementById('btnLoadFromTextarea').addEventListener('click', async ()=>{
     const txt=document.getElementById('jsonTextbox').value.trim();
     if(!txt){ alert('Textarea empty'); return; }
-    try{ const parsed=JSON.parse(txt); if(!Array.isArray(parsed)){ alert('JSON must be an array'); return; }
-      const newRecords=parsed.map(normalizeRecord); parts=parts.concat(newRecords); saveToLocal(); document.getElementById('jsonTextbox').value=''; renderCards(); alert('Loaded '+newRecords.length+' records.'); 
-    }catch(err){ alert('Invalid JSON: '+err.message); }
+    try{ 
+        const parsed=JSON.parse(txt); 
+        if(!Array.isArray(parsed)){ alert('JSON must be an array'); return; }
+        const newRecords=parsed.map(normalizeRecord); 
+        
+        // Batch upload new records
+        const batch = db.batch();
+        newRecords.forEach(record => {
+            const docRef = db.collection("parts").doc();
+            batch.set(docRef, record);
+        });
+        await batch.commit();
+
+        document.getElementById('jsonTextbox').value=''; 
+        loadAndRenderParts(); 
+        alert('Loaded and saved '+newRecords.length+' records to the shared database.');
+    }catch(err){ alert('Invalid JSON or Firebase Error: '+err.message); }
   });
   document.getElementById('btnClearTextarea').addEventListener('click',()=>document.getElementById('jsonTextbox').value='');
 
+  // Bulk Modal (Existing - Update logic for Firebase)
   const modalBulk=document.getElementById('modalBulk');
   document.getElementById('btnBulk').addEventListener('click',()=>modalBulk.classList.remove('hidden'));
   document.getElementById('btnCloseBulk').addEventListener('click',()=>modalBulk.classList.add('hidden'));
@@ -354,29 +465,72 @@
     const f=ev.target.files[0]; if(!f) return; const reader=new FileReader();
     reader.onload=e=>document.getElementById('bulkTextarea').value=e.target.result; reader.readAsText(f);
   });
-  document.getElementById('btnLoadBulk').addEventListener('click',()=>{
-    const txt=document.getElementById('bulkTextarea').value.trim(); if(!txt){ alert('Bulk textarea empty'); return; }
-    try{ const parsed=JSON.parse(txt); if(!Array.isArray(parsed)){ alert('JSON must be an array'); return; }
-      const newRecords=parsed.map(normalizeRecord); parts=parts.concat(newRecords); saveToLocal(); document.getElementById('bulkTextarea').value=''; modalBulk.classList.add('hidden'); renderCards(); alert('Merged '+newRecords.length+' records.'); 
-    }catch(err){ alert('Invalid JSON: '+err.message); }
-  });
-  document.getElementById('btnReplaceBulk').addEventListener('click',()=>{
-    const txt=document.getElementById('bulkTextarea').value.trim(); try{ const parsed=txt?JSON.parse(txt):[]; if(!Array.isArray(parsed)){ alert('JSON must be an array'); return; }
-      parts=parsed.map(normalizeRecord); saveToLocal(); document.getElementById('bulkTextarea').value=''; modalBulk.classList.add('hidden'); renderCards(); alert('Replaced all records. Total: '+parts.length); 
-    }catch(err){ alert('Invalid JSON: '+err.message); }
+  
+  // Load & Merge (Bulk Upload)
+  document.getElementById('btnLoadBulk').addEventListener('click', async ()=>{
+    const txt=document.getElementById('bulkTextarea').value.trim(); 
+    if(!txt){ alert('Bulk textarea empty'); return; }
+    try{ 
+        const parsed=JSON.parse(txt); 
+        if(!Array.isArray(parsed)){ alert('JSON must be an array'); return; }
+        const newRecords=parsed.map(normalizeRecord);
+        
+        const batch = db.batch();
+        newRecords.forEach(record => {
+            const docRef = db.collection("parts").doc();
+            batch.set(docRef, record);
+        });
+        await batch.commit();
+
+        document.getElementById('bulkTextarea').value=''; 
+        modalBulk.classList.add('hidden'); 
+        loadAndRenderParts(); 
+        alert('Merged '+newRecords.length+' records to the shared database.');
+    }catch(err){ alert('Invalid JSON or Firebase Error: '+err.message); }
   });
 
+  // Replace All (Bulk Upload)
+  document.getElementById('btnReplaceBulk').addEventListener('click', async ()=>{
+    if(!confirm('WARNING: Are you sure you want to delete ALL existing data and replace it with the data below? This is public and permanent.')) return;
+    const txt=document.getElementById('bulkTextarea').value.trim(); 
+    try{ 
+        const parsed=txt?JSON.parse(txt):[]; 
+        if(!Array.isArray(parsed)){ alert('JSON must be an array'); return; }
+        const newRecords=parsed.map(normalizeRecord); 
+        
+        // 1. Delete all existing documents
+        const existingSnapshot = await db.collection("parts").get();
+        const deleteBatch = db.batch();
+        existingSnapshot.forEach(doc => {
+            deleteBatch.delete(doc.ref);
+        });
+        await deleteBatch.commit();
+
+        // 2. Upload new documents
+        const uploadBatch = db.batch();
+        newRecords.forEach(record => {
+            const docRef = db.collection("parts").doc();
+            uploadBatch.set(docRef, record);
+        });
+        await uploadBatch.commit();
+        
+        document.getElementById('bulkTextarea').value=''; 
+        modalBulk.classList.add('hidden'); 
+        loadAndRenderParts(); 
+        alert('Successfully replaced all records. Total: '+newRecords.length);
+    }catch(err){ alert('Error during bulk replace: '+err.message); }
+  });
+
+  // File input is now linked to the bulk upload logic
   document.getElementById('fileJson').addEventListener('change',ev=>{
-    const f=ev.target.files[0]; if(!f) return;
-    const reader=new FileReader();
-    reader.onload=e=>{
-      try{ const parsed=JSON.parse(e.target.result); if(!Array.isArray(parsed)){ alert('JSON must be an array'); return; }
-        parts=parts.concat(parsed.map(normalizeRecord)); saveToLocal(); renderCards(); alert('Loaded file with '+parsed.length+' records.'); 
-      }catch(err){ alert('Invalid JSON file: '+err.message); }
-    };
-    reader.readAsText(f);
+    const f=ev.target.files[0]; 
+    if(!f) return;
+    alert("Please use the 'Bulk JSON Upload' modal to load file content.");
+    // Prompting the user to use the bulk modal for file handling simplicity
   });
 
+  // Download JSON & CSV (Existing - uses the current 'parts' array)
+  // NOTE: This downloads the currently visible/filtered data, not necessarily the entire database if you have more than the current page loaded.
   function download(filename, content, mime='application/json'){ const blob=new Blob([content],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);}
   document.getElementById('btnDownloadJson').addEventListener('click',()=>download('parts-data.json',JSON.stringify(parts,null,2)));
   document.getElementById('btnExportCsv').addEventListener('click',()=>{
@@ -387,19 +541,11 @@
   });
   function csvEscape(s){ if(s==null) return ''; s=String(s).replaceAll('"','""'); if(s.includes(',')||s.includes('"')||s.includes('\n')) s=`"${s}"`; return s; }
 
-  loadFromLocal();
-  if(!parts.length){ 
-    parts=[
-      { zoren: "ZRM0001001", oem: ["31110-09000","E8678M"], car_maker:"Hyundai", applications:"HYUNDAI SONATA" },
-      { zoren: "ZRM1501121", oem: ["LR065349", "FKT2-9H307-BB", "J9C3-9H307-BA"], car_maker:"Land Rover", applications:"LAND ROVER DISCOVERY SPORT 2.0L L4 2015-" },
-      { zoren: "ZRM0004013", oem: ["7L6919087"], car_maker:"VW", applications:"2004-2006 Volkswagen Touareg V6, 2004-2007 Volkswagen Touareg V8 left" },
-      { zoren: "ZRM1063004", oem: ["16117173503", "16117173735", "7373503"], car_maker:"BMW", applications:"BMW 5 E60 525i 525xi 528i 530i 530xi 2006-2010" }
-    ]; 
-    saveToLocal(); 
-  }
-  renderCards(); 
+  // Initial Load: Start the process by fetching data from Firestore
+  loadAndRenderParts(); 
 </script>
 
 </body>
 
 </html>
+
