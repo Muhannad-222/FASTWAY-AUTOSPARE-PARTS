@@ -1,534 +1,929 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Auto Spare Parts Data Store</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>FastWay Inventory: Workshop Performance Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDMG67OjTem-QRCS8NNM50weeezhZlGLW0",
-      authDomain: "fastway-autospare-parts-shibi.firebaseapp.com",
-      projectId: "fastway-autospare-parts-shibi",
-      storageBucket: "fastway-autospare-parts-shibi.appspot.com",
-      messagingSenderId: "129701229596",
-      appId: "1:129701229596:web:ff12c4d0ed2c87ee2d9bd9",
-      measurementId: "G-JV6NF5FWRJ"
-    };
-    
-    // Initialize Firebase and Firestore (This is the *only* execution of this logic)
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    
-    console.log("Firebase initialized successfully. Firestore instance ready.");
-  </script>
-  <style>
-    .modal-backdrop { background: rgba(0,0,0,.45); }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; }
-    #searchInput { 
-      background: linear-gradient(to right, #e0f2fe, #bae6fd); 
-      border: 1px solid #3b82f6;
-      transition: all 0.3s; 
-    }
-    #searchInput:focus {
-      outline: none;
-      border-color: #2563eb;
-      box-shadow: 0 0 5px rgba(37,99,235,0.5);
-    }
-    
-    /* Styles for the new landscape card layout */
-    .part-card {
-        background-color: white;
-        border-radius: 1.5rem; 
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
-        padding: 1.25rem; 
-        margin-bottom: 2rem; 
-        display: flex;
-        flex-direction: row; 
-        justify-content: space-between;
-        align-items: stretch;
-        min-height: 180px; 
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; 
-    }
-    .part-card:hover {
-        transform: translateY(-5px); 
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
-    }
-    
-    /* Container for Zoren No. and Actions (Left side of the card) */
-    .card-header-container {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding-right: 1.5rem;
-        border-right: 2px solid #e5e7eb; 
-        min-width: 150px;
-    }
-    
-    .card-actions {
-        display: flex;
-        gap: 0.75rem; 
-        padding-top: 1rem;
-        justify-content: flex-start;
-    }
-    
-    /* Container for the details (Right side of the card) */
-    .card-details-container {
-        flex-grow: 1;
-        padding-left: 1.5rem;
-        display: grid;
-        grid-template-columns: 1fr 1fr; 
-        gap: 0.5rem 1.5rem; 
-    }
-
-    .card-detail-group {
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .card-zoren-no {
-        font-size: 2rem; 
-        font-weight: 800; 
-        color: #1e40af; 
-        word-break: break-all;
-    }
-    .card-label {
-        font-weight: 500; 
-        color: #4b5563; 
-        font-size: 0.875rem; 
-        margin-top: 0.75rem;
-    }
-    .card-value {
-        font-weight: 700; 
-        color: #1f2937; 
-        font-size: 1.125rem; 
-        line-height: 1.3;
-    }
-    .oem-tag {
-        display: inline-block;
-        background-color: #eff6ff; 
-        color: #1e40af; 
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px; 
-        font-size: 0.875rem; 
-        font-weight: 600; 
-        margin-right: 0.5rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    /* Ensure the grid adapts to the wider cards */
-    #partsContainer {
-        gap: 2rem; 
-        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); 
-    }
-  </style>
-</head>
-<body class="bg-gray-100 min-h-screen text-gray-800">
-
-<div class="max-w-6xl mx-auto p-6">
-  <header class="mb-6">
-    <h1 class="text-3xl font-semibold">Auto Spare Parts — Data Manager</h1>
-    <p class="text-sm text-gray-600">Add, edit, upload bulk JSON, export CSV/JSON, and search your spare parts.</p>
-  </header>
-
-  <section class="mb-4 flex flex-wrap gap-2 items-center">
-    <button id="btnAdd" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">+ Add Part</button>
-    <button id="btnBulk" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Bulk JSON Upload</button>
-    <input id="fileJson" type="file" accept=".json,application/json" class="hidden" />
-    <button id="btnDownloadJson" class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900">Download JSON</button>
-    <button id="btnExportCsv" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Export CSV</button>
-
-    <div class="ml-auto flex items-center gap-2">
-      <input id="searchInput" type="search" placeholder="Search Zoren / OEM / Car Maker / Applications" class="px-3 py-2 rounded border w-80" />
-      <select id="perPage" class="px-2 py-2 rounded border">
-        <option value="10">10 / page</option>
-        <option value="25">25 / page</option>
-        <option value="50">50 / page</option>
-        <option value="100">100 / page</option>
-      </select>
-    </div>
-  </section>
-
-  <section class="bg-white rounded shadow overflow-hidden">
-    <div id="partsContainer" class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      </div>
-
-    <div class="p-3 flex items-center justify-between">
-      <div class="text-sm text-gray-600" id="summaryText">0 records</div>
-      <div class="flex items-center gap-2">
-        <button id="prevPage" class="px-2 py-1 border rounded">Prev</button>
-        <span id="pageInfo" class="px-2"></span>
-        <button id="nextPage" class="px-2 py-1 border rounded">Next</button>
-      </div>
-    </div>
-  </section>
-
-  <section class="mt-6 bg-white p-4 rounded shadow">
-    <h2 class="font-medium mb-2">Quick JSON input (paste JSON array here)</h2>
-    <textarea id="jsonTextbox" rows="6" class="w-full border rounded p-2 mono" placeholder='[{"zoren":"ZRM0001001","oem":["31110-09000","E8678M"],"car_maker":"Hyundai","applications":"HYUNDAI SONATA"}]'></textarea>
-    <div class="mt-2 flex gap-2">
-      <button id="btnLoadFromTextarea" class="px-4 py-2 bg-indigo-600 text-white rounded">Load & Save</button>
-      <button id="btnClearTextarea" class="px-4 py-2 border rounded">Clear</button>
-      <div class="ml-auto text-sm text-gray-500">Fields: <span class="font-semibold">zoren</span>, <span class="font-semibold">oem</span>, <span class="font-semibold">car_maker</span>, <span class="font-semibold">applications</span>.</div>
-    </div>
-  </section>
-</div>
-
-<div id="modalAddEdit" class="hidden fixed inset-0 z-40 flex items-center justify-center">
-  <div class="modal-backdrop absolute inset-0"></div>
-  <div class="bg-white rounded shadow-lg z-50 w-full max-w-2xl p-5">
-    <h3 id="modalTitle" class="text-xl font-semibold mb-3">Add Part</h3>
-    <div class="space-y-3">
-      <div>
-        <label class="block text-sm">ZOREN No.</label>
-        <input id="inpZoren" class="w-full px-3 py-2 border rounded" />
-      </div>
-      <div>
-        <label class="block text-sm">OEM No. (comma separated or JSON array)</label>
-        <input id="inpOem" class="w-full px-3 py-2 border rounded" placeholder="31110-09000, E8678M" />
-      </div>
-      <div>
-        <label class="block text-sm">Car Maker</label>
-        <input id="inpCarMaker" class="w-full px-3 py-2 border rounded" />
-      </div>
-      <div>
-        <label class="block text-sm">Applications</label>
-        <input id="inpApplications" class="w-full px-3 py-2 border rounded" />
-      </div>
-    </div>
-
-    <div class="mt-4 flex justify-end gap-2">
-      <button id="btnCancelModal" class="px-4 py-2 border rounded">Cancel</button>
-      <button id="btnSaveModal" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
-    </div>
-  </div>
-</div>
-
-<div id="modalBulk" class="hidden fixed inset-0 z-40 flex items-center justify-center">
-  <div class="modal-backdrop absolute inset-0"></div>
-  <div class="bg-white rounded shadow-lg z-50 w-full max-w-3xl p-5">
-    <h3 class="text-xl font-semibold mb-2">Bulk JSON Upload</h3>
-    <p class="text-sm text-gray-600 mb-3">Paste JSON array or upload a .json file.</p>
-
-    <div>
-      <label class="block text-sm mb-1">Paste JSON array</label>
-      <textarea id="bulkTextarea" rows="8" class="w-full border rounded p-2 mono" placeholder='[{"zoren":"ZRM...","oem":["..."],"car_maker":"...","applications":"..."}]'></textarea>
-    </div>
-
-    <div class="mt-3 flex items-center gap-3">
-      <input id="bulkFileInput" type="file" />
-      <button id="btnLoadBulk" class="px-3 py-2 bg-indigo-600 text-white rounded">Load & Merge</button>
-      <button id="btnReplaceBulk" class="px-3 py-2 bg-red-600 text-white rounded">Replace All</button>
-      <button id="btnCloseBulk" class="ml-auto px-3 py-2 border rounded">Close</button>
-    </div>
-
-    <div class="mt-3 text-sm text-gray-500">
-      <strong>Tip:</strong> If OEM is a string, it will be split by commas into an array.
-    </div>
-  </div>
-</div>
-
-<script>
-  let parts = [];
-  let editIndex = -1;
-  let page = 1;
-  let perPage = 10;
-  const partsContainer = document.getElementById('partsContainer');
-  
-  // NOTE: The 'db' object is initialized in the <head> now.
-
-  function normalizeRecord(item) {
-    const zoren = (item.zoren ?? '').toString().trim();
-    let oem = item.oem ?? [];
-    if (typeof oem === 'string') oem = oem.split(',').map(s=>s.trim()).filter(Boolean);
-    if (!Array.isArray(oem)) oem = [String(oem)];
-    const car_maker = (item.car_maker ?? '').toString().trim();
-    const applications = (item.applications ?? '').toString().trim();
-    return { zoren, oem, car_maker, applications };
-  }
-  
-  function escapeHtml(s){ return s? String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') : ''; }
-
-
-  // 1. READ (Load Data from Firestore)
-  async function loadAndRenderParts() {
-    partsContainer.innerHTML = '<div><p class="text-lg text-center p-8">Loading data from shared database...</p></div>';
-    
-    try {
-      // Get all documents from the 'parts' collection
-      const snapshot = await db.collection("parts").get();
-      parts = []; 
-
-      snapshot.forEach(doc => {
-        // Add the unique Firestore ID to the part object
-        const part = normalizeRecord(doc.data());
-        part.id = doc.id; // Store the unique ID for updating/deleting
-        parts.push(part);
-      });
-      
-      // Now render the fetched data to the cards
-      renderCards(); 
-      if (parts.length === 0) {
-          partsContainer.innerHTML = '<div><p class="text-lg text-center p-8 text-gray-500">No parts found. Click "+ Add Part" to add the first record.</p></div>';
-      }
-    } catch (error) {
-      console.error("Error fetching documents: ", error);
-      partsContainer.innerHTML = '<div><p class="text-lg text-center p-8 text-red-600">ERROR: Could not connect to the database. Check console for details.</p></div>';
-    }
-  }
-
-  // Helper to render the cards (Unchanged logic, just uses the 'parts' array)
-  function renderCards() { 
-    const q = document.getElementById('searchInput').value.trim().toLowerCase();
-    perPage = parseInt(document.getElementById('perPage').value, 10) || 10;
-
-    let filtered = parts.filter(item => {
-      if (!q) return true;
-      const text = (item.zoren+' '+item.oem.join(' ')+' '+item.car_maker+' '+item.applications).toLowerCase();
-      return text.includes(q);
-    });
-
-    filtered.sort((a,b)=>a.zoren.localeCompare(b.zoren, undefined, {numeric:true}));
-
-    const total = filtered.length;
-    const pages = Math.max(1, Math.ceil(total/perPage));
-    page = Math.min(page, pages);
-    const start = (page-1)*perPage;
-    const pageItems = filtered.slice(start, start+perPage);
-
-    partsContainer.innerHTML = ''; 
-    pageItems.forEach((item,i)=>{
-      const oemTags = item.oem.map(oem => `<span class="oem-tag">${escapeHtml(oem)}</span>`).join('');
-      const card = document.createElement('div');
-      card.className = 'part-card';
-      card.innerHTML = `
-        <div class="card-header-container">
-          <h3 class="card-zoren-no">${escapeHtml(item.zoren)}</h3>
-          <div class="card-actions">
-            <button class="editBtn text-gray-500 hover:text-blue-700" title="Edit" data-index="${start+i}">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-7-6l7-7m-7 7l-7 7" /></svg>
-            </button>
-            <button class="delBtn text-red-500 hover:text-red-700" title="Delete" data-index="${start+i}">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-            </button>
-          </div>
-        </div>
-        <div class="card-details-container">
-          <div class="card-detail-group">
-            <div class="card-label">Car Maker:</div>
-            <div class="card-value">${escapeHtml(item.car_maker)}</div>
-          </div>
-          <div class="card-detail-group">
-            <div class="card-label">Applications:</div>
-            <div class="card-value">${escapeHtml(item.applications)}</div>
-          </div>
-          <div class="card-detail-group col-span-2">
-            <div class="card-label">OEM No.:</div>
-            <div class="flex flex-wrap pt-1 pb-2">${oemTags}</div>
-          </div>
-        </div>
-      `;
-      partsContainer.appendChild(card);
-    });
-
-    document.getElementById('summaryText').textContent = `${total} record${total===1?'':'s'} (from shared database)`;
-    document.getElementById('pageInfo').textContent = `Page ${page} / ${pages}`;
-
-    Array.from(document.getElementsByClassName('editBtn')).forEach(b=>b.addEventListener('click', onEdit));
-    Array.from(document.getElementsByClassName('delBtn')).forEach(b=>b.addEventListener('click', onDelete));
-  }
-
-  // Event Listeners (Pagination/Search)
-  document.getElementById('prevPage').addEventListener('click', ()=>{ page=Math.max(1,page-1); renderCards(); });
-  document.getElementById('nextPage').addEventListener('click', ()=>{ page++; renderCards(); });
-  document.getElementById('searchInput').addEventListener('input', ()=>{ page=1; renderCards(); });
-  document.getElementById('perPage').addEventListener('change', ()=>{ page=1; renderCards(); });
-  
-  // 2. CREATE / UPDATE (Save to Firestore)
-  const modalAddEdit = document.getElementById('modalAddEdit');
-  document.getElementById('btnAdd').addEventListener('click', ()=>openAddModal());
-  document.getElementById('btnCancelModal').addEventListener('click', ()=>modalAddEdit.classList.add('hidden'));
-
-  document.getElementById('btnSaveModal').addEventListener('click', async ()=>{
-    const zoren = document.getElementById('inpZoren').value.trim();
-    if(!zoren){ alert('ZOREN No. is required'); return; }
-    let oemRaw=document.getElementById('inpOem').value.trim();
-    let oemArr=[];
-    if(oemRaw){ try{ oemArr=oemRaw.startsWith('[')?JSON.parse(oemRaw):oemRaw.split(',').map(s=>s.trim()).filter(Boolean);}catch{ oemArr=oemRaw.split(',').map(s=>s.trim()).filter(Boolean); } }
-    const car_maker=document.getElementById('inpCarMaker').value.trim();
-    const applications=document.getElementById('inpApplications').value.trim();
-    
-    // Prepare data object for Firestore
-    const dataToSave = { zoren, oem: oemArr, car_maker, applications };
-
-    try {
-        if (editIndex >= 0) {
-            // Update existing record using the Firestore ID
-            const partToUpdate = parts[editIndex];
-            await db.collection("parts").doc(partToUpdate.id).set(dataToSave);
-        } else {
-            // Add new record
-            await db.collection("parts").add(dataToSave);
+    <style>
+        /* Custom Colors based on 'Workshop Performance' Aesthetic */
+        :root {
+            /* Palette: Matte Gray, Traffic Yellow, Safety Orange, Bold Black */
+            --bg-primary: #1F2937; /* Matte Dark Gray (Tailwind gray-800) */
+            --accent-yellow: #FBBF24; /* Traffic Yellow (Amber-400) */
+            --accent-orange: #EA580C; /* Safety Orange (Orange-600) */
+            --card-bg: #F3F4F6; /* Light Gray/Metal (gray-100) */
+            --text-strong: #111827; /* Bold Black (gray-900) */
+            --text-subtle: #6B7280;
         }
-        modalAddEdit.classList.add('hidden'); 
-        // Reload all data from the database to reflect changes
-        loadAndRenderParts(); 
-    } catch (error) {
-        alert("Error saving data: " + error.message);
-        console.error("Error saving document: ", error);
-    }
-  });
 
-  function openAddModal(item=null,index=-1){
-    editIndex=index;
-    document.getElementById('modalTitle').textContent=item?'Edit Part':'Add Part';
-    document.getElementById('inpZoren').value=item?item.zoren:'';
-    document.getElementById('inpOem').value=item?item.oem.join(', '):'';
-    document.getElementById('inpCarMaker').value=item?item.car_maker:'';
-    document.getElementById('inpApplications').value=item?item.applications:'';
-    modalAddEdit.classList.remove('hidden');
-  }
+        body { 
+            background-color: var(--bg-primary); 
+            font-family: 'Inter', sans-serif;
+        }
 
-  function onEdit(e){ const idx=parseInt(e.currentTarget.getAttribute('data-index'),10); if(!Number.isFinite(idx)) return; openAddModal(parts[idx],idx);}
-  
-  // 3. DELETE (Delete from Firestore)
-  async function onDelete(e){ 
-    const idx=parseInt(e.currentTarget.getAttribute('data-index'),10); 
-    if(!Number.isFinite(idx)) return; 
+        /* High-Contrast, Tactile Button Styling */
+        .pro-btn {
+            transition: all 0.15s ease-out;
+            font-weight: 700;
+            border-radius: 0.5rem; 
+            box-shadow: 0 4px 0 var(--text-strong); /* Heavy-duty shadow */
+            letter-spacing: 0.025em;
+            text-transform: uppercase;
+        }
 
-    const partToDelete = parts[idx];
+        .pro-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 var(--text-strong);
+        }
 
-    if(!confirm(`Delete ZOREN No. ${partToDelete.zoren} permanently? This change is public.`)) return; 
+        .pro-btn-primary { 
+            background-color: var(--accent-yellow); 
+            color: var(--text-strong); 
+            border: 2px solid var(--text-strong);
+        }
 
+        .pro-btn-secondary { 
+            background-color: var(--card-bg); 
+            color: var(--text-strong); 
+            border: 2px solid var(--text-strong);
+        }
+
+        .pro-btn-danger { 
+            background-color: #EF4444; 
+            color: white; 
+            border: 2px solid var(--text-strong);
+        }
+
+        .modal-backdrop { 
+            background: rgba(0, 0, 0, 0.9); 
+            backdrop-filter: blur(5px); 
+        }
+
+        /* Workshop Card Style */
+        .part-card {
+            background-color: var(--card-bg);
+            border: 3px solid var(--text-strong);
+            border-radius: 1rem;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.5); 
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        @media (min-width: 768px) {
+            .part-card {
+                grid-template-columns: 1fr 2.5fr;
+            }
+            .card-header-container {
+                border-right: 2px dashed #D1D5DB; /* Tool-like separation */
+                padding-right: 2rem;
+            }
+        }
+        
+        .part-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 10px 10px 0 rgba(0,0,0,0.6);
+        }
+
+        .card-zoren-no {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--accent-orange);
+            line-height: 1;
+        }
+        
+        .oem-tag {
+            background-color: var(--accent-yellow);
+            color: var(--text-strong);
+            padding: 0.3rem 1rem;
+            border-radius: 0.3rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--text-strong);
+        }
+
+        /* Styling for inputs and selects */
+        input, select, textarea {
+            border: 2px solid var(--text-strong); 
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            background-color: white;
+            color: var(--text-strong);
+            font-weight: 600;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent-yellow);
+            box-shadow: 0 0 0 2px var(--accent-yellow);
+            outline: none;
+        }
+
+        .stat-box {
+            background-color: var(--card-bg);
+            border: 2px solid var(--text-strong);
+            border-radius: 0.75rem;
+            padding: 1rem 1.5rem;
+        }
+
+        /* High-contrast status bar */
+        .status-bar {
+            background-color: #000000; 
+            color: var(--accent-yellow);
+            border: 2px solid var(--accent-yellow);
+            border-radius: 9999px;
+            padding: 0.5rem 1rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-800 p-4 md:p-6">
+
+<div class="max-w-7xl mx-auto">
+    <!-- WORKSHOP HEADER -->
+    <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center bg-black p-6 rounded-2xl shadow-2xl border-b-8 border-r-8 border-gray-700">
+        <div class="mb-4 md:mb-0">
+            <h1 class="text-5xl font-extrabold text-white leading-tight">INVENTORY PRO</h1>
+            <p class="text-xl font-bold text-gray-400 mt-1">FASTWAY PARTS CATALOG</p>
+        </div>
+        <div class="flex flex-col items-end">
+            <p id="authStatus" class="status-bar">AUTHENTICATING...</p>
+            <button id="btnManageCategories" class="pro-btn mt-3 px-5 py-2 text-sm bg-gray-700 text-white hover:bg-gray-600 hidden">
+                Manage Categories
+            </button>
+        </div>
+    </header>
+
+    <section id="appContent" class="hidden">
+        <!-- ACTION BAR: HIGH-VISIBILITY CONTROLS -->
+        <section class="mb-10 p-4 md:p-6 bg-gray-700 rounded-xl shadow-xl flex flex-wrap gap-4 items-center border-b-4 border-l-4 border-gray-900">
+            <button id="btnAdd" class="pro-btn pro-btn-primary px-6 py-3 text-lg">+ NEW PART</button>
+            <button id="btnBulk" class="pro-btn bg-gray-500 text-white px-6 py-3 text-lg hover:bg-gray-600">BULK JSON</button>
+
+            <div class="flex-grow flex flex-wrap justify-end items-center gap-3">
+                <!-- ADVANCED SEARCH FILTER -->
+                <select id="categoryFilter" class="w-full md:w-48"></select>
+
+                <input id="searchInput" type="search" placeholder="SEARCH (ZOREN, OEM, MAKER, APP)" class="w-full md:max-w-xs" />
+                <select id="perPage" class="w-24">
+                    <option value="10">10 / Page</option>
+                    <option value="25">25 / Page</option>
+                    <option value="50">50 / Page</option>
+                </select>
+            </div>
+            
+            <button id="btnDownloadJson" class="pro-btn bg-gray-400 text-gray-900 px-4 py-3 hover:bg-gray-500">Export JSON</button>
+            <button id="btnExportCsv" class="pro-btn bg-green-500 text-white px-4 py-3 hover:bg-green-600">Export CSV</button>
+        </section>
+
+        <section>
+            <div id="partsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Cards injected here -->
+            </div>
+
+            <!-- PAGINATION BLOCK -->
+            <div class="mt-10 stat-box flex flex-wrap gap-4 items-center justify-between">
+                <div class="text-base font-semibold text-gray-900" id="summaryText">0 RECORDS LOADED</div>
+                <div class="flex items-center gap-4">
+                    <button id="prevPage" class="pro-btn pro-btn-secondary px-5 py-2">PREVIOUS</button>
+                    <span id="pageInfo" class="px-3 text-lg font-extrabold text-gray-900"></span>
+                    <button id="nextPage" class="pro-btn pro-btn-secondary px-5 py-2">NEXT</button>
+                </div>
+            </div>
+        </section>
+    </section>
+</div>
+
+<!-- Modal: Generic Confirmation/Alert -->
+<div id="modalConfirm" class="hidden fixed inset-0 z-40 flex items-center justify-center">
+    <div class="modal-backdrop absolute inset-0"></div>
+    <div class="bg-white rounded-xl shadow-2xl z-50 w-full max-w-sm p-6 border-t-8 border-accent-orange">
+        <h3 id="confirmTitle" class="text-2xl font-bold mb-4 text-gray-900">CONFIRM ACTION</h3>
+        <p id="confirmMessage" class="text-gray-700 mb-6"></p>
+        <div class="flex justify-end gap-3">
+            <button id="btnConfirmCancel" class="pro-btn pro-btn-secondary px-5 py-2">CANCEL</button>
+            <button id="btnConfirmAction" class="pro-btn pro-btn-danger px-5 py-2">CONFIRM</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add/Edit Part -->
+<div id="modalAddEdit" class="hidden fixed inset-0 z-40 flex items-center justify-center">
+    <div class="modal-backdrop absolute inset-0"></div>
+    <div class="bg-white rounded-xl shadow-2xl z-50 w-full max-w-lg p-8 border-t-8 border-accent-yellow">
+        <h3 id="modalTitle" class="text-3xl font-extrabold mb-6 text-gray-900">ADD PART</h3>
+        <div class="space-y-5">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Category <span class="text-red-500">*</span></label>
+                <select id="inpCategory" class="w-full"></select>
+                <p id="categoryError" class="text-xs text-red-500 mt-1 hidden"></p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">ZOREN No. <span class="text-red-500">*</span></label>
+                <input id="inpZoren" class="w-full" />
+                <p id="zorenError" class="text-xs text-red-500 mt-1 hidden"></p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Car Maker <span class="text-red-500">*</span></label>
+                <input id="inpCarMaker" class="w-full" />
+                <p id="carMakerError" class="text-xs text-red-500 mt-1 hidden"></p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Applications <span class="text-red-500">*</span></label>
+                <input id="inpApplications" class="w-full" />
+                <p id="applicationsError" class="text-xs text-red-500 mt-1 hidden"></p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">OEM No. (comma separated)</label>
+                <input id="inpOem" class="w-full" placeholder="31110-09000, E8678M" />
+            </div>
+        </div>
+
+        <div class="mt-10 flex justify-end gap-3">
+            <button id="btnCancelModal" class="pro-btn pro-btn-secondary px-6 py-2.5">CANCEL</button>
+            <button id="btnSaveModal" class="pro-btn pro-btn-primary px-6 py-2.5">SAVE PART</button>
+            </div>
+        </div>
+</div>
+
+<!-- Modal: Bulk Upload -->
+<div id="modalBulk" class="hidden fixed inset-0 z-40 flex items-center justify-center">
+    <div class="modal-backdrop absolute inset-0"></div>
+    <div class="bg-white rounded-xl shadow-2xl z-50 w-full max-w-3xl p-8 border-t-8 border-orange-600">
+        <h3 class="text-3xl font-extrabold mb-6 text-gray-900">BULK JSON UPLOAD</h3>
+        <p class="text-sm text-gray-600 mb-4">Paste JSON array or upload a .json file. Data is validated on upload.</p>
+
+        <div class="space-y-5">
+            <div>
+                <label class="block text-sm font-medium mb-1 text-gray-700">Paste JSON array</label>
+                <textarea id="bulkTextarea" rows="8" class="w-full font-mono shadow-inner border-gray-400" placeholder='[{"zoren":"ZRM...","oem":["..."],"car_maker":"...","applications":"..."}]'></textarea>
+            </div>
+            <div id="bulkCategorySelector" class="flex flex-col gap-2 p-5 bg-yellow-50 rounded-lg border border-yellow-300">
+                <label class="block text-base font-bold text-gray-900">Category Assignment for uncategorized imports:</label>
+                <select id="bulkCategoryInput" class=""></select>
+            </div>
+        </div>
+
+        <div class="mt-8 flex flex-wrap items-center gap-4">
+            <input id="bulkFileInput" type="file" accept=".json,application/json" class="text-sm font-semibold text-gray-700" />
+            <button id="btnLoadBulk" class="pro-btn bg-gray-700 text-white px-5 py-2.5 hover:bg-gray-600">Load & Merge</button>
+            <button id="btnReplaceBulk" class="pro-btn pro-btn-danger px-5 py-2.5">REPLACE ALL INVENTORY</button>
+            <button id="btnCloseBulk" class="ml-auto pro-btn pro-btn-secondary px-5 py-2.5">CLOSE</button>
+        </div>
+        </div>
+</div>
+
+<!-- Modal: Category Manager -->
+<div id="modalCategoryManager" class="hidden fixed inset-0 z-40 flex items-center justify-center">
+    <div class="modal-backdrop absolute inset-0"></div>
+    <div class="bg-white rounded-xl shadow-2xl z-50 w-full max-w-md p-8 border-t-8 border-gray-700">
+        <h3 class="text-3xl font-extrabold mb-6 text-gray-900">CATEGORY MANAGER</h3>
+        <div class="space-y-5">
+            <div class="flex gap-3">
+                <input id="inpNewCategory" class="w-full" placeholder="e.g., Brake System" />
+                <button id="btnAddCategory" class="pro-btn bg-green-600 text-white px-5 py-2 hover:bg-green-700">ADD</button>
+            </div>
+            <div id="categoryListContainer" class="max-h-64 overflow-y-auto border border-gray-400 rounded-lg p-4 space-y-3 bg-gray-50">
+                <!-- Categories will be injected here -->
+            </div>
+        </div>
+        <div class="mt-8 flex justify-end">
+            <button id="btnCloseCategoryManager" class="pro-btn pro-btn-primary px-6 py-2.5">DONE</button>
+        </div>
+    </div>
+</div>
+
+
+<script type="module">
+    // --- FIREBASE IMPORTS (Modern Modular SDK v11.6.1) ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    // FIX: Added getDoc for retrieving a single document
+    import { getFirestore, doc, setDoc, addDoc, onSnapshot, collection, getDoc, getDocs, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- GLOBAL VARIABLES & INITIALIZATION ---
+
+    // 1. Get configuration from Canvas environment
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+    // 2. Initialize Firebase App and Services
+    let app, auth, db;
     try {
-        await db.collection("parts").doc(partToDelete.id).delete();
-        // Reload data to update the view
-        loadAndRenderParts(); 
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        console.log("Firebase services initialized.");
     } catch (error) {
-        alert("Error deleting record: " + error.message);
-        console.error("Error deleting document: ", error);
+        console.error("Firebase Initialization Error:", error);
     }
-  } 
 
-  // 4. Bulk/Textarea operations need updating too (using simple replace for brevity, can be optimized)
-  document.getElementById('btnLoadFromTextarea').addEventListener('click', async ()=>{
-    const txt=document.getElementById('jsonTextbox').value.trim();
-    if(!txt){ alert('Textarea empty'); return; }
-    try{ 
-        const parsed=JSON.parse(txt); 
-        if(!Array.isArray(parsed)){ alert('JSON must be an array'); return; }
-        const newRecords=parsed.map(normalizeRecord); 
-        
-        // Batch upload new records
-        const batch = db.batch();
-        newRecords.forEach(record => {
-            const docRef = db.collection("parts").doc();
-            batch.set(docRef, record);
+    // --- APP STATE ---
+    let parts = [];
+    let editIndex = -1;
+    let page = 1;
+    let perPage = 10;
+    let categories = [];
+    let currentUser = null; 
+    let partsSnapshotUnsubscribe = null;
+    const partsContainer = document.getElementById('partsContainer');
+    
+    // Global function for custom confirmation (replaces window.confirm/alert)
+    let confirmResolver;
+    
+    function showConfirm(title, message, isAlert = false) {
+        return new Promise(resolve => {
+            confirmResolver = resolve;
+            getEl('confirmTitle').textContent = title;
+            getEl('confirmMessage').textContent = message;
+            getEl('btnConfirmCancel').classList.toggle('hidden', isAlert);
+            getEl('btnConfirmAction').textContent = isAlert ? 'OK' : 'CONFIRM';
+            getEl('modalConfirm').classList.remove('hidden');
         });
+    }
+
+    getEl('btnConfirmCancel')?.addEventListener('click', () => {
+        getEl('modalConfirm').classList.add('hidden');
+        confirmResolver(false);
+    });
+
+    getEl('btnConfirmAction')?.addEventListener('click', () => {
+        getEl('modalConfirm').classList.add('hidden');
+        confirmResolver(true);
+    });
+
+    // --- FIREBASE PATH HELPERS ---
+    function getUserCollectionPath(collectionName) {
+        if (!currentUser || !currentUser.uid) {
+            throw new Error("User not authenticated. Cannot access Firestore.");
+        }
+        // Private Data path
+        return `artifacts/${appId}/users/${currentUser.uid}/${collectionName}`;
+    }
+
+    function getPartsCollectionRef() {
+        return collection(db, getUserCollectionPath('parts'));
+    }
+
+    function getCategoryDocRef() {
+        return doc(db, getUserCollectionPath('categories'), 'list'); 
+    }
+
+    // --- CATEGORY MANAGEMENT LOGIC ---
+
+    async function loadCategories() {
+        if (!currentUser) return;
+        try {
+            // FIX: Use getDoc(docRef) instead of docRef.get()
+            const categoryDoc = await getDoc(getCategoryDocRef());
+            
+            if (categoryDoc.exists() && categoryDoc.data().list) {
+                categories = categoryDoc.data().list.filter(c => c && c.trim()).map(c => c.trim());
+            } else {
+                categories = ['Uncategorized', 'Fuel Injection', 'Brake System', 'Filters', 'Ignition'];
+                await saveCategories();
+            }
+        } catch (error) {
+            console.error("Error loading categories:", error);
+        }
+    }
+
+    async function saveCategories() {
+        if (!currentUser) return;
+        try {
+            const uniqueCategories = [...new Set(categories.map(c => c.trim()).filter(Boolean))];
+            await setDoc(getCategoryDocRef(), { list: uniqueCategories });
+            categories = uniqueCategories; 
+            renderCategorySelects(); 
+        } catch (error) {
+            console.error("Error saving categories:", error);
+        }
+    }
+
+    async function deleteCategory(categoryToDelete) {
+        if (categoryToDelete === 'Uncategorized') return showConfirm('Error', 'Cannot delete the "Uncategorized" category.', true);
+        
+        const confirmed = await showConfirm('Confirm Deletion', `Are you sure you want to delete the category: ${categoryToDelete}?`);
+        if (!confirmed) return;
+        
+        categories = categories.filter(c => c !== categoryToDelete);
+        await saveCategories();
+        renderCategoryManagerList();
+    }
+
+    function renderCategoryManagerList() {
+        const container = document.getElementById('categoryListContainer');
+        container.innerHTML = categories.map((cat, index) => `
+            <div class="flex justify-between items-center p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+                <span class="text-base font-semibold text-gray-900">${escapeHtml(cat)}</span>
+                <button onclick="window.deleteCategoryHandler('${cat}')" class="text-red-500 hover:text-red-700 text-sm font-bold disabled:opacity-50" ${cat === 'Uncategorized' ? 'disabled' : ''}>REMOVE</button>
+            </div>
+        `).join('') || '<p class="text-center text-gray-500 text-sm italic">No categories defined.</p>';
+    }
+    
+    // Expose to window for inline HTML onclick to work
+    window.deleteCategoryHandler = deleteCategory;
+
+    function renderCategorySelects(selectedCategory = '') {
+        const selects = [
+            document.getElementById('inpCategory'),
+            document.getElementById('bulkCategoryInput'),
+            document.getElementById('categoryFilter')
+        ];
+        
+        const standardOptions = categories.map(cat => 
+            `<option value="${escapeHtml(cat)}" ${cat === selectedCategory ? 'selected' : ''}>${escapeHtml(cat)}</option>`
+        ).join('');
+
+        const filterOptions = [
+            `<option value="">ALL CATEGORIES</option>`,
+            ...categories.map(cat => `<option value="${escapeHtml(cat)}" ${cat === selectedCategory ? 'selected' : ''}>${escapeHtml(cat)}</option>`)
+        ].join('');
+
+        selects.forEach(select => {
+            if (select) {
+                if (select.id === 'categoryFilter') {
+                    select.innerHTML = filterOptions;
+                    // Prevent setting onchange multiple times
+                    if (!select._initialized) {
+                         select.addEventListener('change', () => { page = 1; renderCards(); });
+                         select._initialized = true;
+                    }
+                } else {
+                    select.innerHTML = standardOptions;
+                }
+            }
+        });
+    }
+
+
+    // --- AUTHENTICATION & INITIALIZATION ---
+
+    onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+        const authStatus = document.getElementById('authStatus');
+        const appContent = document.getElementById('appContent');
+        const btnManageCategories = document.getElementById('btnManageCategories');
+
+        if (user) {
+            authStatus.textContent = `UID: ${user.uid.substring(0, 8)}...`;
+            appContent.classList.remove('hidden');
+            btnManageCategories.classList.remove('hidden');
+            await loadCategories();
+            loadAndRenderParts(); 
+        } else {
+            authStatus.textContent = 'ATTEMPTING SIGN-IN...';
+            btnManageCategories.classList.add('hidden');
+            await signInUser();
+        }
+    });
+
+    async function signInUser() {
+        try {
+            if (initialAuthToken) {
+                await signInWithCustomToken(auth, initialAuthToken);
+            } else {
+                await signInAnonymously(auth);
+            }
+        } catch (error) {
+            console.error("Authentication Error:", error);
+            document.getElementById('authStatus').textContent = `AUTH FAIL: ${error.code}`;
+            document.getElementById('appContent').innerHTML = '<p class="text-center text-red-400 p-8 text-xl">FATAL ERROR: Could not authenticate user. Check console for details.</p>';
+        }
+    }
+
+
+    // --- DATA HELPERS ---
+    function normalizeRecord(item) {
+        const zoren = (item.zoren ?? '').toString().trim();
+        let oem = item.oem ?? [];
+        if (typeof oem === 'string') oem = oem.split(',').map(s=>s.trim()).filter(Boolean);
+        if (!Array.isArray(oem)) oem = [String(oem)];
+        const car_maker = (item.car_maker ?? '').toString().trim();
+        const applications = (item.applications ?? '').toString().trim();
+        const category = (item.category ?? 'Uncategorized').toString().trim(); 
+
+        return { zoren, oem, car_maker, applications, category };
+    }
+    
+    function escapeHtml(s){ return s? String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') : ''; }
+
+
+    // 1. READ (Load Data from Firestore)
+    function loadAndRenderParts() {
+        if (!currentUser) return;
+        
+        partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-400 font-bold">LOADING INVENTORY...</p></div>';
+        
+        if (partsSnapshotUnsubscribe) {
+            partsSnapshotUnsubscribe(); // Detach previous listener
+        }
+        
+        // Use onSnapshot for real-time updates
+        partsSnapshotUnsubscribe = onSnapshot(getPartsCollectionRef(), (snapshot) => {
+            parts = [];
+            snapshot.forEach(doc => {
+                try {
+                    const part = normalizeRecord(doc.data());
+                    part.id = doc.id;
+                    parts.push(part);
+                } catch (e) {
+                    console.error("Error normalizing part data:", doc.id, e);
+                }
+            });
+            renderCards();
+            if (parts.length === 0) {
+                partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-400 font-bold">NO PARTS FOUND. ADD NEW INVENTORY.</p></div>';
+            }
+        }, (error) => {
+            console.error("Error setting up snapshot listener: ", error);
+            partsContainer.innerHTML = `<div><p class="text-xl text-center p-8 text-red-500 font-bold">ERROR: ${error.message}</p></div>`;
+        });
+    }
+
+    function renderCards() { 
+        const q = document.getElementById('searchInput')?.value.trim().toLowerCase() || '';
+        const selectedCategoryFilter = document.getElementById('categoryFilter')?.value || '';
+        perPage = parseInt(document.getElementById('perPage')?.value, 10) || 10;
+
+        let filtered = parts.filter(item => {
+            // 1. Category Filter Check
+            if (selectedCategoryFilter && item.category !== selectedCategoryFilter) {
+                return false;
+            }
+
+            // 2. Search Query Check
+            if (q) {
+                const text = (item.zoren+' '+item.oem.join(' ')+' '+item.car_maker+' '+item.applications+' '+item.category).toLowerCase();
+                return text.includes(q);
+            }
+            return true;
+        });
+
+        // Sort by ZOREN number
+        filtered.sort((a,b)=>a.zoren.localeCompare(b.zoren, undefined, {numeric:true}));
+
+        const total = filtered.length;
+        const pages = Math.max(1, Math.ceil(total/perPage));
+        page = Math.min(page, pages);
+        const start = (page-1)*perPage;
+        const pageItems = filtered.slice(start, start+perPage);
+
+        partsContainer.innerHTML = '';
+        pageItems.forEach((item,i)=>{
+            const oemTags = item.oem.map(oem => `<span class="oem-tag">${escapeHtml(oem)}</span>`).join('');
+            const card = document.createElement('div');
+            card.className = 'part-card';
+            card.innerHTML = `
+                <div class="flex flex-col justify-between card-header-container">
+                    <div>
+                        <div class="text-sm font-extrabold text-gray-600 mb-2 uppercase">${escapeHtml(item.category)}</div>
+                        <h3 class="card-zoren-no font-mono">${escapeHtml(item.zoren)}</h3>
+                    </div>
+                    <div class="card-actions flex gap-3 mt-4">
+                        <button class="editBtn text-gray-700 hover:text-gray-900" title="Edit" data-index="${start+i}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        </button>
+                        <button class="delBtn text-red-600 hover:text-red-800" title="Delete" data-index="${start+i}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-details-grid text-lg font-semibold">
+                    <div>
+                        <div class="text-sm font-bold text-gray-600 uppercase">Car Maker:</div>
+                        <div class="text-gray-900">${escapeHtml(item.car_maker)}</div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="text-sm font-bold text-gray-600 uppercase">Applications:</div>
+                        <div class="text-gray-900">${escapeHtml(item.applications)}</div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="text-sm font-bold text-gray-600 uppercase">OEM No. / Interchange:</div>
+                        <div class="flex flex-wrap pt-1 min-h-[30px]">${oemTags}</div>
+                    </div>
+                </div>
+            `;
+            partsContainer.appendChild(card);
+        });
+
+        document.getElementById('summaryText').textContent = `${total} RECORDS (${pageItems.length} VISIBLE)`;
+        document.getElementById('pageInfo').textContent = `PAGE ${page} / ${pages}`;
+        
+        getEl('prevPage').disabled = page === 1;
+        getEl('nextPage').disabled = page === pages;
+
+        Array.from(document.getElementsByClassName('editBtn')).forEach(b=>b.addEventListener('click', onEdit));
+        Array.from(document.getElementsByClassName('delBtn')).forEach(b=>b.addEventListener('click', onDelete));
+    }
+
+    // --- Utility to safely get elements ---
+    function getEl(id) {
+        return document.getElementById(id);
+    }
+    
+    // Event Listeners (Pagination/Search)
+    getEl('prevPage')?.addEventListener('click', ()=>{ page=Math.max(1,page-1); renderCards(); });
+    getEl('nextPage')?.addEventListener('click', ()=>{ page++; renderCards(); });
+    getEl('searchInput')?.addEventListener('input', ()=>{ page=1; renderCards(); });
+    getEl('perPage')?.addEventListener('change', ()=>{ page=1; renderCards(); });
+    
+    // 2. CREATE / UPDATE (Save to Firestore)
+    const modalAddEdit = getEl('modalAddEdit');
+    getEl('btnAdd')?.addEventListener('click', ()=>{ openAddModal(); renderCategorySelects(); });
+    getEl('btnCancelModal')?.addEventListener('click', ()=>modalAddEdit?.classList.add('hidden'));
+
+    getEl('btnSaveModal')?.addEventListener('click', async ()=>{
+        if (!currentUser) { showConfirm('Auth Error', 'Authentication is required.', true); return; }
+
+        const zoren = getEl('inpZoren')?.value.trim();
+        const category = getEl('inpCategory')?.value.trim();
+        const car_maker=getEl('inpCarMaker')?.value.trim();
+        const applications=getEl('inpApplications')?.value.trim();
+
+        // Helper function to clear all errors
+        const clearErrors = () => {
+            getEl('zorenError')?.classList.add('hidden');
+            getEl('carMakerError')?.classList.add('hidden');
+            getEl('applicationsError')?.classList.add('hidden');
+        };
+
+        clearErrors();
+
+        // --- DATA VALIDATION ---
+        let isValid = true;
+        const zorenRegex = /^[a-zA-Z0-9-]+$/; 
+
+        if(!zoren || zoren.length < 4 || !zorenRegex.test(zoren)){ 
+            getEl('zorenError').textContent = 'ZOREN No. is required (min 4 chars) and must be alphanumeric/hyphen.';
+            getEl('zorenError').classList.remove('hidden');
+            isValid = false;
+        }
+        if(!category){ 
+            showConfirm('Error', 'Category is required', true);
+            isValid = false;
+        }
+        if(!car_maker){ 
+            getEl('carMakerError').textContent = 'Car Maker is required.';
+            getEl('carMakerError').classList.remove('hidden');
+            isValid = false;
+        }
+        if(!applications){ 
+            getEl('applicationsError').textContent = 'Applications field is required.';
+            getEl('applicationsError').classList.remove('hidden');
+            isValid = false;
+        }
+
+        if (!isValid) return;
+        // -----------------------
+
+        let oemRaw=getEl('inpOem')?.value.trim();
+        let oemArr=[];
+        if(oemRaw){ 
+            try{ 
+                // Attempt to parse as JSON array first, then fallback to comma split
+                oemArr=oemRaw.startsWith('[')?JSON.parse(oemRaw):oemRaw.split(',').map(s=>s.trim()).filter(Boolean);
+            }catch{ 
+                oemArr=oemRaw.split(',').map(s=>s.trim()).filter(Boolean); 
+            } 
+        }
+        
+        const dataToSave = { zoren, oem: oemArr, car_maker, applications, category };
+
+        try {
+            if (editIndex >= 0) {
+                const partToUpdate = parts[editIndex];
+                await setDoc(doc(getPartsCollectionRef(), partToUpdate.id), dataToSave);
+            } else {
+                await addDoc(getPartsCollectionRef(), dataToSave);
+            }
+            modalAddEdit.classList.add('hidden');
+            // loadAndRenderParts() will be triggered by onSnapshot automatically
+        } catch (error) {
+            showConfirm('Error Saving Data', "Error saving data. Check console for details.", true);
+            console.error("Error saving document: ", error);
+        }
+    });
+
+    function openAddModal(item=null,index=-1){
+        editIndex=index;
+        // Clear errors on modal open
+        getEl('zorenError')?.classList.add('hidden');
+        getEl('carMakerError')?.classList.add('hidden');
+        getEl('applicationsError')?.classList.add('hidden');
+
+        getEl('modalTitle').textContent=item?'EDIT PART':'ADD PART';
+        getEl('inpZoren').value=item?item.zoren:'';
+        getEl('inpOem').value=item?item.oem.join(', '):'';
+        getEl('inpCarMaker').value=item?item.car_maker:'';
+        getEl('inpApplications').value=item?item.applications:'';
+        renderCategorySelects(item ? item.category : categories[0]);
+        modalAddEdit.classList.remove('hidden');
+    }
+
+    function onEdit(e){ 
+        const idx=parseInt(e.currentTarget.getAttribute('data-index'),10); 
+        if(!Number.isFinite(idx)) return; 
+        const part = parts.find(p => p.id === parts[idx].id); // Get from main array via ID check
+        openAddModal(part, idx);
+    }
+    
+    // 3. DELETE (Delete from Firestore)
+    async function onDelete(e){ 
+        if (!currentUser) { showConfirm('Auth Error', 'Authentication is required.', true); return; }
+        const idx=parseInt(e.currentTarget.getAttribute('data-index'),10); 
+        if(!Number.isFinite(idx)) return; 
+
+        const partToDelete = parts[idx];
+
+        const confirmed = await showConfirm('Confirm Deletion', `Permanently delete ZOREN No. ${partToDelete.zoren}? This action cannot be undone.`);
+        if (!confirmed) return;
+
+        try {
+            await deleteDoc(doc(getPartsCollectionRef(), partToDelete.id));
+            // loadAndRenderParts() will be triggered by onSnapshot automatically
+        } catch (error) {
+            showConfirm('Error Deleting', "Error deleting record. Check console for details.", true);
+            console.error("Error deleting document: ", error);
+        }
+    } 
+
+    // --- BULK UPLOAD LOGIC ---
+    // Bulk Modal Controls
+    const modalBulk=getEl('modalBulk');
+    getEl('btnBulk')?.addEventListener('click',()=>{ 
+        modalBulk.classList.remove('hidden'); 
+        getEl('bulkCategorySelector').classList.remove('hidden');
+        renderCategorySelects();
+    });
+    getEl('btnCloseBulk')?.addEventListener('click',()=>modalBulk.classList.add('hidden'));
+    
+    getEl('bulkFileInput')?.addEventListener('change',ev=>{
+        const f=ev.target.files[0]; 
+        if(!f) return; 
+        const reader=new FileReader();
+        reader.onload=e=>getEl('bulkTextarea').value=e.target.result; 
+        showConfirm('File Loaded', "JSON content loaded into the textarea. Click 'Load & Merge' or 'Replace All' to proceed.", true);
+    });
+    
+    // Centralized Batch Upload Function
+    async function executeBatchUpload(records, replaceMode) {
+        if (!currentUser) { throw new Error('Authentication is required.'); }
+        
+        // Basic Bulk Validation: Check if required fields exist in all records
+        const invalidRecords = records.filter(r => !r.zoren || r.zoren.length < 4 || !r.car_maker || !r.applications);
+        if (invalidRecords.length > 0) {
+            showConfirm('Validation Failed', `Bulk upload failed: ${invalidRecords.length} records are missing required fields (Zoren No. (min 4), Car Maker, or Applications). Please fix and retry.`, true);
+            return;
+        }
+
+        const batch = writeBatch(db);
+
+        if (replaceMode) {
+            // Delete all existing documents in the collection
+            const existingSnapshot = await getDocs(getPartsCollectionRef());
+            existingSnapshot.forEach(doc => { batch.delete(doc.ref); });
+        }
+        
+        records.forEach(record => {
+            const newDocRef = doc(getPartsCollectionRef());
+            batch.set(newDocRef, record);
+        });
+        
         await batch.commit();
-
-        document.getElementById('jsonTextbox').value=''; 
-        loadAndRenderParts(); 
-        alert('Loaded and saved '+newRecords.length+' records to the shared database.');
-    }catch(err){ alert('Invalid JSON or Firebase Error: '+err.message); }
-  });
-  document.getElementById('btnClearTextarea').addEventListener('click',()=>document.getElementById('jsonTextbox').value='');
-
-  // Bulk Modal (Existing - Update logic for Firebase)
-  const modalBulk=document.getElementById('modalBulk');
-  document.getElementById('btnBulk').addEventListener('click',()=>modalBulk.classList.remove('hidden'));
-  document.getElementById('btnCloseBulk').addEventListener('click',()=>modalBulk.classList.add('hidden'));
-  document.getElementById('bulkFileInput').addEventListener('change',ev=>{
-    const f=ev.target.files[0]; if(!f) return; const reader=new FileReader();
-    reader.onload=e=>document.getElementById('bulkTextarea').value=e.target.result; reader.readAsText(f);
-  });
-  
-  // Load & Merge (Bulk Upload)
-  document.getElementById('btnLoadBulk').addEventListener('click', async ()=>{
-    const txt=document.getElementById('bulkTextarea').value.trim(); 
-    if(!txt){ alert('Bulk textarea empty'); return; }
-    try{ 
-        const parsed=JSON.parse(txt); 
-        if(!Array.isArray(parsed)){ alert('JSON must be an array'); return; }
-        const newRecords=parsed.map(normalizeRecord);
         
-        const batch = db.batch();
-        newRecords.forEach(record => {
-            const docRef = db.collection("parts").doc();
-            batch.set(docRef, record);
-        });
-        await batch.commit();
-
-        document.getElementById('bulkTextarea').value=''; 
+        getEl('bulkTextarea').value=''; 
         modalBulk.classList.add('hidden'); 
-        loadAndRenderParts(); 
-        alert('Merged '+newRecords.length+' records to the shared database.');
-    }catch(err){ alert('Invalid JSON or Firebase Error: '+err.message); }
-  });
-
-  // Replace All (Bulk Upload)
-  document.getElementById('btnReplaceBulk').addEventListener('click', async ()=>{
-    if(!confirm('WARNING: Are you sure you want to delete ALL existing data and replace it with the data below? This is public and permanent.')) return;
-    const txt=document.getElementById('bulkTextarea').value.trim(); 
-    try{ 
-        const parsed=txt?JSON.parse(txt):[]; 
-        if(!Array.isArray(parsed)){ alert('JSON must be an array'); return; }
-        const newRecords=parsed.map(normalizeRecord); 
+        // onSnapshot handles the re-render
+        return records.length;
+    }
+    
+    async function handleBulkUpload(replaceMode) {
+        const txt=getEl('bulkTextarea')?.value.trim(); 
+        if(!txt){ showConfirm('Input Empty', 'Bulk textarea is empty.', true); return; }
         
-        // 1. Delete all existing documents
-        const existingSnapshot = await db.collection("parts").get();
-        const deleteBatch = db.batch();
-        existingSnapshot.forEach(doc => {
-            deleteBatch.delete(doc.ref);
-        });
-        await deleteBatch.commit();
+        if(replaceMode) {
+            const confirmed = await showConfirm('DANGER: REPLACE ALL', 'WARNING: Are you sure you want to delete ALL your existing data and replace it? This is PERMANENT.', false);
+            if (!confirmed) return;
+        }
 
-        // 2. Upload new documents
-        const uploadBatch = db.batch();
-        newRecords.forEach(record => {
-            const docRef = db.collection("parts").doc();
-            uploadBatch.set(docRef, record);
-        });
-        await uploadBatch.commit();
-        
-        document.getElementById('bulkTextarea').value=''; 
-        modalBulk.classList.add('hidden'); 
-        loadAndRenderParts(); 
-        alert('Successfully replaced all records. Total: '+newRecords.length);
-    }catch(err){ alert('Error during bulk replace: '+err.message); }
-  });
+        try { 
+            const parsed=JSON.parse(txt); 
+            if(!Array.isArray(parsed)){ showConfirm('Invalid Format', 'JSON must be a root array of part objects.', true); return; }
+            
+            let recordsToImport = parsed.map(normalizeRecord);
+            const selectedCategory = getEl('bulkCategoryInput').value.trim();
+            
+            // Assign the selected category to any record that didn't have one
+            const finalRecords = recordsToImport.map(r => ({
+                ...r,
+                category: r.category === 'Uncategorized' ? selectedCategory : r.category
+            }));
 
-  // File input is now linked to the bulk upload logic
-  document.getElementById('fileJson').addEventListener('change',ev=>{
-    const f=ev.target.files[0]; 
-    if(!f) return;
-    alert("Please use the 'Bulk JSON Upload' modal to load file content.");
-    // Prompting the user to use the bulk modal for file handling simplicity
-  });
+            const count = await executeBatchUpload(finalRecords, replaceMode);
+            if (count) {
+                const message = replaceMode 
+                    ? `SUCCESS: Replaced all records. Total: ${count}.`
+                    : `SUCCESS: Merged ${count} new records.`;
+                showConfirm('Upload Complete', message, true);
+            }
 
-  // Download JSON & CSV (Existing - uses the current 'parts' array)
-  // NOTE: This downloads the currently visible/filtered data, not necessarily the entire database if you have more than the current page loaded.
-  function download(filename, content, mime='application/json'){ const blob=new Blob([content],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);}
-  document.getElementById('btnDownloadJson').addEventListener('click',()=>download('parts-data.json',JSON.stringify(parts,null,2)));
-  document.getElementById('btnExportCsv').addEventListener('click',()=>{
-    if(!parts.length) return alert('No records to export');
-    const header=['zoren','oem','car_maker','applications'];
-    const rows=parts.map(r=>[csvEscape(r.zoren),csvEscape(r.oem.join('; ')),csvEscape(r.car_maker),csvEscape(r.applications)]);
-    download('parts-data.csv',[header.join(','),...rows.map(r=>r.join(','))].join('\n'),'text/csv;charset=utf-8;');
-  });
-  function csvEscape(s){ if(s==null) return ''; s=String(s).replaceAll('"','""'); if(s.includes(',')||s.includes('"')||s.includes('\n')) s=`"${s}"`; return s; }
+        } catch(err){ 
+            showConfirm('Processing Error', 'Error during bulk operation. Check console for JSON parsing details.', true); 
+            console.error("Bulk upload error:", err); 
+        }
+    }
 
-  // Initial Load: Start the process by fetching data from Firestore
-  loadAndRenderParts(); 
+    getEl('btnLoadBulk')?.addEventListener('click', () => handleBulkUpload(false)); // Merge
+    getEl('btnReplaceBulk')?.addEventListener('click', () => handleBulkUpload(true)); // Replace
+
+    // --- CATEGORY MANAGER MODAL LISTENERS ---
+    const modalCategoryManager = getEl('modalCategoryManager');
+    getEl('btnManageCategories')?.addEventListener('click', () => {
+        renderCategoryManagerList();
+        modalCategoryManager?.classList.remove('hidden');
+    });
+
+    getEl('btnCloseCategoryManager')?.addEventListener('click', () => {
+        modalCategoryManager?.classList.add('hidden');
+    });
+
+    getEl('btnAddCategory')?.addEventListener('click', () => {
+        const newCat = getEl('inpNewCategory')?.value.trim();
+        if (newCat && !categories.includes(newCat)) {
+            categories.push(newCat);
+            getEl('inpNewCategory').value = '';
+            saveCategories(); 
+            renderCategoryManagerList();
+        } else if (newCat) {
+            showConfirm('Error', 'Category already exists or is invalid.', true);
+        }
+    });
+
+    // --- EXPORT LOGIC ---
+
+    function createDownloadLink(data, filename, mimeType) {
+        const blob = new Blob([data], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    getEl('btnDownloadJson')?.addEventListener('click', () => {
+        const dataToExport = parts.map(p => ({
+            zoren: p.zoren,
+            car_maker: p.car_maker,
+            applications: p.applications,
+            oem: p.oem,
+            category: p.category
+        }));
+        const json = JSON.stringify(dataToExport, null, 2);
+        createDownloadLink(json, `inventory_export_${new Date().toISOString().slice(0, 10)}.json`, 'application/json');
+        showConfirm('Export Complete', 'Inventory data successfully exported as JSON.', true);
+    });
+
+    getEl('btnExportCsv')?.addEventListener('click', () => {
+        if (parts.length === 0) {
+            showConfirm('Export Error', 'No data to export.', true);
+            return;
+        }
+
+        const headers = ["ZOREN No.", "Car Maker", "Applications", "OEM No.", "Category"];
+        const rows = parts.map(p => [
+            p.zoren,
+            p.car_maker,
+            p.applications,
+            p.oem.join('; '), // Use semicolon to separate multiple OEM numbers
+            p.category
+        ]);
+
+        const csvContent = [
+            headers.map(h => `"${h}"`).join(','),
+            ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+        ].join('\n');
+
+        createDownloadLink(csvContent, `inventory_export_${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv');
+        showConfirm('Export Complete', 'Inventory data successfully exported as CSV.', true);
+    });
+
+    // Initialize perPage dropdown
+    document.addEventListener('DOMContentLoaded', () => {
+        // Since the select is populated directly in HTML, just set the default value.
+        // The event listener is attached above.
+    });
 </script>
 
 </body>
-
 </html>
-
-
