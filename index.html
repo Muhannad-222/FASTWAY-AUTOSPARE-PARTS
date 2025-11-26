@@ -152,6 +152,27 @@
             font-family: monospace;
         }
 
+        /* Security Rules Instruction Block */
+        #rulesInstruction {
+            border: 4px solid #EF4444; /* Red border for urgency */
+            background-color: #FEE2E2; /* Red-50 */
+            color: #991B1B; /* Red-800 */
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        #rulesInstruction pre {
+            background-color: #FCA5A5; /* Red-300 */
+            color: #7F1D1D; /* Red-900 */
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-top: 0.75rem;
+            overflow-x: auto;
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body class="min-h-screen text-gray-800 p-4 md:p-6">
@@ -172,6 +193,14 @@
             </button>
         </div>
     </header>
+
+    <!-- SECURITY RULES INSTRUCTION (Hidden by default) -->
+    <div id="rulesInstruction" class="hidden">
+        <p class="font-extrabold text-xl mb-2">🔴 CRITICAL ERROR: PERMISSION DENIED 🔴</p>
+        <p>Your application is authenticated, but the Firestore Security Rules are preventing it from reading data.</p>
+        <p class="mt-2">To fix this, go to the <strong>Firebase Console > Firestore Database > Rules</strong>, and replace the existing rules with the code below. Then click <strong>Publish</strong>.</p>
+        <pre id="rulesCode"></pre>
+    </div>
 
     <section id="appContent" class="hidden">
         <!-- ACTION BAR: HIGH-VISIBILITY CONTROLS -->
@@ -353,6 +382,41 @@
         }
     }
 
+    // --- Utility to safely get elements ---
+    function getEl(id) {
+        return document.getElementById(id);
+    }
+    
+    // --- Security Rules Handler ---
+    function displaySecurityRulesError(errorMessage) {
+        const rulesInstruction = getEl('rulesInstruction');
+        const rulesCode = getEl('rulesCode');
+
+        rulesInstruction.classList.remove('hidden');
+        getEl('appContent').classList.remove('hidden');
+        getEl('partsContainer').innerHTML = `<p class="text-center text-red-400 p-8 text-xl font-bold">Error: ${errorMessage}. See instructions above.</p>`;
+        
+        rulesCode.textContent = `
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // This function checks if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // This rule allows authenticated users (anonymous or otherwise)
+    // to read and write ONLY within their own user path, 
+    // ensuring data privacy.
+    match /artifacts/{appId}/users/{userId}/{documents=**} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+    }
+  }
+}
+`;
+    }
+
+
     // --- Core Initialization Function ---
     async function initApp() {
         updateConnectionStatus("Attempting Firebase initialization...");
@@ -409,8 +473,6 @@
             console.error("Firebase Initialization/Startup Error:", error);
         }
     }
-
-    // --- Remaining functions (signInUser, loadCategories, etc.) remain below... ---
 
     // --- APP STATE ---
     let parts = [];
@@ -480,8 +542,12 @@
                 updateConnectionStatus("Default categories initialized.");
             }
         } catch (error) {
-            updateConnectionStatus("Error: Failed to load categories.", true);
-            console.error("Error loading categories:", error);
+             if (error.code === 'permission-denied') {
+                displaySecurityRulesError('Data load failed due to security rules');
+            } else {
+                updateConnectionStatus("Error: Failed to load categories.", true);
+                console.error("Error loading categories:", error);
+            }
         }
     }
 
@@ -636,9 +702,13 @@
                 partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-400 font-bold">NO PARTS FOUND. ADD NEW INVENTORY.</p></div>';
             }
         }, (error) => {
-            updateConnectionStatus(`FATAL: Data stream interrupted. ${error.code}`, true);
-            console.error("Error setting up snapshot listener: ", error);
-            partsContainer.innerHTML = `<div><p class="text-xl text-center p-8 text-red-500 font-bold">ERROR: ${error.message}</p></div>`;
+            if (error.code === 'permission-denied') {
+                displaySecurityRulesError('Data stream failed due to security rules');
+            } else {
+                updateConnectionStatus(`FATAL: Data stream interrupted. ${error.code}`, true);
+                console.error("Error setting up snapshot listener: ", error);
+                partsContainer.innerHTML = `<div><p class="text-xl text-center p-8 text-red-500 font-bold">ERROR: ${error.message}</p></div>`;
+            }
         });
     }
 
@@ -719,9 +789,6 @@
     }
 
     // --- Utility to safely get elements ---
-    function getEl(id) {
-        return document.getElementById(id);
-    }
     
     // Event Listeners (Pagination/Search)
     getEl('prevPage')?.addEventListener('click', ()=>{ page=Math.max(1,page-1); renderCards(); });
