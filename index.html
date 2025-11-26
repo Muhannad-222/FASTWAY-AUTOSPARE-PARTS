@@ -140,7 +140,18 @@
             padding: 0.5rem 1rem;
             font-family: monospace;
             font-size: 0.75rem;
+            transition: background-color 0.3s;
         }
+        
+        /* New Connection Log Style */
+        #connectionLog {
+            font-size: 0.8rem;
+            color: #ccc;
+            margin-top: 8px;
+            padding-right: 0.5rem;
+            font-family: monospace;
+        }
+
     </style>
 </head>
 <body class="min-h-screen text-gray-800 p-4 md:p-6">
@@ -154,6 +165,8 @@
         </div>
         <div class="flex flex-col items-end">
             <p id="authStatus" class="status-bar">AUTHENTICATING...</p>
+            <!-- NEW CONNECTION LOG DISPLAY -->
+            <p id="connectionLog">Starting initialization...</p>
             <button id="btnManageCategories" class="pro-btn mt-3 px-5 py-2 text-sm bg-gray-700 text-white hover:bg-gray-600 hidden">
                 Manage Categories
             </button>
@@ -304,24 +317,51 @@
     // --- FIREBASE IMPORTS (Modern Modular SDK v11.6.1) ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    // FIX: Added getDoc for retrieving a single document
     import { getFirestore, doc, setDoc, addDoc, onSnapshot, collection, getDoc, getDocs, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // --- GLOBAL VARIABLES & INITIALIZATION ---
 
     // 1. Get configuration from Canvas environment
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+    
+    // User-provided configuration (must be manually set if __firebase_config is not available)
+    const userFirebaseConfig = {
+        apiKey: "AIzaSyDMG67OjTem-qRC8S8NN58weeeHnZIGLW0",
+        authDomain: "fastway-autospare-parts-shibi.firebaseapp.com",
+        projectId: "fastway-autospare-parts-shibi",
+        storageBucket: "fastway-autospare-parts-shibi.firebasestorage.app",
+        messagingSenderId: "129701229596",
+        appId: "1:129701229596:web:ff12c4d0ed2c87ee2d9bd9",
+        measurementId: "G-JV6NF5FREJ"
+    };
+
+    // Use environment config if available, otherwise use user's explicit config
+    const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+    const firebaseConfig = Object.keys(envConfig).length > 0 ? envConfig : userFirebaseConfig;
+
     const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
 
     // 2. Initialize Firebase App and Services
     let app, auth, db;
+    
+    // Status update helper
+    function updateConnectionStatus(message, isError = false) {
+        const logEl = getEl('connectionLog');
+        if (logEl) {
+            logEl.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logEl.style.color = isError ? '#EF4444' : '#fff';
+        }
+    }
+
+    updateConnectionStatus("Attempting Firebase initialization...");
     try {
         app = initializeApp(firebaseConfig);
         auth = getAuth(app);
         db = getFirestore(app);
-        console.log("Firebase services initialized.");
+        updateConnectionStatus("Services initialized. Starting authentication...");
     } catch (error) {
+        updateConnectionStatus("FATAL: Initialization failed.", true);
         console.error("Firebase Initialization Error:", error);
     }
 
@@ -380,17 +420,20 @@
 
     async function loadCategories() {
         if (!currentUser) return;
+        updateConnectionStatus("Loading categories...");
         try {
-            // FIX: Use getDoc(docRef) instead of docRef.get()
             const categoryDoc = await getDoc(getCategoryDocRef());
             
             if (categoryDoc.exists() && categoryDoc.data().list) {
                 categories = categoryDoc.data().list.filter(c => c && c.trim()).map(c => c.trim());
+                updateConnectionStatus(`Categories loaded (${categories.length}).`);
             } else {
                 categories = ['Uncategorized', 'Fuel Injection', 'Brake System', 'Filters', 'Ignition'];
                 await saveCategories();
+                updateConnectionStatus("Default categories initialized.");
             }
         } catch (error) {
+            updateConnectionStatus("Error: Failed to load categories.", true);
             console.error("Error loading categories:", error);
         }
     }
@@ -403,6 +446,7 @@
             categories = uniqueCategories; 
             renderCategorySelects(); 
         } catch (error) {
+            updateConnectionStatus("Error saving categories.", true);
             console.error("Error saving categories:", error);
         }
     }
@@ -473,14 +517,16 @@
         const btnManageCategories = document.getElementById('btnManageCategories');
 
         if (user) {
-            authStatus.textContent = `UID: ${user.uid.substring(0, 8)}...`;
+            authStatus.textContent = `UID: ${user.uid.substring(0, 8)}... (Authenticated)`;
+            updateConnectionStatus("Authentication successful. Loading inventory...");
             appContent.classList.remove('hidden');
             btnManageCategories.classList.remove('hidden');
             await loadCategories();
             loadAndRenderParts(); 
         } else {
-            authStatus.textContent = 'ATTEMPTING SIGN-IN...';
+            authStatus.textContent = 'PENDING SIGN-IN...';
             btnManageCategories.classList.add('hidden');
+            updateConnectionStatus("Attempting anonymous sign-in...");
             await signInUser();
         }
     });
@@ -493,8 +539,9 @@
                 await signInAnonymously(auth);
             }
         } catch (error) {
+            updateConnectionStatus(`AUTH FAIL: ${error.code}`, true);
             console.error("Authentication Error:", error);
-            document.getElementById('authStatus').textContent = `AUTH FAIL: ${error.code}`;
+            document.getElementById('authStatus').textContent = `AUTH FAIL`;
             document.getElementById('appContent').innerHTML = '<p class="text-center text-red-400 p-8 text-xl">FATAL ERROR: Could not authenticate user. Check console for details.</p>';
         }
     }
@@ -521,6 +568,7 @@
         if (!currentUser) return;
         
         partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-400 font-bold">LOADING INVENTORY...</p></div>';
+        updateConnectionStatus("Setting up real-time inventory listener...");
         
         if (partsSnapshotUnsubscribe) {
             partsSnapshotUnsubscribe(); // Detach previous listener
@@ -538,11 +586,13 @@
                     console.error("Error normalizing part data:", doc.id, e);
                 }
             });
+            updateConnectionStatus(`Inventory loaded successfully (${parts.length} parts).`);
             renderCards();
             if (parts.length === 0) {
                 partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-400 font-bold">NO PARTS FOUND. ADD NEW INVENTORY.</p></div>';
             }
         }, (error) => {
+            updateConnectionStatus(`FATAL: Data stream interrupted. ${error.code}`, true);
             console.error("Error setting up snapshot listener: ", error);
             partsContainer.innerHTML = `<div><p class="text-xl text-center p-8 text-red-500 font-bold">ERROR: ${error.message}</p></div>`;
         });
