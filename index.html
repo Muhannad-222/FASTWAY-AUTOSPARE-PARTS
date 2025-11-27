@@ -1,1350 +1,1391 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FastWay Inventory: Email/Password Auth Edition</title>
-        <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FastWay Inventory: Email/Password Auth Edition</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    <style>
-        /* --- Option 2: Soft Clay/Neumorphism Aesthetic --- */
-        :root {
-            /* Palette: Soft Light Background, Light Shadows, Vibrant Accents */
-            --bg-primary: #E0E0E0; /* Soft Clay Background */
-            --accent-yellow: #FFC000; /* Glowing Yellow */
-            --accent-orange: #FF6A00; /* Glowing Orange */
-            --text-dark: #374151; /* Dark Text */
-            --text-subtle: #9CA3AF;
-            
-            /* Neumorphism Base Shadows */
-            --shadow-light: #ffffff; /* Lighter shadow for top/left */
-            --shadow-dark: #b0b0b0; /* Darker shadow for bottom/right */
-            
-            /* Elevation Mixin */
-            --neumo-elevated: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
-            --neumo-pressed: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
-        }
+    <style>
+        /* --- Option 2: Soft Clay/Neumorphism Aesthetic --- */
+        :root {
+            /* Palette: Soft Light Background, Light Shadows, Vibrant Accents */
+            --bg-primary: #E0E0E0; /* Soft Clay Background */
+            --accent-yellow: #FFC000; /* Glowing Yellow */
+            --accent-orange: #FF6A00; /* Glowing Orange */
+            --text-dark: #374151; /* Dark Text */
+            --text-subtle: #9CA3AF;
+            
+            /* Neumorphism Base Shadows */
+            --shadow-light: #ffffff; /* Lighter shadow for top/left */
+            --shadow-dark: #b0b0b0; /* Darker shadow for bottom/right */
+            
+            /* Elevation Mixin */
+            --neumo-elevated: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+            --neumo-pressed: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+        }
 
-        body { 
-            background-color: var(--bg-primary); 
-            font-family: 'Inter', sans-serif;
-            color: var(--text-dark);
-            transition: background-color 0.3s;
-        }
+        body { 
+            background-color: var(--bg-primary); 
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            transition: background-color 0.3s;
+        }
 
-        /* --- Neumorphism Base Styles --- */
-        .neumo-panel {
-            background-color: var(--bg-primary);
-            border-radius: 2.5rem; /* Larger, softer corners for panels */
-            box-shadow: var(--neumo-elevated); /* Soft, elevated look */
-            padding: 2rem;
-            transition: all 0.2s ease-in-out;
-        }
+        /* --- Neumorphism Base Styles --- */
+        .neumo-panel {
+            background-color: var(--bg-primary);
+            border-radius: 2.5rem; /* Larger, softer corners for panels */
+            box-shadow: var(--neumo-elevated); /* Soft, elevated look */
+            padding: 2rem;
+            transition: all 0.2s ease-in-out;
+        }
 
-        /* High-Contrast/Extruded Buttons */
-        .neumo-btn {
-            transition: all 0.2s ease-in-out;
-            font-weight: 600;
-            border-radius: 9999px; /* Pill shape */
-            padding: 0.75rem 1.5rem;
-            border: none;
-            letter-spacing: 0.01em;
-            cursor: pointer;
-            
-            /* Inherit base background and apply elevation */
-            background-color: var(--bg-primary); 
-            box-shadow: var(--neumo-elevated);
-        }
-        
-        .neumo-btn:hover {
-            opacity: 0.95;
-            box-shadow: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
-            transform: translateY(-1px);
-        }
-        
-        /* Pressed state (for user feedback) */
-        .neumo-btn:active {
-            box-shadow: var(--neumo-pressed);
-            transform: translateY(0);
-        }
+        /* High-Contrast/Extruded Buttons */
+        .neumo-btn {
+            transition: all 0.2s ease-in-out;
+            font-weight: 600;
+            border-radius: 9999px; /* Pill shape */
+            padding: 0.75rem 1.5rem;
+            border: none;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            
+            /* Inherit base background and apply elevation */
+            background-color: var(--bg-primary); 
+            box-shadow: var(--neumo-elevated);
+        }
+        
+        .neumo-btn:hover {
+            opacity: 0.95;
+            box-shadow: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
+            transform: translateY(-1px);
+        }
+        
+        /* Pressed state (for user feedback) */
+        .neumo-btn:active {
+            box-shadow: var(--neumo-pressed);
+            transform: translateY(0);
+        }
 
-        .neumo-btn-primary { 
-            /* Primary accent button, color overrides neumo look */
-            background: linear-gradient(145deg, var(--accent-yellow), var(--accent-orange)); 
-            color: var(--text-dark); 
-            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2), -4px -4px 10px rgba(255, 255, 255, 0.5); /* Stronger button shadow */
-        }
-        
-        /* Secondary buttons get the soft clay look */
-        .neumo-btn-secondary { 
-            color: var(--text-dark); 
-        }
+        .neumo-btn-primary { 
+            /* Primary accent button, color overrides neumo look */
+            background: linear-gradient(145deg, var(--accent-yellow), var(--accent-orange)); 
+            color: var(--text-dark); 
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2), -4px -4px 10px rgba(255, 255, 255, 0.5); /* Stronger button shadow */
+        }
+        
+        /* Secondary buttons get the soft clay look */
+        .neumo-btn-secondary { 
+            color: var(--text-dark); 
+        }
 
-        /* Status Pill Style (Keep some vibrance) */
-        .status-pill {
-            background: linear-gradient(145deg, var(--accent-yellow), var(--accent-orange));
-            color: var(--text-dark);
-            border-radius: 9999px;
-            padding: 0.5rem 1.5rem;
-            font-size: 0.8rem;
-            font-weight: 700;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-        }
+        /* Status Pill Style (Keep some vibrance) */
+        .status-pill {
+            background: linear-gradient(145deg, var(--accent-yellow), var(--accent-orange));
+            color: var(--text-dark);
+            border-radius: 9999px;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
 
-        /* Inventory Card (Layered Neumorphism) */
-        .part-card {
-            background-color: var(--bg-primary);
-            border-radius: 2rem;
-            /* Inset shadow for a "pressed" card look */
-            box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); 
-            padding: 2rem;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-            color: var(--text-dark);
-            border: none; /* Remove border from old style */
-        }
+        /* Inventory Card (Layered Neumorphism) */
+        .part-card {
+            background-color: var(--bg-primary);
+            border-radius: 2rem;
+            /* Inset shadow for a "pressed" card look */
+            box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); 
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            color: var(--text-dark);
+            border: none; /* Remove border from old style */
+        }
 
-        @media (min-width: 768px) {
-            .part-card {
-                grid-template-columns: 1fr 2.5fr;
-            }
-            .card-header-container {
-                border-right: 1px solid var(--shadow-dark); /* Subtle separation line */
-                padding-right: 2rem;
-            }
-        }
-        
-        .card-zoren-no {
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: var(--accent-orange);
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); /* Soft shadow for contrast */
-            line-height: 1;
-        }
-        
-        .oem-tag {
-            background: #D1D5DB; /* Tailwind Gray-300 - better contrast */
-            color: var(--text-dark);
-            padding: 0.3rem 1rem;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-            font-weight: 700;
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
-            box-shadow: inset 1px 1px 3px var(--shadow-dark), inset -1px -1px 3px var(--shadow-light);
-        }
+        @media (min-width: 768px) {
+            .part-card {
+                grid-template-columns: 1fr 2.5fr;
+            }
+            .card-header-container {
+                border-right: 1px solid var(--shadow-dark); /* Subtle separation line */
+                padding-right: 2rem;
+            }
+        }
+        
+        .card-zoren-no {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--accent-orange);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); /* Soft shadow for contrast */
+            line-height: 1;
+        }
+        
+        .oem-tag {
+            background: #D1D5DB; /* Tailwind Gray-300 - better contrast */
+            color: var(--text-dark);
+            padding: 0.3rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            box-shadow: inset 1px 1px 3px var(--shadow-dark), inset -1px -1px 3px var(--shadow-light);
+        }
 
-        /* Styling for ALL inputs and selects */
-        input, select, textarea {
-            border: none; 
-            border-radius: 1.5rem; /* Match panel curvature */
-            padding: 0.9rem 1.75rem; 
-            background-color: var(--bg-primary); 
-            color: var(--text-dark);
-            font-weight: 500;
-            transition: all 0.2s;
-            /* Inset Shadow for Pressed Input */
-            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
-        }
-        
-        /* Custom Styling for Modal Inputs (to make them look thicker/more substantial) */
-        #modalAddEdit input, 
-        #modalAddEdit select, 
-        #modalAddEdit textarea,
-        #modalAuth input {
-            padding: 1rem 2rem; /* Increased padding */
-            font-size: 1.125rem; /* Larger font size */
-            font-weight: 600; /* Bolder text */
-        }
+        /* Styling for ALL inputs and selects */
+        input, select, textarea {
+            border: none; 
+            border-radius: 1.5rem; /* Match panel curvature */
+            padding: 0.9rem 1.75rem; 
+            background-color: var(--bg-primary); 
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: all 0.2s;
+            /* Inset Shadow for Pressed Input */
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        }
+        
+        /* Custom Styling for Modal Inputs (to make them look thicker/more substantial) */
+        #modalAddEdit input, 
+        #modalAddEdit select, 
+        #modalAddEdit textarea,
+        #modalAuth input {
+            padding: 1rem 2rem; /* Increased padding */
+            font-size: 1.125rem; /* Larger font size */
+            font-weight: 600; /* Bolder text */
+        }
 
-        input::placeholder, textarea::placeholder {
-            color: var(--text-subtle);
-            opacity: 1;
-        }
+        input::placeholder, textarea::placeholder {
+            color: var(--text-subtle);
+            opacity: 1;
+        }
 
-        input:focus, select:focus, textarea:focus {
-            background-color: var(--bg-primary);
-            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light), 0 0 0 2px var(--accent-yellow); /* Focus ring */
-            outline: none;
-        }
-        
-        /* Dedicated style for primary control inputs (Search/Filter) */
-        .neumo-control-input {
-            font-size: 1.125rem; /* Same larger font for consistency */
-            padding: 1rem 2rem; /* Substantial padding */
-            border-radius: 2rem; /* Softer edges */
-            font-weight: 600;
-        }
+        input:focus, select:focus, textarea:focus {
+            background-color: var(--bg-primary);
+            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light), 0 0 0 2px var(--accent-yellow); /* Focus ring */
+            outline: none;
+        }
+        
+        /* Dedicated style for primary control inputs (Search/Filter) */
+        .neumo-control-input {
+            font-size: 1.125rem; /* Same larger font for consistency */
+            padding: 1rem 2rem; /* Substantial padding */
+            border-radius: 2rem; /* Softer edges */
+            font-weight: 600;
+        }
 
-        /* Modal: Retain Neumorphism on modal for consistency */
-        .modal-neumo { 
-            background-color: var(--bg-primary); 
-            border: 1px solid var(--shadow-light);
-            border-radius: 2rem;
-            box-shadow: var(--neumo-elevated);
-        }
-        
-        /* Error Alert (Contrasting) */
-        .system-error {
-            background-color: #FEE2E2; /* Red-100 */
-            color: #DC2626; /* Red-600 */
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Specific adjustments for dark text on light background */
-        .text-light-override {
-            color: var(--text-dark) !important;
-        }
+        /* Modal: Retain Neumorphism on modal for consistency */
+        .modal-neumo { 
+            background-color: var(--bg-primary); 
+            border: 1px solid var(--shadow-light);
+            border-radius: 2rem;
+            box-shadow: var(--neumo-elevated);
+        }
+        
+        /* Error Alert (Contrasting) */
+        .system-error {
+            background-color: #FEE2E2; /* Red-100 */
+            color: #DC2626; /* Red-600 */
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Specific adjustments for dark text on light background */
+        .text-light-override {
+            color: var(--text-dark) !important;
+        }
 
-        /* --- Search Highlight Style --- */
-        .highlight {
-            background-color: #FACC15; /* Tailwind yellow-400 for high contrast */
-            color: black;
-            font-weight: 700;
-            padding: 1px 3px;
-            border-radius: 4px;
-        }
+        /* --- Search Highlight Style --- */
+        .highlight {
+            background-color: #FACC15; /* Tailwind yellow-400 for high contrast */
+            color: black;
+            font-weight: 700;
+            padding: 1px 3px;
+            border-radius: 4px;
+        }
+        /* Custom styles for auth buttons */
+        #auth-buttons .neumo-btn-secondary {
+            background: var(--bg-primary);
+            box-shadow: var(--neumo-elevated);
+        }
+        #auth-buttons .neumo-btn-primary {
+            background: linear-gradient(145deg, var(--accent-yellow), var(--accent-orange));
+        }
 
-    </style>
+    </style>
 </head>
 <body class="min-h-screen text-gray-800 p-4 md:p-6">
 
 <div class="max-w-7xl mx-auto">
-    <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center p-6 rounded-2xl">
-        <div class="mb-4 md:mb-0">
-                        <h1 class="text-5xl font-extrabold text-gray-800 leading-tight">FASTWAY AUTO SPAREPARTS</h1>
-            <p class="text-xl font-bold text-gray-600 mt-1">INVENTORY CATALOG</p>
-        </div>
-        <div class="flex flex-col items-end">
-            <p id="authStatus" class="status-pill">AUTHENTICATING...</p>
-            <p id="connectionLog" class="text-xs mt-1 text-gray-500">Starting initialization...</p>
-            
-                        <div id="loggedOutButtons" class="flex gap-2 mt-3 hidden">
-                <button id="btnOpenSignIn" class="neumo-btn neumo-btn-secondary px-5 py-2 text-sm">Sign In</button>
-                <button id="btnOpenSignUp" class="neumo-btn neumo-btn-primary px-5 py-2 text-sm">Sign Up</button>
-            </div>
-            
-                        <div id="loggedInButtons" class="flex gap-2 mt-3 hidden">
-                <button id="btnManageCategories" class="neumo-btn neumo-btn-secondary px-5 py-2 text-sm">
-                    Manage Categories
-                </button>
-                <button id="btnLogout" class="neumo-btn neumo-btn-secondary bg-gray-400 text-light-override px-5 py-2 text-sm">
-                    Logout
-                </button>
-            </div>
-        </div>
-    </header>
+    <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center p-6 rounded-2xl">
+        <div class="mb-4 md:mb-0">
+            <h1 class="text-5xl font-extrabold text-gray-800 leading-tight">FASTWAY AUTO SPAREPARTS</h1>
+            <p class="text-xl font-bold text-gray-600 mt-1">INVENTORY CATALOG</p>
+        </div>
+        <div class="flex flex-col items-end">
+            <p id="authStatus" class="status-pill">AUTHENTICATING...</p>
+            <p id="connectionLog" class="text-xs mt-1 text-gray-500">Starting initialization...</p>
+            
+            <!-- NEW: Auth Buttons Container -->
+            <div id="auth-buttons" class="flex flex-wrap gap-2 mt-3">
+                <!-- Logged Out State -->
+                <div id="loggedOutButtons" class="flex gap-2 hidden">
+                    <button id="btnOpenSignIn" class="neumo-btn neumo-btn-secondary px-5 py-2 text-sm">Sign In</button>
+                    <button id="btnOpenSignUp" class="neumo-btn neumo-btn-primary px-5 py-2 text-sm">Sign Up</button>
+                </div>
+                
+                <!-- Logged In State -->
+                <div id="loggedInButtons" class="flex gap-2 hidden">
+                    <button id="btnManageCategories" class="neumo-btn neumo-btn-secondary px-5 py-2 text-sm">
+                        Manage Categories
+                    </button>
+                    <button id="btnLogout" class="neumo-btn neumo-btn-secondary px-5 py-2 text-sm">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
 
-    <div id="rulesInstruction" class="hidden neumo-panel p-6 border-red-500 border-2">
-        <p class="font-extrabold text-xl mb-2 text-red-600">🔴 CRITICAL ERROR: PERMISSION DENIED 🔴</p>
-        <p class="text-gray-700">Your application is authenticated, but the Firestore Security Rules are preventing it from reading data.</p>
-        <p class="mt-2 text-gray-700">To fix this, go to the Firebase Console > Firestore Database > Rules, and replace the existing rules with the code below.</p>
-        <pre id="rulesCode" class="bg-gray-200 text-yellow-700 p-4 rounded-lg mt-3 overflow-x-auto text-sm"></pre>
-    </div>
+    <div id="rulesInstruction" class="hidden neumo-panel p-6 border-red-500 border-2">
+        <p class="font-extrabold text-xl mb-2 text-red-600">🔴 CRITICAL ERROR: PERMISSION DENIED 🔴</p>
+        <p class="text-gray-700">Your application is authenticated, but the Firestore Security Rules are preventing it from reading data.</p>
+        <p class="mt-2 text-gray-700">To fix this, go to the Firebase Console > Firestore Database > Rules, and replace the existing rules with the code below.</p>
+        <pre id="rulesCode" class="bg-gray-200 text-yellow-700 p-4 rounded-lg mt-3 overflow-x-auto text-sm"></pre>
+    </div>
 
-    <section id="appContent" class="hidden">
-        
-                <section class="mb-10 p-4 md:p-6 neumo-panel flex flex-col md:flex-row flex-wrap gap-4 items-center" 
-                 style="box-shadow: var(--neumo-pressed); padding: 1.5rem; border-radius: 2rem;">
-            
-                        <div class="flex flex-wrap gap-4 w-full md:w-auto md:min-w-[200px]">
-                <button id="btnAdd" class="neumo-btn neumo-btn-primary text-lg flex-grow">+ NEW PART</button>
-                <button id="btnBulk" class="neumo-btn neumo-btn-secondary text-lg flex-grow">BULK JSON</button>
-            </div>
+    <!-- Main Content hidden until authenticated -->
+    <section id="appContent" class="hidden">
+        
+        <!-- CONTROL PANEL (Neumorphism Inset) -->
+        <section class="mb-10 p-4 md:p-6 neumo-panel flex flex-col md:flex-row flex-wrap gap-4 items-center" 
+                 style="box-shadow: var(--neumo-pressed); padding: 1.5rem; border-radius: 2rem;">
+            
+            <!-- Left Action Buttons (Extruded) -->
+            <div class="flex flex-wrap gap-4 w-full md:w-auto md:min-w-[200px]">
+                <button id="btnAdd" class="neumo-btn neumo-btn-primary text-lg flex-grow">+ NEW PART</button>
+                <button id="btnBulk" class="neumo-btn neumo-btn-secondary text-lg flex-grow">BULK JSON</button>
+            </div>
 
-                        <div class="flex-grow flex flex-col md:flex-row items-center gap-4 w-full md:w-auto p-3 rounded-2xl bg-gray-300 bg-opacity-30">
-                
-                                <select id="categoryFilter" class="neumo-control-input flex-grow w-full md:w-60"></select>
-                <input id="searchInput" type="search" placeholder="SEARCH (ZOREN, OEM, MAKER, APP)" class="neumo-control-input flex-grow w-full md:flex-grow" />
-                
-                                <select id="perPage" class="w-full md:w-32 neumo-control-input">
-                    <option value="10">10 / Page</option>
-                    <option value="25">25 / Page</option>
-                    <option value="50">50 / Page</option>
-                    <option value="100">100 / Page</option>
-                    <option value="200">200 / Page</option>
-                </select>
-            </div>
-            
-                        <div class="flex flex-wrap gap-3 w-full md:w-auto md:justify-end">
-                <button id="btnDownloadJson" class="neumo-btn neumo-btn-secondary bg-gray-400 text-light-override px-4 py-3 flex-grow md:flex-none">Export JSON</button>
-                <button id="btnExportCsv" class="neumo-btn neumo-btn-secondary bg-green-500 text-light-override px-4 py-3 flex-grow md:flex-none">Export CSV</button>
-            </div>
-        </section>
+            <!-- Central Search/Filter/Pagination/Export (Integrated Inset Fields - Uses neumo-control-input class) -->
+            <div class="flex-grow flex flex-col md:flex-row items-center gap-4 w-full md:w-auto p-3 rounded-2xl bg-gray-300 bg-opacity-30">
+                
+                <!-- Filter and Search Fields (Wider and Taller) -->
+                <select id="categoryFilter" class="neumo-control-input flex-grow w-full md:w-60"></select>
+                <input id="searchInput" type="search" placeholder="SEARCH (ZOREN, OEM, MAKER, APP)" class="neumo-control-input flex-grow w-full md:flex-grow" />
+                
+                <!-- Per Page Selector (Narrower) -->
+                <select id="perPage" class="w-full md:w-32 neumo-control-input">
+                    <option value="10">10 / Page</option>
+                    <option value="25">25 / Page</option>
+                    <option value="50">50 / Page</option>
+                    <option value="100">100 / Page</option>
+                    <option value="200">200 / Page</option>
+                </select>
+            </div>
+            
+            <!-- Export Buttons (Extruded) -->
+            <div class="flex flex-wrap gap-3 w-full md:w-auto md:justify-end">
+                <button id="btnDownloadJson" class="neumo-btn neumo-btn-secondary bg-gray-400 text-light-override px-4 py-3 flex-grow md:flex-none">Export JSON</button>
+                <button id="btnExportCsv" class="neumo-btn neumo-btn-secondary bg-green-500 text-light-override px-4 py-3 flex-grow md:flex-none">Export CSV</button>
+            </div>
+        </section>
 
-        <section>
-            <div id="partsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                </div>
+        <section>
+            <div id="partsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                </div>
 
-            <div class="mt-10 neumo-panel p-4 flex flex-wrap gap-4 items-center justify-between text-gray-800">
-                <div class="text-base font-semibold" id="summaryText">0 RECORDS LOADED</div>
-                <div class="flex items-center gap-4">
-                    <button id="prevPage" class="neumo-btn neumo-btn-secondary px-5 py-2">PREVIOUS</button>
-                    <span id="pageInfo" class="px-3 text-lg font-extrabold"></span>
-                    <button id="nextPage" class="neumo-btn neumo-btn-secondary px-5 py-2">NEXT</button>
-                </div>
-            </div>
-        </section>
-    </section>
+            <div class="mt-10 neumo-panel p-4 flex flex-wrap gap-4 items-center justify-between text-gray-800">
+                <div class="text-base font-semibold" id="summaryText">0 RECORDS LOADED</div>
+                <div class="flex items-center gap-4">
+                    <button id="prevPage" class="neumo-btn neumo-btn-secondary px-5 py-2">PREVIOUS</button>
+                    <span id="pageInfo" class="px-3 text-lg font-extrabold"></span>
+                    <button id="nextPage" class="neumo-btn neumo-btn-secondary px-5 py-2">NEXT</button>
+                </div>
+            </div>
+        </section>
+    </section>
 </div>
 
+<!-- Modal Confirm -->
 <div id="modalConfirm" class="hidden fixed inset-0 z-40 flex items-center justify-center">
-    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
-    <div class="modal-neumo z-50 w-full max-w-sm p-6 text-gray-800 border-yellow-700 border-t-2">
-        <h3 id="confirmTitle" class="text-2xl font-bold mb-4">CONFIRM ACTION</h3>
-        <p id="confirmMessage" class="text-gray-600 mb-6"></p>
-        <div class="flex justify-end gap-3">
-            <button id="btnConfirmCancel" class="neumo-btn neumo-btn-secondary px-5 py-2">CANCEL</button>
-            <button id="btnConfirmAction" class="neumo-btn neumo-btn-primary px-5 py-2 bg-red-600 text-light-override">CONFIRM</button>
-        </div>
-    </div>
+    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
+    <div class="modal-neumo z-50 w-full max-w-sm p-6 text-gray-800 border-yellow-700 border-t-2">
+        <h3 id="confirmTitle" class="text-2xl font-bold mb-4">CONFIRM ACTION</h3>
+        <p id="confirmMessage" class="text-gray-600 mb-6"></p>
+        <div class="flex justify-end gap-3">
+            <button id="btnConfirmCancel" class="neumo-btn neumo-btn-secondary px-5 py-2">CANCEL</button>
+            <button id="btnConfirmAction" class="neumo-btn neumo-btn-primary px-5 py-2 bg-red-600 text-light-override">CONFIRM</button>
+        </div>
+    </div>
 </div>
 
+<!-- Modal Add/Edit Part -->
 <div id="modalAddEdit" class="hidden fixed inset-0 z-40 flex items-center justify-center">
-    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
-        <div class="modal-neumo z-50 w-full max-w-3xl p-8 text-gray-800 border-yellow-700 border-t-4">
-        <h3 id="modalTitle" class="text-3xl font-extrabold mb-6">ADD/EDIT PART</h3>
-        <div class="space-y-5">
-            <div>
-                <label class="block text-sm font-medium text-gray-600">Category <span class="text-red-600">*</span></label>
-                                <select id="inpCategory" class="w-full"></select>
-                <p id="categoryError" class="text-xs text-red-600 mt-1 hidden system-error">Category is required.</p>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-600">ZOREN No. <span class="text-red-600">*</span></label>
-                <input id="inpZoren" class="w-full" />
-                <p id="zorenError" class="mt-2 hidden system-error">ZOREN No. is required (min 4 chars) and must be alphanumeric/hyphen.</p>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-600">Car Maker <span class="text-red-600">*</span></label>
-                <input id="inpCarMaker" class="w-full" />
-                <p id="carMakerError" class="mt-2 hidden system-error">Car Maker is required.</p>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-600">Applications <span class="text-red-600">*</span></label>
-                <input id="inpApplications" class="w-full" />
-                <p id="applicationsError" class="mt-2 hidden system-error">Applications field is required.</p>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-600">OEM No. (comma separated)</label>
-                <input id="inpOem" class="w-full" placeholder="31110-09000, E8678M" />
-            </div>
-        </div>
+    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
+    <div class="modal-neumo z-50 w-full max-w-3xl p-8 text-gray-800 border-yellow-700 border-t-4">
+        <h3 id="modalTitle" class="text-3xl font-extrabold mb-6">ADD/EDIT PART</h3>
+        <p id="deduplicationWarning" class="text-sm font-semibold text-orange-600 mt-2 hidden system-error">
+            Note: Saving this will check for duplicates based on ZOREN No.
+        </p>
+        <div class="space-y-5">
+            <div>
+                <label class="block text-sm font-medium text-gray-600">Category <span class="text-red-600">*</span></label>
+                <select id="inpCategory" class="w-full"></select>
+                <p id="categoryError" class="text-xs text-red-600 mt-1 hidden system-error">Category is required.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-600">ZOREN No. <span class="text-red-600">*</span></label>
+                <input id="inpZoren" class="w-full" />
+                <p id="zorenError" class="mt-2 hidden system-error">ZOREN No. is required (min 4 chars) and must be alphanumeric/hyphen.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-600">Car Maker <span class="text-red-600">*</span></label>
+                <input id="inpCarMaker" class="w-full" />
+                <p id="carMakerError" class="mt-2 hidden system-error">Car Maker is required.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-600">Applications <span class="text-red-600">*</span></label>
+                <input id="inpApplications" class="w-full" />
+                <p id="applicationsError" class="mt-2 hidden system-error">Applications field is required.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-600">OEM No. (comma separated)</label>
+                <input id="inpOem" class="w-full" placeholder="31110-09000, E8678M" />
+            </div>
+        </div>
 
-        <div class="mt-10 flex justify-end gap-3">
-            <button id="btnCancelModal" class="neumo-btn neumo-btn-secondary px-6 py-2.5">CANCEL</button>
-            <button id="btnSaveModal" class="neumo-btn neumo-btn-primary px-6 py-2.5">SAVE PART</button>
-            </div>
-        </div>
+        <div class="mt-10 flex justify-end gap-3">
+            <button id="btnCancelModal" class="neumo-btn neumo-btn-secondary px-6 py-2.5">CANCEL</button>
+            <button id="btnSaveModal" class="neumo-btn neumo-btn-primary px-6 py-2.5">SAVE PART</button>
+            </div>
+        </div>
 </div>
 
+<!-- Modal Bulk Upload -->
 <div id="modalBulk" class="hidden fixed inset-0 z-40 flex items-center justify-center">
-    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
-    <div class="modal-neumo z-50 w-full max-w-3xl p-8 text-gray-800 border-orange-600 border-t-4">
-        <h3 class="text-3xl font-extrabold mb-6">BULK JSON UPLOAD</h3>
-        <p class="text-sm text-gray-600 mb-4">Paste JSON array or upload a .json file. Data is validated on upload.</p>
+    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
+    <div class="modal-neumo z-50 w-full max-w-3xl p-8 text-gray-800 border-orange-600 border-t-4">
+        <h3 class="text-3xl font-extrabold mb-6">BULK JSON UPLOAD</h3>
+        <p class="text-sm text-gray-600 mb-4">Paste JSON array or upload a .json file. Data is validated on upload, and duplicates (by ZOREN No.) will be ignored.</p>
 
-        <div class="space-y-5">
-            <div>
-                <label class="block text-sm font-medium mb-1 text-gray-600">Paste JSON array</label>
-                <textarea id="bulkTextarea" rows="8" class="w-full font-mono shadow-inner border-gray-400 bg-gray-200 bg-opacity-50" placeholder='[{"zoren":"ZRM...","oem":["..."],"car_maker":"...","applications":"..."}]'></textarea>
-            </div>
-            <div id="bulkCategorySelector" class="flex flex-col gap-2 p-5 neumo-panel border-yellow-700 border-t-2">
-                <label class="block text-base font-bold">Category Assignment for uncategorized imports:</label>
-                <select id="bulkCategoryInput" class=""></select>
-            </div>
-        </div>
+        <div class="space-y-5">
+            <div>
+                <label class="block text-sm font-medium mb-1 text-gray-600">Paste JSON array</label>
+                <textarea id="bulkTextarea" rows="8" class="w-full font-mono shadow-inner border-gray-400 bg-gray-200 bg-opacity-50" placeholder='[{"zoren":"ZRM...","oem":["..."],"car_maker":"...","applications":"..."}]'></textarea>
+            </div>
+            <div id="bulkCategorySelector" class="flex flex-col gap-2 p-5 neumo-panel border-yellow-700 border-t-2">
+                <label class="block text-base font-bold">Category Assignment for uncategorized imports:</label>
+                <select id="bulkCategoryInput" class=""></select>
+            </div>
+        </div>
 
-        <div class="mt-8 flex flex-wrap items-center gap-4">
-            <input id="bulkFileInput" type="file" accept=".json,application/json" class="text-sm font-semibold text-gray-800" />
-            <button id="btnLoadBulk" class="neumo-btn neumo-btn-secondary bg-gray-400 text-light-override px-5 py-2.5">Load & Merge</button>
-            <button id="btnReplaceBulk" class="neumo-btn neumo-btn-primary px-5 py-2.5 bg-red-600 text-light-override">REPLACE ALL INVENTORY</button>
-            <button id="btnCloseBulk" class="ml-auto neumo-btn neumo-btn-secondary px-5 py-2.5">CLOSE</button>
-        </div>
-        </div>
+        <div class="mt-8 flex flex-wrap items-center gap-4">
+            <input id="bulkFileInput" type="file" accept=".json,application/json" class="text-sm font-semibold text-gray-800" />
+            <button id="btnLoadBulk" class="neumo-btn neumo-btn-secondary bg-gray-400 text-light-override px-5 py-2.5">Load & Merge</button>
+            <button id="btnReplaceBulk" class="neumo-btn neumo-btn-primary px-5 py-2.5 bg-red-600 text-light-override">REPLACE ALL INVENTORY</button>
+            <button id="btnCloseBulk" class="ml-auto neumo-btn neumo-btn-secondary px-5 py-2.5">CLOSE</button>
+        </div>
+        </div>
 </div>
 
+<!-- Modal Category Manager -->
 <div id="modalCategoryManager" class="hidden fixed inset-0 z-40 flex items-center justify-center">
-    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
-    <div class="modal-neumo z-50 w-full max-w-md p-8 text-gray-800 border-gray-600 border-t-4">
-        <h3 class="text-3xl font-extrabold mb-6">CATEGORY MANAGER</h3>
-        <div class="space-y-5">
-            <div class="flex gap-3">
-                <input id="inpNewCategory" class="w-full" placeholder="e.g., Brake System" />
-                <button id="btnAddCategory" class="neumo-btn neumo-btn-primary bg-green-600 text-light-override px-5 py-2">ADD</button>
-            </div>
-            <div id="categoryListContainer" class="max-h-64 overflow-y-auto border border-gray-400 rounded-xl p-4 space-y-3 neumo-panel" style="box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);">
-                </div>
-        </div>
-        <div class="mt-8 flex justify-end">
-            <button id="btnCloseCategoryManager" class="neumo-btn neumo-btn-primary px-6 py-2.5">DONE</button>
-        </div>
-    </div>
+    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
+    <div class="modal-neumo z-50 w-full max-w-md p-8 text-gray-800 border-gray-600 border-t-4">
+        <h3 class="text-3xl font-extrabold mb-6">CATEGORY MANAGER</h3>
+        <div class="space-y-5">
+            <div class="flex gap-3">
+                <input id="inpNewCategory" class="w-full" placeholder="e.g., Brake System" />
+                <button id="btnAddCategory" class="neumo-btn neumo-btn-primary bg-green-600 text-light-override px-5 py-2">ADD</button>
+            </div>
+            <div id="categoryListContainer" class="max-h-64 overflow-y-auto border border-gray-400 rounded-xl p-4 space-y-3 neumo-panel" style="box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);">
+                </div>
+        </div>
+        <div class="mt-8 flex justify-end">
+            <button id="btnCloseCategoryManager" class="neumo-btn neumo-btn-primary px-6 py-2.5">DONE</button>
+        </div>
+    </div>
 </div>
 
-
+<!-- NEW MODAL: Sign In/Sign Up -->
 <div id="modalAuth" class="hidden fixed inset-0 z-40 flex items-center justify-center">
-    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
-    <div class="modal-neumo z-50 w-full max-w-md p-8 text-gray-800 border-yellow-700 border-t-4">
-        <h3 id="authModalTitle" class="text-3xl font-extrabold mb-6">Sign In</h3>
-        <p id="authError" class="mt-2 hidden system-error"></p>
-        <div class="space-y-5 mt-5">
-            <div>
-                <label class="block text-sm font-medium text-gray-600">Email</label>
-                <input id="authEmail" type="email" class="w-full" placeholder="you@company.com" />
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-600">Password</label>
-                <input id="authPassword" type="password" class="w-full" placeholder="••••••••" />
-            </div>
-        </div>
+    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
+    <div class="modal-neumo z-50 w-full max-w-md p-8 text-gray-800 border-yellow-700 border-t-4">
+        <h3 id="authModalTitle" class="text-3xl font-extrabold mb-6">Sign In</h3>
+        <p id="authError" class="mt-2 hidden system-error"></p>
+        <div class="space-y-5 mt-5">
+            <div>
+                <label class="block text-sm font-medium text-gray-600">Email</label>
+                <input id="authEmail" type="email" class="w-full" placeholder="you@company.com" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-600">Password</label>
+                <input id="authPassword" type="password" class="w-full" placeholder="••••••••" />
+            </div>
+        </div>
 
-        <div class="mt-8 flex justify-between items-center">
-            <button id="btnToggleAuthMode" class="text-sm font-semibold text-gray-600 hover:text-gray-800">Need an account? Sign Up</button>
-            <div class="flex gap-3">
-                <button id="btnCloseAuthModal" class="neumo-btn neumo-btn-secondary px-6 py-2.5">CANCEL</button>
-                <button id="btnAuthAction" class="neumo-btn neumo-btn-primary px-6 py-2.5">SIGN IN</button>
-            </div>
-        </div>
-    </div>
+        <div class="mt-8 flex justify-between items-center">
+            <button id="btnToggleAuthMode" class="text-sm font-semibold text-gray-600 hover:text-gray-800">Need an account? Sign Up</button>
+            <div class="flex gap-3">
+                <button id="btnCloseAuthModal" class="neumo-btn neumo-btn-secondary px-6 py-2.5">CANCEL</button>
+                <button id="btnAuthAction" class="neumo-btn neumo-btn-primary px-6 py-2.5">SIGN IN</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 
 <script type="module">
-    // --- FIREBASE IMPORTS (Modern Modular SDK v11.6.1) ---
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    // UPDATED: Added new Auth methods for Email/Password
-    import { 
-        getAuth, 
-        onAuthStateChanged, 
-        createUserWithEmailAndPassword, 
-        signInWithEmailAndPassword, 
-        signOut
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, addDoc, onSnapshot, collection, getDoc, getDocs, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    // --- FIREBASE IMPORTS (Modern Modular SDK v11.6.1) ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged, 
+        createUserWithEmailAndPassword, 
+        signInWithEmailAndPassword, 
+        signOut,
+        signInAnonymously,
+        signInWithCustomToken
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, addDoc, onSnapshot, collection, query, where, getDoc, getDocs, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // --- GLOBAL VARIABLES & INITIALIZATION ---
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    
-    // User's explicit Firebase configuration 
-    const userFirebaseConfig = {
-        apiKey: "AIzaSyDMG67OjTem-qRC8S8NN58weeeHnZIGLW0",
-        authDomain: "fastway-autospare-parts-shibi.firebaseapp.com",
-        projectId: "fastway-autospare-parts-shibi",
-        storageBucket: "fastway-autospare-parts-shibi.firebasestorage.app",
-        messagingSenderId: "129701229596",
-        appId: "1:129701229596:web:ff12c4d0ed2c87ee2d9bd9",
-        measurementId: "G-JV6NF5FREJ"
-    };
+    // --- GLOBAL VARIABLES & INITIALIZATION ---
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    
+    // User's explicit Firebase configuration 
+    const userFirebaseConfig = {
+        apiKey: "AIzaSyDMG67OjTem-qRC8S8NN58weeeHnZIGLW0",
+        authDomain: "fastway-autospare-parts-shibi.firebaseapp.com",
+        projectId: "fastway-autospare-parts-shibi",
+        storageBucket: "fastway-autospare-parts-shibi.firebasestorage.app",
+        messagingSenderId: "129701229596",
+        appId: "1:129701229596:web:ff12c4d0ed2c87ee2d9bd9",
+        measurementId: "G-JV6NF5FREJ"
+    };
 
-    // Use environment config if available, otherwise use user's explicit config
-    const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-    const firebaseConfig = Object.keys(envConfig).length > 0 ? envConfig : userFirebaseConfig;
+    // Use environment config if available, otherwise use user's explicit config
+    const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+    const firebaseConfig = Object.keys(envConfig).length > 0 ? envConfig : userFirebaseConfig;
 
-    // REMOVED: initialAuthToken is no longer used for email/password auth
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
 
-    // 2. Initialize Firebase App and Services
-    let app, auth, db;
-    
-    // Status update helper
-    function updateConnectionStatus(message, isError = false) {
-        const logEl = getEl('connectionLog');
-        if (logEl) {
-            logEl.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            logEl.style.color = isError ? '#DC2626' : '#6B7280'; // Red or Gray-500
-        }
-    }
+    // 2. Initialize Firebase App and Services
+    let app, auth, db;
+    
+    // Status update helper
+    function updateConnectionStatus(message, isError = false) {
+        const logEl = getEl('connectionLog');
+        if (logEl) {
+            logEl.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logEl.style.color = isError ? '#DC2626' : '#6B7280'; // Red or Gray-500
+        }
+    }
 
-    // --- Utility to safely get elements ---
-    function getEl(id) {
-        return document.getElementById(id);
-    }
-    
-    // --- Security Rules Handler ---
-    function displaySecurityRulesError(errorMessage) {
-        const rulesInstruction = getEl('rulesInstruction');
-        const rulesCode = getEl('rulesCode');
+    // --- Utility to safely get elements ---
+    function getEl(id) {
+        return document.getElementById(id);
+    }
+    
+    // --- Security Rules Handler ---
+    function displaySecurityRulesError(errorMessage) {
+        const rulesInstruction = getEl('rulesInstruction');
+        const rulesCode = getEl('rulesCode');
 
-        rulesInstruction.classList.remove('hidden');
-        getEl('appContent').classList.add('hidden'); // Hide the main content until fixed
-        getEl('partsContainer').innerHTML = `<p class="text-center text-red-600 p-8 text-xl font-bold">Error: ${errorMessage}. See instructions above.</p>`;
-        
-        // UPDATED RULES for /users/{userId}
-        rulesCode.textContent = `
+        rulesInstruction.classList.remove('hidden');
+        getEl('appContent').classList.add('hidden'); // Hide main content on security error
+        getEl('partsContainer').innerHTML = `<p class="text-center text-red-600 p-8 text-xl font-bold">Error: ${errorMessage}. See instructions above.</p>`;
+        
+        // Updated Rules to ensure private data access under /artifacts/{appId}/users/{userId}
+        rulesCode.textContent = `
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
-    // This function checks if the user is authenticated
-    function isAuthenticated() {
-      return request.auth != null;
-    }
+  match /databases/{database}/documents {
+    // This function checks if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
 
-    // IMPORTANT: The new path stores data privately under the authenticated user's ID.
-    // The rule ensures a user can ONLY read/write documents located directly under their UID.
-    match /users/{userId}/{documents=**} {
-      allow read, write: if isAuthenticated() && request.auth.uid == userId;
-    }
-
-    // DENY access to the old 'public_parts' if it exists.
-    match /public_parts/{document=**} {
-      allow read, write: if false;
-    }
-  }
+    // This rule allows authenticated users to read and write ONLY within their own user path
+    match /artifacts/{appId}/users/{userId}/{documents=**} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+    }
+  }
 }
 `;
-    }
-
-
-    // --- Core Initialization Function ---
-    async function initApp() {
-        updateConnectionStatus("Attempting Firebase initialization...");
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            updateConnectionStatus("Services initialized. Starting authentication check...");
-            
-            // Set up listener for auth state changes
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    currentUser = user;
-                    // Display email if available, otherwise use a generic 'Authenticated'
-                    const display = user.email ? user.email : `UID: ${user.uid.substring(0, 8)}...`;
-                    getEl('authStatus').textContent = `${display} (Authenticated)`;
-                    
-                    // Show/Hide UI elements
-                    getEl('appContent').classList.remove('hidden');
-                    getEl('loggedInButtons').classList.remove('hidden');
-                    getEl('loggedOutButtons').classList.add('hidden');
-                    
-                    updateConnectionStatus("Authentication successful. Loading inventory...");
-                    // Must be called AFTER currentUser is set
-                    await loadCategories();
-                    loadAndRenderParts(); // Start listening to parts data
-                } else {
-                    currentUser = null;
-                    getEl('authStatus').textContent = `LOGGED OUT`;
-                    
-                    // Show/Hide UI elements
-                    getEl('appContent').classList.add('hidden');
-                    getEl('loggedInButtons').classList.add('hidden');
-                    getEl('loggedOutButtons').classList.remove('hidden');
-                    
-                    updateConnectionStatus("Please sign in or sign up to access inventory.", true);
-                    partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">Please SIGN IN to view inventory.</p></div>';
-                    // Detach the old listener when user logs out
-                    if (partsSnapshotUnsubscribe) { partsSnapshotUnsubscribe(); }
-                    // Automatically open the sign-in modal if no one is logged in
-                    if (!getEl('modalAuth').classList.contains('hidden')) return; // Don't re-open if already open
-                    openAuthModal('signIn');
-                }
-            });
-
-        } catch (error) {
-            updateConnectionStatus("FATAL: Initialization failed. See console.", true);
-            console.error("Firebase Initialization/Startup Error:", error);
-        }
-    }
-
-    // --- APP STATE ---
-    let parts = [];
-    // Stores the Firestore document ID for editing/deleting
-    let editPartId = null; 
-    let page = 1;
-    let perPage = 10;
-    let categories = [];
-    let currentUser = null; 
-    let partsSnapshotUnsubscribe = null;
-    const partsContainer = document.getElementById('partsContainer');
-    
-    // Global function for custom confirmation (replaces window.confirm/alert)
-    let confirmResolver;
-    
-    function showConfirm(title, message, isAlert = false) {
-        return new Promise(resolve => {
-            confirmResolver = resolve;
-            getEl('confirmTitle').textContent = title;
-            getEl('confirmMessage').textContent = message;
-            // The CONFIRM button should be primary (red for deletion, yellow for standard)
-            const confirmBtn = getEl('btnConfirmAction');
-            
-            // Set CONFIRM button text/color based on alert status or title context
-            if (isAlert) {
-                confirmBtn.textContent = 'OK';
-                confirmBtn.classList.remove('bg-red-600');
-                confirmBtn.classList.add('neumo-btn-primary');
-            } else {
-                confirmBtn.textContent = 'CONFIRM';
-                confirmBtn.classList.add('bg-red-600');
-            }
-            
-            getEl('btnConfirmCancel').classList.toggle('hidden', isAlert);
-            getEl('modalConfirm').classList.remove('hidden');
-        });
-    }
-
-    getEl('btnConfirmCancel')?.addEventListener('click', () => {
-        getEl('modalConfirm').classList.add('hidden');
-        confirmResolver(false);
-    });
-
-    getEl('btnConfirmAction')?.addEventListener('click', () => {
-        getEl('modalConfirm').classList.add('hidden');
-        confirmResolver(true);
-    });
-
-    // --- FIREBASE PATH HELPERS ---
-    function getUserCollectionPath(collectionName) {
-        if (!currentUser || !currentUser.uid) {
-            // This should ideally not happen if called after successful sign-in
-            throw new Error("User not authenticated. Cannot access Firestore.");
-        }
-        // Private Data path: /users/{userId}/{collectionName}
-        return `users/${currentUser.uid}/${collectionName}`;
-    }
-
-    // Corrected to point to the secure, private 'parts' collection under the user's ID.
-function getPartsCollectionRef() {
-    // This makes the collection path /users/{userId}/parts
-    return collection(db, getUserCollectionPath('parts')); 
-}
-
-    function getCategoryDocRef() {
-        // This makes the document path /users/{userId}/categories/list
-        return doc(db, getUserCollectionPath('categories'), 'list'); 
-    }
-
-    // --- CATEGORY MANAGEMENT LOGIC ---
-
-    async function loadCategories() {
-        if (!currentUser) return;
-        updateConnectionStatus("Loading categories...");
-        try {
-            const categoryDoc = await getDoc(getCategoryDocRef());
-            
-            if (categoryDoc.exists() && categoryDoc.data().list) {
-                // Ensure array contains only valid, unique strings
-                categories = categoryDoc.data().list.filter(c => c && c.trim()).map(c => c.trim());
-                // Ensure 'Uncategorized' is always present
-                if (!categories.includes('Uncategorized')) {
-                    categories.unshift('Uncategorized');
-                }
-                updateConnectionStatus(`Categories loaded (${categories.length}).`);
-            } else {
-                // Initial load: Set defaults and save them
-                categories = ['Uncategorized', 'Fuel Injection', 'Brake System', 'Filters', 'Ignition'];
-                await saveCategories();
-                updateConnectionStatus("Default categories initialized.");
-            }
-            renderCategorySelects();
-        } catch (error) {
-             if (error.code === 'permission-denied') {
-                displaySecurityRulesError('Data load failed due to security rules');
-            } else {
-                updateConnectionStatus("Error: Failed to load categories.", true);
-                console.error("Error loading categories:", error);
-            }
-        }
-    }
-
-    async function saveCategories() {
-        if (!currentUser) return;
-        try {
-            // Filter, trim, ensure uniqueness, and ensure 'Uncategorized' is first
-            let uniqueCategories = [...new Set(categories.map(c => c.trim()).filter(Boolean))];
-            uniqueCategories = uniqueCategories.filter(c => c !== 'Uncategorized');
-            uniqueCategories.unshift('Uncategorized');
-            
-            await setDoc(getCategoryDocRef(), { list: uniqueCategories });
-            categories = uniqueCategories; 
-            renderCategorySelects(); 
-        } catch (error) {
-            updateConnectionStatus("Error saving categories.", true);
-            console.error("Error saving categories:", error);
-        }
-    }
-
-    async function deleteCategory(categoryToDelete) {
-        if (categoryToDelete === 'Uncategorized') return showConfirm('Error', 'Cannot delete the "Uncategorized" category.', true);
-        
-        const confirmed = await showConfirm('Confirm Deletion', `Are you sure you want to delete the category: ${categoryToDelete}? All parts currently assigned to this category will be moved to "Uncategorized".`);
-        if (!confirmed) return;
-        
-        // 1. Move all parts from the deleted category to 'Uncategorized'
-        const partsToUpdate = parts.filter(p => p.category === categoryToDelete);
-        const updateBatch = writeBatch(db);
-
-        partsToUpdate.forEach(part => {
-            // Correctly reference the part doc using the secure path
-            const partRef = doc(getPartsCollectionRef(), part.id);
-            updateBatch.update(partRef, { category: 'Uncategorized' });
-        });
-        
-        try {
-            await updateBatch.commit();
-            
-            // 2. Remove category and save updated list
-            categories = categories.filter(c => c !== categoryToDelete);
-            await saveCategories();
-            renderCategoryManagerList();
-            showConfirm('Category Deleted', `Category "${categoryToDelete}" deleted. ${partsToUpdate.length} parts reassigned to "Uncategorized".`, true);
-        } catch (error) {
-            showConfirm('Update Error', `Failed to delete category and reassign parts. Check console.`, true);
-            console.error("Category deletion error:", error);
-        }
-    }
-
-    function renderCategoryManagerList() {
-        const container = document.getElementById('categoryListContainer');
-        // Updated styling for categories list (sleek background/text)
-        container.innerHTML = categories.map((cat, index) => `
-            <div class="flex justify-between items-center p-3 bg-gray-200 rounded-lg shadow-inner">
-                <span class="text-base font-semibold text-gray-800">${escapeHtml(cat)}</span>
-                <button onclick="window.deleteCategoryHandler('${escapeHtml(cat)}')" class="text-red-600 hover:text-red-500 text-sm font-bold disabled:opacity-50" ${cat === 'Uncategorized' ? 'disabled' : ''}>REMOVE</button>
-            </div>
-        `).join('') || '<p class="text-center text-gray-500 text-sm italic">No categories defined.</p>';
-    }
-    
-    // Expose to window for inline HTML onclick to work
-    window.deleteCategoryHandler = deleteCategory;
-
-    function renderCategorySelects(selectedCategory = '') {
-        const selects = [
-            document.getElementById('inpCategory'),
-            document.getElementById('bulkCategoryInput'),
-            document.getElementById('categoryFilter')
-        ];
-        
-        const standardOptions = categories.map(cat => 
-            `<option value="${escapeHtml(cat)}" ${cat === selectedCategory ? 'selected' : ''}>${escapeHtml(cat)}</option>`
-        ).join('');
-
-        const filterOptions = [
-            `<option value="">ALL CATEGORIES</option>`,
-            ...categories.map(cat => `<option value="${escapeHtml(cat)}" ${cat === selectedCategory ? 'selected' : ''}>${escapeHtml(cat)}</option>`)
-        ].join('');
-
-        selects.forEach(select => {
-            if (select) {
-                if (select.id === 'categoryFilter') {
-                    select.innerHTML = filterOptions;
-                    // Prevent setting onchange multiple times
-                    if (!select._initialized) {
-                         select.addEventListener('change', () => { page = 1; renderCards(); });
-                         select._initialized = true;
-                    }
-                } else {
-                    select.innerHTML = standardOptions;
-                }
-            }
-        });
-    }
-
-
-    // --- AUTHENTICATION & INITIALIZATION (Updated for Email/Password) ---
-    
-    let authMode = 'signIn'; // 'signIn' or 'signUp'
-
-    function openAuthModal(mode) {
-        authMode = mode;
-        getEl('authModalTitle').textContent = mode === 'signIn' ? 'Sign In to Your Account' : 'Create New Account';
-        getEl('btnAuthAction').textContent = mode === 'signIn' ? 'SIGN IN' : 'SIGN UP';
-        getEl('btnToggleAuthMode').textContent = mode === 'signIn' ? 'Need an account? Sign Up' : 'Have an account? Sign In';
-        getEl('authError').classList.add('hidden');
-        getEl('authEmail').value = '';
-        getEl('authPassword').value = '';
-        getEl('modalAuth').classList.remove('hidden');
-    }
-
-    async function handleAuthAction() {
-        const email = getEl('authEmail').value.trim();
-        const password = getEl('authPassword').value.trim();
-        const errorEl = getEl('authError');
-        errorEl.classList.add('hidden');
-
-        if (!email || !password) {
-            errorEl.textContent = 'Email and password are required.';
-            errorEl.classList.remove('hidden');
-            return;
-        }
-        
-        getEl('btnAuthAction').disabled = true;
-        updateConnectionStatus(`Attempting ${authMode}...`);
-
-        try {
-            if (authMode === 'signUp') {
-                await createUserWithEmailAndPassword(auth, email, password);
-            } else {
-                await signInWithEmailAndPassword(auth, email, password);
-            }
-            
-            // Success - onAuthStateChanged handles the UI update
-            getEl('modalAuth').classList.add('hidden');
-        } catch (error) {
-            let msg = 'An unknown error occurred.';
-            if (error.code === 'auth/email-already-in-use') { msg = 'This email is already registered. Try signing in.'; }
-            else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') { msg = 'Invalid email or password.'; }
-            else if (error.code === 'auth/weak-password') { msg = 'Password should be at least 6 characters.'; }
-            else { console.error('Auth Error:', error); }
-            
-            errorEl.textContent = msg;
-            errorEl.classList.remove('hidden');
-            updateConnectionStatus(`AUTH FAIL: ${error.code}`, true);
-        } finally {
-            getEl('btnAuthAction').disabled = false;
-        }
-    }
-
-    getEl('btnOpenSignIn')?.addEventListener('click', () => openAuthModal('signIn'));
-    getEl('btnOpenSignUp')?.addEventListener('click', () => openAuthModal('signUp'));
-    getEl('btnCloseAuthModal')?.addEventListener('click', () => getEl('modalAuth').classList.add('hidden'));
-    getEl('btnAuthAction')?.addEventListener('click', handleAuthAction);
-    
-    getEl('btnToggleAuthMode')?.addEventListener('click', () => {
-        openAuthModal(authMode === 'signIn' ? 'signUp' : 'signIn');
-    });
-    
-    // Logout Handler
-    getEl('btnLogout')?.addEventListener('click', async () => {
-        const confirmed = await showConfirm('Confirm Logout', 'Are you sure you want to log out?', false);
-        if (!confirmed) return;
-        
-        try {
-            await signOut(auth);
-            showConfirm('Logged Out', 'You have been successfully logged out.', true);
-        } catch (error) {
-            showConfirm('Logout Error', `Failed to log out: ${error.message}`, true);
-            console.error("Logout Error:", error);
-        }
-    });
-
-
-    // --- DATA HELPERS (Unchanged, but now using new secure paths) ---
-    function normalizeRecord(item) {
-        // Coerce to string/trim and ensure a default value
-        const zoren = (item.zoren ?? '').toString().trim();
-        let oem = item.oem ?? [];
-        if (typeof oem === 'string') {
-            // Safely split and trim comma-separated strings
-            oem = oem.split(',').map(s=>s.trim()).filter(Boolean);
-        } else if (!Array.isArray(oem)) {
-            // Handle if it was null/undefined or an unexpected type
-            oem = [];
-        }
-        const car_maker = (item.car_maker ?? '').toString().trim();
-        const applications = (item.applications ?? '').toString().trim();
-        const category = (item.category ?? 'Uncategorized').toString().trim(); 
-
-        return { zoren, oem, car_maker, applications, category };
-    }
-    
-    function escapeHtml(s){ return s? String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') : ''; }
-
-    /**
-     * Highlights all occurrences of the search query in the given text.
-     * @param {string} text The original string content.
-     * @param {string} query The search term.
-     * @returns {string} The HTML string with highlighted spans.
-     */
-    function highlightSearchTerm(text, query) {
-        if (!query) return escapeHtml(text);
-        const escapedText = escapeHtml(text);
-        // Create a RegExp that globally matches the query string (case-insensitive)
-        const regex = new RegExp(query, 'gi');
-        // Replace all matches with the matched term wrapped in a span
-        return escapedText.replace(regex, (match) => {
-            return `<span class="highlight">${match}</span>`;
-        });
-    }
-
-
-    // 1. READ (Load Data from Firestore)
-    function loadAndRenderParts() {
-        if (!currentUser || !db) return;
-        
-        partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">LOADING INVENTORY...</p></div>';
-        updateConnectionStatus("Setting up real-time inventory listener...");
-        
-        if (partsSnapshotUnsubscribe) {
-            partsSnapshotUnsubscribe(); // Detach previous listener
-        }
-        
-        // Use onSnapshot for real-time updates
-        try {
-            partsSnapshotUnsubscribe = onSnapshot(getPartsCollectionRef(), (snapshot) => {
-                parts = [];
-                snapshot.forEach(doc => {
-                    try {
-                        const part = normalizeRecord(doc.data());
-                        // Ensure the Firestore ID is saved with the part object
-                        part.id = doc.id; 
-                        parts.push(part);
-                    } catch (e) {
-                        console.error("Error normalizing part data:", doc.id, e);
-                    }
-                });
-                updateConnectionStatus(`Inventory loaded successfully (${parts.length} parts).`);
-                renderCards();
-                if (parts.length === 0) {
-                    partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">NO PARTS FOUND. ADD NEW INVENTORY.</p></div>';
-                }
-            }, (error) => {
-                if (error.code === 'permission-denied') {
-                    displaySecurityRulesError('Data stream failed due to security rules');
-                } else {
-                    updateConnectionStatus(`FATAL: Data stream interrupted. ${error.code}`, true);
-                    console.error("Error setting up snapshot listener: ", error);
-                    partsContainer.innerHTML = `<div><p class="text-xl text-center p-8 text-red-600 font-bold">ERROR: ${error.message}</p></div>`;
-                }
-            });
-        } catch (e) {
-            console.error("Error accessing collection ref during onSnapshot setup:", e);
-        }
-    }
-
-    function renderCards() { 
-        if (!currentUser) { 
-            partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">Please SIGN IN to view inventory.</p></div>';
-            return;
-        }
-        
-        // Get the current search query, converting it to lowercase for matching
-        const q = document.getElementById('searchInput')?.value.trim();
-        const qLower = q ? q.toLowerCase() : '';
-
-        const selectedCategoryFilter = document.getElementById('categoryFilter')?.value || '';
-        // Ensure perPage is set based on the current selection
-        perPage = parseInt(document.getElementById('perPage')?.value, 10) || 10; 
-
-        let filtered = parts.filter(item => {
-            // 1. Category Filter Check
-            if (selectedCategoryFilter && item.category !== selectedCategoryFilter) {
-                return false;
-            }
-
-            // 2. Search Query Check
-            if (qLower) {
-                const searchString = `${item.zoren} ${item.oem.join(' ')} ${item.car_maker} ${item.applications} ${item.category}`.toLowerCase();
-                return searchString.includes(qLower);
-            }
-            return true;
-        });
-
-        // Sort by ZOREN number (in-memory)
-        filtered.sort((a,b)=>a.zoren.localeCompare(b.zoren, undefined, {numeric:true}));
-
-        const total = filtered.length;
-        const pages = Math.max(1, Math.ceil(total/perPage));
-        // Reset page if necessary (e.g., filter/search changed the total count)
-        if (page > pages) page = pages;
-        page = Math.max(1, page); // Ensure page is at least 1
-        
-        const start = (page-1)*perPage;
-        const pageItems = filtered.slice(start, start+perPage);
-
-        partsContainer.innerHTML = '';
-        pageItems.forEach((item,i)=>{
-            // Highlight OEM tags before joining them
-            const oemTags = item.oem.map(oem => 
-                `<span class="oem-tag">${highlightSearchTerm(oem, q)}</span>`
-            ).join('');
-
-            const card = document.createElement('div');
-            card.className = 'part-card';
-            // Apply highlighting to all displayed fields
-            card.innerHTML = `
-                <div class="flex flex-col justify-between card-header-container">
-                    <div>
-                        <div class="text-sm font-extrabold text-gray-500 mb-2 uppercase">${highlightSearchTerm(item.category, q)}</div>
-                        <h3 class="card-zoren-no font-mono">${highlightSearchTerm(item.zoren, q)}</h3>
-                    </div>
-                    <div class="card-actions flex gap-3 mt-4">
-                        <button class="editBtn text-gray-600 hover:text-gray-800" title="Edit" data-id="${escapeHtml(item.id)}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                        </button>
-                        <button class="delBtn text-red-600 hover:text-red-500" title="Delete" data-id="${escapeHtml(item.id)}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </button>
-                    </div>
-                </div>
-                <div class="card-details-grid text-lg font-medium">
-                    <div>
-                        <div class="text-sm font-bold text-gray-500 uppercase">Car Maker:</div>
-                        <div class="text-gray-800">${highlightSearchTerm(item.car_maker, q)}</div>
-                    </div>
-                    <div class="mt-4">
-                        <div class="text-sm font-bold text-gray-500 uppercase">Applications:</div>
-                        <div class="text-gray-800">${highlightSearchTerm(item.applications, q)}</div>
-                    </div>
-                    <div class="mt-4">
-                        <div class="text-sm font-bold text-gray-500 uppercase">OEM No. / Interchange:</div>
-                        <div class="flex flex-wrap pt-1 min-h-[30px]">${oemTags}</div>
-                    </div>
-                </div>
-            `;
-            partsContainer.appendChild(card);
-        });
-
-        document.getElementById('summaryText').textContent = `${total} RECORDS (${pageItems.length} VISIBLE)`;
-        document.getElementById('pageInfo').textContent = `PAGE ${page} / ${pages}`;
-        
-        getEl('prevPage').disabled = page === 1;
-        getEl('nextPage').disabled = page === pages;
-
-        Array.from(document.getElementsByClassName('editBtn')).forEach(b=>b.addEventListener('click', onEdit));
-        Array.from(document.getElementsByClassName('delBtn')).forEach(b=>b.addEventListener('click', onDelete));
-    }
-
-    // Event Listeners (Pagination/Search)
-    getEl('prevPage')?.addEventListener('click', ()=>{ page=Math.max(1,page-1); renderCards(); });
-    getEl('nextPage')?.addEventListener('click', ()=>{ page++; renderCards(); });
-    getEl('searchInput')?.addEventListener('input', ()=>{ page=1; renderCards(); });
-    getEl('perPage')?.addEventListener('change', ()=>{ page=1; renderCards(); });
-    
-    // 2. CREATE / UPDATE (Save to Firestore)
-    const modalAddEdit = getEl('modalAddEdit');
-    getEl('btnAdd')?.addEventListener('click', ()=>{ openAddModal(); });
-    getEl('btnCancelModal')?.addEventListener('click', ()=>modalAddEdit?.classList.add('hidden'));
-
-    getEl('btnSaveModal')?.addEventListener('click', async ()=>{
-        if (!currentUser) { showConfirm('Auth Error', 'Authentication is required.', true); return; }
-
-        const zoren = getEl('inpZoren')?.value.trim();
-        const category = getEl('inpCategory')?.value.trim();
-        const car_maker=getEl('inpCarMaker')?.value.trim();
-        const applications=getEl('inpApplications')?.value.trim();
-
-        // Helper function to clear all errors
-        const clearErrors = () => {
-            getEl('zorenError')?.classList.add('hidden');
-            getEl('carMakerError')?.classList.add('hidden');
-            getEl('applicationsError')?.classList.add('hidden');
-        };
-
-        clearErrors();
-
-        // --- DATA VALIDATION ---
-        let isValid = true;
-        // Regex allows alphanumeric characters and hyphens only
-        const zorenRegex = /^[a-zA-Z0-9-]+$/; 
-
-        if(!zoren || zoren.length < 4 || !zorenRegex.test(zoren)){ 
-            getEl('zorenError').textContent = 'ZOREN No. is required (min 4 chars) and must be alphanumeric/hyphen.';
-            getEl('zorenError').classList.remove('hidden');
-            isValid = false;
-        }
-        if(!category){ 
-            showConfirm('Error', 'Category is required', true);
-            isValid = false;
-        }
-        if(!car_maker){ 
-            getEl('carMakerError').textContent = 'Car Maker is required.';
-            getEl('carMakerError').classList.remove('hidden');
-            isValid = false;
-        }
-        if(!applications){ 
-            getEl('applicationsError').textContent = 'Applications field is required.';
-            getEl('applicationsError').classList.remove('hidden');
-            isValid = false;
-        }
-
-        if (!isValid) return;
-        // -----------------------
-
-        let oemRaw=getEl('inpOem')?.value.trim();
-        let oemArr=[];
-        if(oemRaw){ 
-            // Only split by comma; assume user enters CSV format
-            oemArr=oemRaw.split(',').map(s=>s.trim()).filter(Boolean); 
-        }
-        
-        const dataToSave = { zoren, oem: oemArr, car_maker, applications, category };
-
-        try {
-            if (editPartId) {
-                // Update existing document using its stored ID
-                await setDoc(doc(getPartsCollectionRef(), editPartId), dataToSave);
-            } else {
-                // Add new document
-                await addDoc(getPartsCollectionRef(), dataToSave);
-            }
-            modalAddEdit.classList.add('hidden');
-            // loadAndRenderParts() will be triggered by onSnapshot automatically
-        } catch (error) {
-            showConfirm('Error Saving Data', "Error saving data. Check console for details.", true);
-            console.error("Error saving document: ", error);
-        }
-    });
-
-    // Updated to pass the Part object and its Firestore ID.
-    function openAddModal(item=null, partId=null){ 
-        if (!currentUser) { 
-            showConfirm('Access Denied', 'Please sign in to add or edit parts.', true); 
-            return;
-        }
-        
-        editPartId = partId; // Store the ID
-        
-        // Clear errors on modal open
-        getEl('zorenError')?.classList.add('hidden');
-        getEl('carMakerError')?.classList.add('hidden');
-        getEl('applicationsError')?.classList.add('hidden');
-
-        getEl('modalTitle').textContent=item?'EDIT PART':'ADD PART';
-        getEl('inpZoren').value=item?item.zoren:'';
-        // Join the array for display in the input field
-        getEl('inpOem').value=item?item.oem.join(', '):'';
-        getEl('inpCarMaker').value=item?item.car_maker:'';
-        getEl('inpApplications').value=item?item.applications:'';
-        // Render selects and pre-select the category if item exists
-        renderCategorySelects(item ? item.category : categories[0]); 
-        modalAddEdit.classList.remove('hidden');
-    }
-
-    // --- NEW RELIABLE onEdit function ---
-    function onEdit(e){ 
-        const partId = e.currentTarget.getAttribute('data-id');
-        if (!partId) return; 
-
-        // Find the part object using the guaranteed Firestore ID
-        const partToEdit = parts.find(p => p.id === partId); 
-
-        if (!partToEdit) {
-            showConfirm('Error', 'Could not find part to edit.', true);
-            return;
-        }
-
-        // Pass the actual part object and its Firestore ID
-        openAddModal(partToEdit, partToEdit.id);
-    }
-    
-    // 3. DELETE (Delete from Firestore)
-    // --- NEW RELIABLE onDelete function ---
-    async function onDelete(e){ 
-        if (!currentUser) { showConfirm('Auth Error', 'Authentication is required.', true); return; }
-        
-        // Get the guaranteed Firestore ID
-        const partId = e.currentTarget.getAttribute('data-id'); 
-        if (!partId) return; 
-        
-        // Find the part object using the ID
-        const partToDelete = parts.find(p => p.id === partId); 
-
-        if (!partToDelete || !partToDelete.id) {
-            showConfirm('Error', 'Could not identify part for deletion.', true);
-            return;
-        }
-
-        const confirmed = await showConfirm('Confirm Deletion', `Permanently delete ZOREN No. ${partToDelete.zoren}? This action cannot be undone.`);
-        if (!confirmed) return;
-
-        try {
-            // Use the unique Firestore ID (partToDelete.id) for deletion
-            await deleteDoc(doc(getPartsCollectionRef(), partToDelete.id));
-            // loadAndRenderParts() will be triggered by onSnapshot automatically
-        } catch (error) {
-            showConfirm('Error Deleting', "Error deleting record. Check console for details.", true);
-            console.error("Error deleting document: ", error);
-        }
-    } 
-
-    // --- BULK UPLOAD LOGIC ---
-    // Bulk Modal Controls
-    const modalBulk=getEl('modalBulk');
-    getEl('btnBulk')?.addEventListener('click',()=>{
-        if (!currentUser) { 
-            showConfirm('Access Denied', 'Please sign in to perform bulk operations.', true); 
-            return;
-        }
-        modalBulk.classList.remove('hidden'); 
-        getEl('bulkCategorySelector').classList.remove('hidden');
-        renderCategorySelects();
-    });
-    getEl('btnCloseBulk')?.addEventListener('click',()=>modalBulk.classList.add('hidden'));
-    
-    getEl('bulkFileInput')?.addEventListener('change',ev=>{
-        const f=ev.target.files[0]; 
-        if(!f) return; 
-        const reader=new FileReader();
-        reader.onload=e=>getEl('bulkTextarea').value=e.target.result; 
-        showConfirm('File Loaded', "JSON content loaded into the textarea. Click 'Load & Merge' or 'Replace All' to proceed.", true);
-    });
-    
-    // Centralized Batch Upload Function
-    async function executeBatchUpload(records, replaceMode) {
-        if (!currentUser) { throw new Error('Authentication is required.'); }
-        
-        // Basic Bulk Validation: Check if required fields exist in all records
-        const invalidRecords = records.filter(r => !r.zoren || r.zoren.length < 4 || !r.car_maker || !r.applications);
-        if (invalidRecords.length > 0) {
-            showConfirm('Validation Failed', `Bulk upload failed: ${invalidRecords.length} records are missing required fields (Zoren No. (min 4), Car Maker, or Applications). Please fix and retry.`, true);
-            return;
-        }
-
-        const batch = writeBatch(db);
-
-        if (replaceMode) {
-            // Delete all existing documents in the collection
-            const existingSnapshot = await getDocs(getPartsCollectionRef());
-            existingSnapshot.forEach(doc => { batch.delete(doc.ref); });
-        }
-        
-        // Add new records
-        records.forEach(record => {
-            const newDocRef = doc(getPartsCollectionRef());
-            // Filter out 'id' if it somehow made its way in
-            const { id, ...data } = record; 
-            batch.set(newDocRef, data);
-        });
-        
-        await batch.commit();
-        
-        getEl('bulkTextarea').value=''; 
-        modalBulk.classList.add('hidden'); 
-        // onSnapshot handles the re-render
-        return records.length;
-    }
-    
-    async function handleBulkUpload(replaceMode) {
-        const txt=getEl('bulkTextarea')?.value.trim(); 
-        if(!txt){ showConfirm('Input Empty', 'Bulk textarea is empty.', true); return; }
-        
-        if(replaceMode) {
-            const confirmed = await showConfirm('DANGER: REPLACE ALL', 'WARNING: Are you sure you want to delete ALL your existing data and replace it? This is PERMANENT.', false);
-            if (!confirmed) return;
-        }
-
-        try { 
-            const parsed=JSON.parse(txt); 
-            if(!Array.isArray(parsed)){ showConfirm('Invalid Format', 'JSON must be a root array of part objects.', true); return; }
-            
-            let recordsToImport = parsed.map(normalizeRecord);
-            const selectedCategory = getEl('bulkCategoryInput').value.trim();
-            
-            // Assign the selected category to any record that didn't have one (category is 'Uncategorized' by default if not set)
-            const finalRecords = recordsToImport.map(r => ({
-                ...r,
-                category: r.category === 'Uncategorized' ? selectedCategory : r.category
-            }));
-
-            const count = await executeBatchUpload(finalRecords, replaceMode);
-            if (count) {
-                const message = replaceMode 
-                    ? `SUCCESS: Replaced all records. Total: ${count}.`
-                    : `SUCCESS: Merged ${count} new records.`;
-                showConfirm('Upload Complete', message, true);
-            }
-
-        } catch(err){ 
-            showConfirm('Processing Error', 'Error during bulk operation. Check console for JSON parsing details.', true); 
-            console.error("Bulk upload error:", err); 
-        }
-    }
-
-    getEl('btnLoadBulk')?.addEventListener('click', () => handleBulkUpload(false)); // Merge
-    getEl('btnReplaceBulk')?.addEventListener('click', () => handleBulkUpload(true)); // Replace
-
-    // --- CATEGORY MANAGER MODAL LISTENERS (Unchanged, now using secure paths) ---
-    const modalCategoryManager = getEl('modalCategoryManager');
-    getEl('btnManageCategories')?.addEventListener('click', () => {
-        renderCategoryManagerList();
-        modalCategoryManager?.classList.remove('hidden');
-    });
-
-    getEl('btnCloseCategoryManager')?.addEventListener('click', () => {
-        modalCategoryManager?.classList.add('hidden');
-    });
-
-    // --- Corrected btnAddCategory for Persistence ---
-    getEl('btnAddCategory')?.addEventListener('click', async () => {
-        const newCat = getEl('inpNewCategory')?.value.trim();
-        
-        if (!newCat) {
-             showConfirm('Error', 'Category name cannot be empty.', true);
-             return;
-        }
-        
-        if (categories.includes(newCat)) {
-            showConfirm('Error', 'Category already exists.', true);
-            return;
-        }
-
-        // 1. Add the new category to the local array
-        categories.push(newCat);
-        
-        // 2. Clear the input field
-        getEl('inpNewCategory').value = '';
-        
-        // 3. Save the updated list to Firestore (calls saveCategories and re-renders selects)
-        await saveCategories(); 
-        
-        // 4. Re-render the list in the Category Manager modal
-        renderCategoryManagerList();
-        
-        showConfirm('Category Added', `Category "${newCat}" has been added.`, true);
-    });
-
-    // --- EXPORT LOGIC (Unchanged) ---
-
-    function createDownloadLink(data, filename, mimeType) {
-        const blob = new Blob([data], { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-
-    getEl('btnDownloadJson')?.addEventListener('click', () => {
-        const dataToExport = parts.map(p => ({
-            zoren: p.zoren,
-            car_maker: p.car_maker,
-            applications: p.applications,
-            oem: p.oem,
-            category: p.category
-        }));
-        const json = JSON.stringify(dataToExport, null, 2);
-        createDownloadLink(json, `inventory_export_${new Date().toISOString().slice(0, 10)}.json`, 'application/json');
-        showConfirm('Export Complete', 'Inventory data successfully exported as JSON.', true);
-    });
-
-    getEl('btnExportCsv')?.addEventListener('click', () => {
-        if (parts.length === 0) {
-            showConfirm('Export Error', 'No data to export.', true);
-            return;
-        }
-
-        const headers = ["ZOREN No.", "Car Maker", "Applications", "OEM No.", "Category"];
-        const rows = parts.map(p => [
-            p.zoren,
-            p.car_maker,
-            p.applications,
-            p.oem.join('; '), // Use semicolon to separate multiple OEM numbers
-            p.category
-        ]);
-
-        const csvContent = [
-            headers.map(h => `"${h}"`).join(','),
-            ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-        ].join('\n');
-
-        createDownloadLink(csvContent, `inventory_export_${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv');
-        showConfirm('Export Complete', 'Inventory data successfully exported as CSV.', true);
-    });
-
-    // --- Start App Initialization ---
-    // Wait for the DOM content to be fully loaded before trying to initialize Firebase
-    document.addEventListener('DOMContentLoaded', initApp);
-    // --------------------------------
+    }
+
+
+    // --- Core Initialization Function ---
+    async function initApp() {
+        updateConnectionStatus("Attempting Firebase initialization...");
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            updateConnectionStatus("Services initialized. Starting authentication check...");
+            
+            // Set up listener for auth state changes
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUser = user;
+                    const display = user.email ? user.email : `UID: ${user.uid.substring(0, 8)}...`;
+                    getEl('authStatus').textContent = `${display} (Authenticated)`;
+                    
+                    // Show/Hide UI elements
+                    getEl('appContent').classList.remove('hidden');
+                    getEl('loggedInButtons').classList.remove('hidden');
+                    getEl('loggedOutButtons').classList.add('hidden');
+
+                    updateConnectionStatus("Authentication successful. Loading inventory...");
+                    await loadCategories();
+                    loadAndRenderParts(); // Start listening to parts data
+                } else {
+                    currentUser = null;
+                    getEl('authStatus').textContent = `LOGGED OUT`;
+                    
+                    // Show/Hide UI elements
+                    getEl('appContent').classList.add('hidden');
+                    getEl('loggedInButtons').classList.add('hidden');
+                    getEl('loggedOutButtons').classList.remove('hidden');
+
+                    updateConnectionStatus("Please sign in or sign up to access inventory.", true);
+                    partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">Please SIGN IN to view inventory.</p></div>';
+                     // Detach the old listener when user logs out
+                    if (partsSnapshotUnsubscribe) { partsSnapshotUnsubscribe(); }
+                    
+                    // Automatically open sign-in modal if no one is logged in (optional check)
+                    if (!getEl('modalAuth').classList.contains('hidden')) return;
+                    openAuthModal('signIn');
+                }
+            });
+
+            // FIX: Remove conflicting custom token/anonymous sign-in attempt which can cause 
+            // 'auth/operation-not-allowed' if the project is set up for Email/Password only.
+            // If the user hasn't authenticated yet, the onAuthStateChanged listener will 
+            // trigger the openAuthModal('signIn') from the 'else' block.
+
+        } catch (error) {
+            updateConnectionStatus("FATAL: Initialization failed. See console.", true);
+            console.error("Firebase Initialization/Startup Error:", error);
+        }
+    }
+
+    // --- APP STATE ---
+    let parts = [];
+    let editPartId = null; 
+    let page = 1;
+    let perPage = 10;
+    let categories = [];
+    let currentUser = null; 
+    let partsSnapshotUnsubscribe = null;
+    const partsContainer = document.getElementById('partsContainer');
+    
+    // Global function for custom confirmation (replaces window.confirm/alert)
+    let confirmResolver;
+    
+    function showConfirm(title, message, isAlert = false) {
+        return new Promise(resolve => {
+            confirmResolver = resolve;
+            getEl('confirmTitle').textContent = title;
+            getEl('confirmMessage').textContent = message;
+            
+            const confirmBtn = getEl('btnConfirmAction');
+            
+            if (isAlert) {
+                confirmBtn.textContent = 'OK';
+                confirmBtn.classList.remove('bg-red-600');
+                confirmBtn.classList.add('neumo-btn-primary');
+            } else {
+                confirmBtn.textContent = 'CONFIRM';
+                confirmBtn.classList.add('bg-red-600');
+            }
+            
+            getEl('btnConfirmCancel').classList.toggle('hidden', isAlert);
+            getEl('modalConfirm').classList.remove('hidden');
+        });
+    }
+
+    getEl('btnConfirmCancel')?.addEventListener('click', () => {
+        getEl('modalConfirm').classList.add('hidden');
+        confirmResolver(false);
+    });
+
+    getEl('btnConfirmAction')?.addEventListener('click', () => {
+        getEl('modalConfirm').classList.add('hidden');
+        confirmResolver(true);
+    });
+
+    // --- FIREBASE PATH HELPERS ---
+    function getUserCollectionPath(collectionName) {
+        if (!currentUser || !currentUser.uid) {
+            throw new Error("User not authenticated. Cannot access Firestore.");
+        }
+        // Private Data path: /artifacts/{appId}/users/{userId}/{collectionName}
+        return `artifacts/${appId}/users/${currentUser.uid}/${collectionName}`;
+    }
+
+    // Use the secure path for parts
+    function getPartsCollectionRef() {
+        return collection(db, getUserCollectionPath('parts')); 
+    }
+
+    // Use the secure path for categories list document
+    function getCategoryDocRef() {
+        return doc(db, getUserCollectionPath('categories'), 'list'); 
+    }
+
+    // --- CATEGORY MANAGEMENT LOGIC (unchanged functionality, secure paths used) ---
+    async function loadCategories() {
+        if (!currentUser) return;
+        updateConnectionStatus("Loading categories...");
+        try {
+            const categoryDoc = await getDoc(getCategoryDocRef());
+            
+            if (categoryDoc.exists() && categoryDoc.data().list) {
+                categories = categoryDoc.data().list.filter(c => c && c.trim()).map(c => c.trim());
+                if (!categories.includes('Uncategorized')) {
+                    categories.unshift('Uncategorized');
+                }
+                updateConnectionStatus(`Categories loaded (${categories.length}).`);
+            } else {
+                categories = ['Uncategorized', 'Fuel Injection', 'Brake System', 'Filters', 'Ignition'];
+                await saveCategories();
+                updateConnectionStatus("Default categories initialized.");
+            }
+            renderCategorySelects();
+        } catch (error) {
+             if (error.code === 'permission-denied') {
+                 displaySecurityRulesError('Data load failed due to security rules');
+             } else {
+                 updateConnectionStatus("Error: Failed to load categories.", true);
+                 console.error("Error loading categories:", error);
+             }
+        }
+    }
+
+    async function saveCategories() {
+        if (!currentUser) return;
+        try {
+            let uniqueCategories = [...new Set(categories.map(c => c.trim()).filter(Boolean))];
+            uniqueCategories = uniqueCategories.filter(c => c !== 'Uncategorized');
+            uniqueCategories.unshift('Uncategorized');
+            
+            await setDoc(getCategoryDocRef(), { list: uniqueCategories });
+            categories = uniqueCategories; 
+            renderCategorySelects(); 
+        } catch (error) {
+            updateConnectionStatus("Error saving categories.", true);
+            console.error("Error saving categories:", error);
+        }
+    }
+
+    async function deleteCategory(categoryToDelete) {
+        if (categoryToDelete === 'Uncategorized') return showConfirm('Error', 'Cannot delete the "Uncategorized" category.', true);
+        
+        const confirmed = await showConfirm('Confirm Deletion', `Are you sure you want to delete the category: ${categoryToDelete}? All parts currently assigned to this category will be moved to "Uncategorized".`);
+        if (!confirmed) return;
+        
+        const partsToUpdate = parts.filter(p => p.category === categoryToDelete);
+        const updateBatch = writeBatch(db);
+
+        partsToUpdate.forEach(part => {
+            const partRef = doc(getPartsCollectionRef(), part.id);
+            updateBatch.update(partRef, { category: 'Uncategorized' });
+        });
+        
+        try {
+            await updateBatch.commit();
+            
+            categories = categories.filter(c => c !== categoryToDelete);
+            await saveCategories();
+            renderCategoryManagerList();
+            showConfirm('Category Deleted', `Category "${categoryToDelete}" deleted. ${partsToUpdate.length} parts reassigned to "Uncategorized".`, true);
+        } catch (error) {
+            showConfirm('Update Error', `Failed to delete category and reassign parts. Check console.`, true);
+            console.error("Category deletion error:", error);
+        }
+    }
+
+    function renderCategoryManagerList() {
+        const container = document.getElementById('categoryListContainer');
+        container.innerHTML = categories.map((cat, index) => `
+            <div class="flex justify-between items-center p-3 bg-gray-200 rounded-lg shadow-inner">
+                <span class="text-base font-semibold text-gray-800">${escapeHtml(cat)}</span>
+                <button onclick="window.deleteCategoryHandler('${escapeHtml(cat)}')" class="text-red-600 hover:text-red-500 text-sm font-bold disabled:opacity-50" ${cat === 'Uncategorized' ? 'disabled' : ''}>REMOVE</button>
+            </div>
+        `).join('') || '<p class="text-center text-gray-500 text-sm italic">No categories defined.</p>';
+    }
+    
+    // Expose to window for inline HTML onclick to work
+    window.deleteCategoryHandler = deleteCategory;
+
+    function renderCategorySelects(selectedCategory = '') {
+        const selects = [
+            document.getElementById('inpCategory'),
+            document.getElementById('bulkCategoryInput'),
+            document.getElementById('categoryFilter')
+        ];
+        
+        const standardOptions = categories.map(cat => 
+            `<option value="${escapeHtml(cat)}" ${cat === selectedCategory ? 'selected' : ''}>${escapeHtml(cat)}</option>`
+        ).join('');
+
+        const filterOptions = [
+            `<option value="">ALL CATEGORIES</option>`,
+            ...categories.map(cat => `<option value="${escapeHtml(cat)}" ${cat === selectedCategory ? 'selected' : ''}>${escapeHtml(cat)}</option>`)
+        ].join('');
+
+        selects.forEach(select => {
+            if (select) {
+                if (select.id === 'categoryFilter') {
+                    select.innerHTML = filterOptions;
+                    if (!select._initialized) {
+                         select.addEventListener('change', () => { page = 1; renderCards(); });
+                         select._initialized = true;
+                    }
+                } else {
+                    select.innerHTML = standardOptions;
+                }
+            }
+        });
+    }
+
+
+    // --- AUTHENTICATION LOGIC ---
+    let authMode = 'signIn'; // 'signIn' or 'signUp'
+
+    function openAuthModal(mode) {
+        authMode = mode;
+        getEl('authModalTitle').textContent = mode === 'signIn' ? 'Sign In to Your Account' : 'Create New Account';
+        getEl('btnAuthAction').textContent = mode === 'signIn' ? 'SIGN IN' : 'SIGN UP';
+        getEl('btnToggleAuthMode').textContent = mode === 'signIn' ? 'Need an account? Sign Up' : 'Have an account? Sign In';
+        getEl('authError').classList.add('hidden');
+        getEl('authEmail').value = '';
+        getEl('authPassword').value = '';
+        getEl('modalAuth').classList.remove('hidden');
+    }
+
+    async function handleAuthAction() {
+        const email = getEl('authEmail').value.trim();
+        const password = getEl('authPassword').value.trim();
+        const errorEl = getEl('authError');
+        errorEl.classList.add('hidden');
+
+        if (!email || !password) {
+            errorEl.textContent = 'Email and password are required.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+        
+        getEl('btnAuthAction').disabled = true;
+        updateConnectionStatus(`Attempting ${authMode}...`);
+
+        try {
+            if (authMode === 'signUp') {
+                await createUserWithEmailAndPassword(auth, email, password);
+            } else {
+                await signInWithEmailAndPassword(auth, email, password);
+            }
+            
+            // Success - onAuthStateChanged handles the UI update
+            getEl('modalAuth').classList.add('hidden');
+        } catch (error) {
+            let msg = 'An unknown error occurred.';
+            if (error.code === 'auth/email-already-in-use') { msg = 'This email is already registered. Try signing in.'; }
+            else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') { msg = 'Invalid email or password.'; }
+            else if (error.code === 'auth/weak-password') { msg = 'Password should be at least 6 characters.'; }
+            else if (error.code === 'auth/invalid-credential') { msg = 'Invalid email or password.'; }
+            else if (error.code === 'auth/operation-not-allowed') { 
+                // This is the error we need to guide the user on
+                msg = 'Authentication operation not allowed. Please ensure "Email/Password" sign-in is ENABLED in your Firebase Console > Authentication > Sign-in method.'; 
+            }
+            else { console.error('Auth Error:', error); }
+            
+            errorEl.textContent = msg;
+            errorEl.classList.remove('hidden');
+            updateConnectionStatus(`AUTH FAIL: ${error.code}`, true);
+        } finally {
+            getEl('btnAuthAction').disabled = false;
+        }
+    }
+
+    getEl('btnOpenSignIn')?.addEventListener('click', () => openAuthModal('signIn'));
+    getEl('btnOpenSignUp')?.addEventListener('click', () => openAuthModal('signUp'));
+    getEl('btnCloseAuthModal')?.addEventListener('click', () => getEl('modalAuth').classList.add('hidden'));
+    getEl('btnAuthAction')?.addEventListener('click', handleAuthAction);
+    
+    getEl('btnToggleAuthMode')?.addEventListener('click', () => {
+        openAuthModal(authMode === 'signIn' ? 'signUp' : 'signIn');
+    });
+    
+    // Logout Handler
+    getEl('btnLogout')?.addEventListener('click', async () => {
+        const confirmed = await showConfirm('Confirm Logout', 'Are you sure you want to log out?', false);
+        if (!confirmed) return;
+        
+        try {
+            await signOut(auth);
+            showConfirm('Logged Out', 'You have been successfully logged out.', true);
+        } catch (error) {
+            showConfirm('Logout Error', `Failed to log out: ${error.message}`, true);
+            console.error("Logout Error:", error);
+        }
+    });
+
+    // --- DATA HELPERS ---
+    function normalizeRecord(item) {
+        const zoren = (item.zoren ?? '').toString().trim();
+        let oem = item.oem ?? [];
+        if (typeof oem === 'string') {
+            oem = oem.split(',').map(s=>s.trim()).filter(Boolean);
+        } else if (!Array.isArray(oem)) {
+            oem = [];
+        }
+        const car_maker = (item.car_maker ?? '').toString().trim();
+        const applications = (item.applications ?? '').toString().trim();
+        const category = (item.category ?? 'Uncategorized').toString().trim(); 
+
+        return { zoren, oem, car_maker, applications, category };
+    }
+    
+    function escapeHtml(s){ return s? String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') : ''; }
+
+    /**
+     * Highlights all occurrences of the search query in the given text.
+     */
+    function highlightSearchTerm(text, query) {
+        if (!query) return escapeHtml(text);
+        const escapedText = escapeHtml(text);
+        const regex = new RegExp(query, 'gi');
+        return escapedText.replace(regex, (match) => {
+            return `<span class="highlight">${match}</span>`;
+        });
+    }
+
+    /**
+     * Checks if a ZOREN No. already exists in the local `parts` array (our source of truth).
+     * @param {string} zoren The ZOREN number to check.
+     * @param {string | null} excludeId If editing, exclude the current document ID.
+     * @returns {boolean} True if a duplicate exists, false otherwise.
+     */
+    function checkIfZorenExists(zoren, excludeId = null) {
+        const normalizedZoren = zoren.trim().toLowerCase();
+        
+        return parts.some(p => 
+            p.zoren.trim().toLowerCase() === normalizedZoren && p.id !== excludeId
+        );
+    }
+
+
+    // 1. READ (Load Data from Firestore)
+    function loadAndRenderParts() {
+        if (!currentUser || !db) return;
+        
+        partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">LOADING INVENTORY...</p></div>';
+        updateConnectionStatus("Setting up real-time inventory listener...");
+        
+        if (partsSnapshotUnsubscribe) {
+            partsSnapshotUnsubscribe(); // Detach previous listener
+        }
+        
+        try {
+            partsSnapshotUnsubscribe = onSnapshot(getPartsCollectionRef(), (snapshot) => {
+                parts = [];
+                snapshot.forEach(doc => {
+                    try {
+                        const part = normalizeRecord(doc.data());
+                        part.id = doc.id; 
+                        parts.push(part);
+                    } catch (e) {
+                        console.error("Error normalizing part data:", doc.id, e);
+                    }
+                });
+                updateConnectionStatus(`Inventory loaded successfully (${parts.length} parts).`);
+                renderCards();
+                if (parts.length === 0) {
+                    partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">NO PARTS FOUND. ADD NEW INVENTORY.</p></div>';
+                }
+            }, (error) => {
+                if (error.code === 'permission-denied') {
+                    displaySecurityRulesError('Data stream failed due to security rules');
+                } else {
+                    updateConnectionStatus(`FATAL: Data stream interrupted. ${error.code}`, true);
+                    console.error("Error setting up snapshot listener: ", error);
+                    partsContainer.innerHTML = `<div><p class="text-xl text-center p-8 text-red-600 font-bold">ERROR: ${error.message}</p></div>`;
+                }
+            });
+        } catch (e) {
+            console.error("Error accessing collection ref during onSnapshot setup:", e);
+        }
+    }
+
+    function renderCards() { 
+        if (!currentUser) return; // Prevent rendering if not logged in
+        
+        const q = document.getElementById('searchInput')?.value.trim();
+        const qLower = q ? q.toLowerCase() : '';
+
+        const selectedCategoryFilter = document.getElementById('categoryFilter')?.value || '';
+        perPage = parseInt(document.getElementById('perPage')?.value, 10) || 10; 
+
+        let filtered = parts.filter(item => {
+            // 1. Category Filter Check
+            if (selectedCategoryFilter && item.category !== selectedCategoryFilter) {
+                return false;
+            }
+
+            // 2. Search Query Check
+            if (qLower) {
+                const searchString = `${item.zoren} ${item.oem.join(' ')} ${item.car_maker} ${item.applications} ${item.category}`.toLowerCase();
+                return searchString.includes(qLower);
+            }
+            return true;
+        });
+
+        // Sort by ZOREN number (in-memory)
+        filtered.sort((a,b)=>a.zoren.localeCompare(b.zoren, undefined, {numeric:true}));
+
+        const total = filtered.length;
+        const pages = Math.max(1, Math.ceil(total/perPage));
+        if (page > pages) page = pages;
+        page = Math.max(1, page); // Ensure page is at least 1
+        
+        const start = (page-1)*perPage;
+        const pageItems = filtered.slice(start, start+perPage);
+
+        partsContainer.innerHTML = '';
+        pageItems.forEach((item,i)=>{
+            const oemTags = item.oem.map(oem => 
+                `<span class="oem-tag">${highlightSearchTerm(oem, q)}</span>`
+            ).join('');
+
+            const card = document.createElement('div');
+            card.className = 'part-card';
+            card.innerHTML = `
+                <div class="flex flex-col justify-between card-header-container">
+                    <div>
+                        <div class="text-sm font-extrabold text-gray-500 mb-2 uppercase">${highlightSearchTerm(item.category, q)}</div>
+                        <h3 class="card-zoren-no font-mono">${highlightSearchTerm(item.zoren, q)}</h3>
+                    </div>
+                    <div class="card-actions flex gap-3 mt-4">
+                        <button class="editBtn text-gray-600 hover:text-gray-800" title="Edit" data-id="${escapeHtml(item.id)}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        </button>
+                        <button class="delBtn text-red-600 hover:text-red-500" title="Delete" data-id="${escapeHtml(item.id)}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-details-grid text-lg font-medium">
+                    <div>
+                        <div class="text-sm font-bold text-gray-500 uppercase">Car Maker:</div>
+                        <div class="text-gray-800">${highlightSearchTerm(item.car_maker, q)}</div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="text-sm font-bold text-gray-500 uppercase">Applications:</div>
+                        <div class="text-gray-800">${highlightSearchTerm(item.applications, q)}</div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="text-sm font-bold text-gray-500 uppercase">OEM No. / Interchange:</div>
+                        <div class="flex flex-wrap pt-1 min-h-[30px]">${oemTags}</div>
+                    </div>
+                </div>
+            `;
+            partsContainer.appendChild(card);
+        });
+
+        document.getElementById('summaryText').textContent = `${total} RECORDS (${pageItems.length} VISIBLE)`;
+        document.getElementById('pageInfo').textContent = `PAGE ${page} / ${pages}`;
+        
+        getEl('prevPage').disabled = page === 1;
+        getEl('nextPage').disabled = page === pages;
+
+        Array.from(document.getElementsByClassName('editBtn')).forEach(b=>b.addEventListener('click', onEdit));
+        Array.from(document.getElementsByClassName('delBtn')).forEach(b=>b.addEventListener('click', onDelete));
+    }
+
+    // Event Listeners (Pagination/Search)
+    getEl('prevPage')?.addEventListener('click', ()=>{ page=Math.max(1,page-1); renderCards(); });
+    getEl('nextPage')?.addEventListener('click', ()=>{ page++; renderCards(); });
+    getEl('searchInput')?.addEventListener('input', ()=>{ page=1; renderCards(); });
+    getEl('perPage')?.addEventListener('change', ()=>{ page=1; renderCards(); });
+    
+    // 2. CREATE / UPDATE (Save to Firestore)
+    const modalAddEdit = getEl('modalAddEdit');
+    getEl('btnAdd')?.addEventListener('click', ()=>{ openAddModal(); });
+    getEl('btnCancelModal')?.addEventListener('click', ()=>modalAddEdit?.classList.add('hidden'));
+
+    getEl('btnSaveModal')?.addEventListener('click', async ()=>{
+        if (!currentUser) { showConfirm('Auth Error', 'Authentication is required.', true); return; }
+
+        const zoren = getEl('inpZoren')?.value.trim();
+        const category = getEl('inpCategory')?.value.trim();
+        const car_maker=getEl('inpCarMaker')?.value.trim();
+        const applications=getEl('inpApplications')?.value.trim();
+
+        // Helper function to clear all errors
+        const clearErrors = () => {
+            getEl('zorenError')?.classList.add('hidden');
+            getEl('carMakerError')?.classList.add('hidden');
+            getEl('applicationsError')?.classList.add('hidden');
+        };
+
+        clearErrors();
+
+        // --- DATA VALIDATION ---
+        let isValid = true;
+        // Regex allows alphanumeric characters and hyphens only
+        const zorenRegex = /^[a-zA-Z0-9-]+$/; 
+
+        if(!zoren || zoren.length < 4 || !zorenRegex.test(zoren)){ 
+            getEl('zorenError').textContent = 'ZOREN No. is required (min 4 chars) and must be alphanumeric/hyphen.';
+            getEl('zorenError').classList.remove('hidden');
+            isValid = false;
+        }
+        if(!category){ 
+            showConfirm('Error', 'Category is required', true);
+            isValid = false;
+        }
+        if(!car_maker){ 
+            getEl('carMakerError').textContent = 'Car Maker is required.';
+            getEl('carMakerError').classList.remove('hidden');
+            isValid = false;
+        }
+        if(!applications){ 
+            getEl('applicationsError').textContent = 'Applications field is required.';
+            getEl('applicationsError').classList.remove('hidden');
+            isValid = false;
+        }
+
+        if (!isValid) return;
+        // -----------------------
+
+        // --- DEDUPLICATION CHECK ---
+        const isDuplicate = checkIfZorenExists(zoren, editPartId);
+
+        if (isDuplicate) {
+            getEl('zorenError').textContent = `DEDUPLICATION ERROR: ZOREN No. "${zoren}" already exists in your inventory.`;
+            getEl('zorenError').classList.remove('hidden');
+            return;
+        }
+        // ---------------------------
+
+        let oemRaw=getEl('inpOem')?.value.trim();
+        let oemArr=[];
+        if(oemRaw){ 
+            // Only split by comma; assume user enters CSV format
+            oemArr=oemRaw.split(',').map(s=>s.trim()).filter(Boolean); 
+        }
+        
+        const dataToSave = { zoren, oem: oemArr, car_maker, applications, category };
+
+        try {
+            if (editPartId) {
+                // Update existing document using its stored ID
+                await setDoc(doc(getPartsCollectionRef(), editPartId), dataToSave);
+            } else {
+                // Add new document
+                await addDoc(getPartsCollectionRef(), dataToSave);
+            }
+            modalAddEdit.classList.add('hidden');
+            // loadAndRenderParts() will be triggered by onSnapshot automatically
+        } catch (error) {
+            showConfirm('Error Saving Data', "Error saving data. Check console for details.", true);
+            console.error("Error saving document: ", error);
+        }
+    });
+
+    // Updated to pass the Part object and its Firestore ID.
+    function openAddModal(item=null, partId=null){ 
+        if (!currentUser) { 
+            showConfirm('Access Denied', 'Please sign in to add or edit parts.', true); 
+            return;
+        }
+        
+        editPartId = partId; // Store the ID
+        
+        // Clear errors on modal open
+        getEl('zorenError')?.classList.add('hidden');
+        getEl('carMakerError')?.classList.add('hidden');
+        getEl('applicationsError')?.classList.add('hidden');
+        getEl('deduplicationWarning').classList.toggle('hidden', !!item);
+
+        getEl('modalTitle').textContent=item?'EDIT PART':'ADD PART';
+        getEl('inpZoren').value=item?item.zoren:'';
+        getEl('inpZoren').disabled = !!item; // Disable ZOREN edit if editing to maintain unique ID integrity
+        
+        // Join the array for display in the input field
+        getEl('inpOem').value=item?item.oem.join(', '):'';
+        getEl('inpCarMaker').value=item?item.car_maker:'';
+        getEl('inpApplications').value=item?item.applications:'';
+        // Render selects and pre-select the category if item exists
+        renderCategorySelects(item ? item.category : categories[0]); 
+        modalAddEdit.classList.remove('hidden');
+    }
+
+    // --- NEW RELIABLE onEdit function ---
+    function onEdit(e){ 
+        const partId = e.currentTarget.getAttribute('data-id');
+        if (!partId) return; 
+
+        // Find the part object using the guaranteed Firestore ID
+        const partToEdit = parts.find(p => p.id === partId); 
+
+        if (!partToEdit) {
+            showConfirm('Error', 'Could not find part to edit.', true);
+            return;
+        }
+
+        // Pass the actual part object and its Firestore ID
+        openAddModal(partToEdit, partToEdit.id);
+    }
+    
+    // 3. DELETE (Delete from Firestore)
+    async function onDelete(e){ 
+        if (!currentUser) { showConfirm('Auth Error', 'Authentication is required.', true); return; }
+        
+        const partId = e.currentTarget.getAttribute('data-id'); 
+        if (!partId) return; 
+        
+        const partToDelete = parts.find(p => p.id === partId); 
+
+        if (!partToDelete || !partToDelete.id) {
+            showConfirm('Error', 'Could not identify part for deletion.', true);
+            return;
+        }
+
+        const confirmed = await showConfirm('Confirm Deletion', `Permanently delete ZOREN No. ${partToDelete.zoren}? This action cannot be undone.`);
+        if (!confirmed) return;
+
+        try {
+            await deleteDoc(doc(getPartsCollectionRef(), partToDelete.id));
+        } catch (error) {
+            showConfirm('Error Deleting', "Error deleting record. Check console for details.", true);
+            console.error("Error deleting document: ", error);
+        }
+    } 
+
+    // --- BULK UPLOAD LOGIC ---
+    const modalBulk=getEl('modalBulk');
+    getEl('btnBulk')?.addEventListener('click',()=>{ 
+        if (!currentUser) { 
+            showConfirm('Access Denied', 'Please sign in to perform bulk operations.', true); 
+            return;
+        }
+        modalBulk.classList.remove('hidden'); 
+        getEl('bulkCategorySelector').classList.remove('hidden');
+        renderCategorySelects();
+    });
+    getEl('btnCloseBulk')?.addEventListener('click',()=>modalBulk.classList.add('hidden'));
+    
+    getEl('bulkFileInput')?.addEventListener('change',ev=>{
+        const f=ev.target.files[0]; 
+        if(!f) return; 
+        const reader=new FileReader();
+        reader.onload=e=>getEl('bulkTextarea').value=e.target.result; 
+        showConfirm('File Loaded', "JSON content loaded into the textarea. Click 'Load & Merge' or 'Replace All' to proceed.", true);
+    });
+    
+    // Centralized Batch Upload Function
+    async function executeBatchUpload(records, replaceMode) {
+        if (!currentUser) { throw new Error('Authentication is required.'); }
+        
+        // --- BULK DEDUPLICATION & VALIDATION ---
+        const existingZorens = new Set(parts.map(p => p.zoren.trim().toLowerCase()));
+        let recordsToAdd = [];
+        let duplicatesCount = 0;
+        let invalidCount = 0;
+
+        for (const record of records) {
+            const zoren = record.zoren.trim();
+            const normalizedZoren = zoren.toLowerCase();
+
+            // Validate fields
+            const zorenRegex = /^[a-zA-Z0-9-]+$/; 
+            if (!zoren || zoren.length < 4 || !zorenRegex.test(zoren) || !record.car_maker || !record.applications) {
+                invalidCount++;
+                continue;
+            }
+
+            // Deduplication Check: Only add if ZOREN is new
+            if (replaceMode || !existingZorens.has(normalizedZoren)) {
+                recordsToAdd.push(record);
+                existingZorens.add(normalizedZoren); // Add new ZORENs to set if merging
+            } else {
+                duplicatesCount++;
+            }
+        }
+
+        if (recordsToAdd.length === 0) {
+            throw new Error(`Import failed. ${invalidCount} invalid records, ${duplicatesCount} duplicates. No unique, valid records found to import.`);
+        }
+        // ------------------------------------------
+
+        const batch = writeBatch(db);
+
+        if (replaceMode) {
+            // Delete all existing documents in the collection
+            const existingSnapshot = await getDocs(getPartsCollectionRef());
+            existingSnapshot.forEach(doc => { batch.delete(doc.ref); });
+        }
+        
+        // Add new records
+        recordsToAdd.forEach(record => {
+            const newDocRef = doc(getPartsCollectionRef());
+            const { id, ...data } = record; 
+            batch.set(newDocRef, data);
+        });
+        
+        await batch.commit();
+        
+        getEl('bulkTextarea').value=''; 
+        modalBulk.classList.add('hidden'); 
+        
+        return { added: recordsToAdd.length, duplicates: duplicatesCount, invalid: invalidCount };
+    }
+    
+    async function handleBulkUpload(replaceMode) {
+        const txt=getEl('bulkTextarea')?.value.trim(); 
+        if(!txt){ showConfirm('Input Empty', 'Bulk textarea is empty.', true); return; }
+        
+        if(replaceMode) {
+            const confirmed = await showConfirm('DANGER: REPLACE ALL', 'WARNING: Are you sure you want to delete ALL your existing data and replace it? This is PERMANENT.', false);
+            if (!confirmed) return;
+        }
+
+        try { 
+            const parsed=JSON.parse(txt); 
+            if(!Array.isArray(parsed)){ showConfirm('Invalid Format', 'JSON must be a root array of part objects.', true); return; }
+            
+            let recordsToImport = parsed.map(normalizeRecord);
+            const selectedCategory = getEl('bulkCategoryInput').value.trim();
+            
+            // Assign the selected category to any record that didn't have one
+            const finalRecords = recordsToImport.map(r => ({
+                ...r,
+                category: r.category === 'Uncategorized' ? selectedCategory : r.category
+            }));
+
+            const results = await executeBatchUpload(finalRecords, replaceMode);
+            
+            let message;
+            if (replaceMode) {
+                message = `SUCCESS: Replaced all records. Total added: ${results.added}.`;
+            } else {
+                message = `SUCCESS: Merged ${results.added} new records. ${results.duplicates} duplicates ignored.`;
+            }
+
+            if (results.invalid > 0) {
+                message += ` (${results.invalid} records ignored due to missing required fields).`;
+            }
+
+            showConfirm('Upload Complete', message, true);
+
+        } catch(err){ 
+            showConfirm('Processing Error', `Error during bulk operation. ${err.message}`, true); 
+            console.error("Bulk upload error:", err); 
+        }
+    }
+
+    getEl('btnLoadBulk')?.addEventListener('click', () => handleBulkUpload(false)); // Merge
+    getEl('btnReplaceBulk')?.addEventListener('click', () => handleBulkUpload(true)); // Replace
+
+    // --- CATEGORY MANAGER MODAL LISTENERS (unchanged) ---
+    const modalCategoryManager = getEl('modalCategoryManager');
+    getEl('btnManageCategories')?.addEventListener('click', () => {
+        renderCategoryManagerList();
+        modalCategoryManager?.classList.remove('hidden');
+    });
+
+    getEl('btnCloseCategoryManager')?.addEventListener('click', () => {
+        modalCategoryManager?.classList.add('hidden');
+    });
+
+    getEl('btnAddCategory')?.addEventListener('click', async () => {
+        const newCat = getEl('inpNewCategory')?.value.trim();
+        
+        if (!newCat) {
+             showConfirm('Error', 'Category name cannot be empty.', true);
+             return;
+        }
+        
+        if (categories.includes(newCat)) {
+            showConfirm('Error', 'Category already exists.', true);
+            return;
+        }
+
+        categories.push(newCat);
+        getEl('inpNewCategory').value = '';
+        
+        await saveCategories(); 
+        
+        renderCategoryManagerList();
+        
+        showConfirm('Category Added', `Category "${newCat}" has been added.`, true);
+    });
+
+    // --- EXPORT LOGIC (unchanged) ---
+
+    function createDownloadLink(data, filename, mimeType) {
+        const blob = new Blob([data], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    getEl('btnDownloadJson')?.addEventListener('click', () => {
+        const dataToExport = parts.map(p => ({
+            zoren: p.zoren,
+            car_maker: p.car_maker,
+            applications: p.applications,
+            oem: p.oem,
+            category: p.category
+        }));
+        const json = JSON.stringify(dataToExport, null, 2);
+        createDownloadLink(json, `inventory_export_${new Date().toISOString().slice(0, 10)}.json`, 'application/json');
+        showConfirm('Export Complete', 'Inventory data successfully exported as JSON.', true);
+    });
+
+    getEl('btnExportCsv')?.addEventListener('click', () => {
+        if (parts.length === 0) {
+            showConfirm('Export Error', 'No data to export.', true);
+            return;
+        }
+
+        const headers = ["ZOREN No.", "Car Maker", "Applications", "OEM No.", "Category"];
+        const rows = parts.map(p => [
+            p.zoren,
+            p.car_maker,
+            p.applications,
+            p.oem.join('; '), // Use semicolon to separate multiple OEM numbers
+            p.category
+        ]);
+
+        const csvContent = [
+            headers.map(h => `"${h}"`).join(','),
+            ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+        ].join('\n');
+
+        createDownloadLink(csvContent, `inventory_export_${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv');
+        showConfirm('Export Complete', 'Inventory data successfully exported as CSV.', true);
+    });
+
+    // --- Start App Initialization ---
+    document.addEventListener('DOMContentLoaded', initApp);
 </script>
 
 </body>
