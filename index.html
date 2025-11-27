@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FastWay Inventory: Email/Password Auth Edition</title>
+    <title>FastWay Inventory: Optional Fields Edition</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -333,26 +333,30 @@
     <div class="modal-neumo z-50 w-full max-w-3xl p-8 text-gray-800 border-yellow-700 border-t-4">
         <h3 id="modalTitle" class="text-3xl font-extrabold mb-6">ADD/EDIT PART</h3>
         <p id="deduplicationWarning" class="text-sm font-semibold text-orange-600 mt-2 hidden system-error">
-            Note: Saving this will check for duplicates based on ZOREN No.
+            Note: ZOREN No. must be unique if provided.
         </p>
         <div class="space-y-5">
             <div>
-                <label class="block text-sm font-medium text-gray-600">Category <span class="text-red-600">*</span></label>
+                <!-- Removed * indicator -->
+                <label class="block text-sm font-medium text-gray-600">Category</label>
                 <select id="inpCategory" class="w-full"></select>
                 <p id="categoryError" class="text-xs text-red-600 mt-1 hidden system-error">Category is required.</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-600">ZOREN No. <span class="text-red-600">*</span></label>
+                <!-- Removed * indicator -->
+                <label class="block text-sm font-medium text-gray-600">ZOREN No.</label>
                 <input id="inpZoren" class="w-full" />
-                <p id="zorenError" class="mt-2 hidden system-error">ZOREN No. is required (min 4 chars) and must be alphanumeric/hyphen.</p>
+                <p id="zorenError" class="mt-2 hidden system-error"></p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-600">Car Maker <span class="text-red-600">*</span></label>
+                <!-- Removed * indicator -->
+                <label class="block text-sm font-medium text-gray-600">Car Maker</label>
                 <input id="inpCarMaker" class="w-full" />
                 <p id="carMakerError" class="mt-2 hidden system-error">Car Maker is required.</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-600">Applications <span class="text-red-600">*</span></label>
+                <!-- Removed * indicator -->
+                <label class="block text-sm font-medium text-gray-600">Applications</label>
                 <input id="inpApplications" class="w-full" />
                 <p id="applicationsError" class="mt-2 hidden system-error">Applications field is required.</p>
             </div>
@@ -374,7 +378,7 @@
     <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
     <div class="modal-neumo z-50 w-full max-w-3xl p-8 text-gray-800 border-orange-600 border-t-4">
         <h3 class="text-3xl font-extrabold mb-6">BULK JSON UPLOAD</h3>
-        <p class="text-sm text-gray-600 mb-4">Paste JSON array or upload a .json file. Data is validated on upload, and duplicates (by ZOREN No.) will be ignored.</p>
+        <p class="text-sm text-gray-600 mb-4">Paste JSON array or upload a .json file. All fields are optional. Deduplication runs on ZOREN No.</p>
 
         <div class="space-y-5">
             <div>
@@ -451,11 +455,9 @@
         onAuthStateChanged, 
         createUserWithEmailAndPassword, 
         signInWithEmailAndPassword, 
-        signOut,
-        signInAnonymously,
-        signInWithCustomToken
+        signOut
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, addDoc, onSnapshot, collection, query, where, getDoc, getDocs, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, addDoc, onSnapshot, collection, getDoc, getDocs, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // --- GLOBAL VARIABLES & INITIALIZATION ---
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -474,9 +476,6 @@
     // Use environment config if available, otherwise use user's explicit config
     const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
     const firebaseConfig = Object.keys(envConfig).length > 0 ? envConfig : userFirebaseConfig;
-
-    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
 
     // 2. Initialize Firebase App and Services
     let app, auth, db;
@@ -509,7 +508,7 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // This function checks if the user is authenticated
+    // This function checks if the user is authenticated (logged in)
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -567,11 +566,6 @@ service cloud.firestore {
                     openAuthModal('signIn');
                 }
             });
-
-            // FIX: Remove conflicting custom token/anonymous sign-in attempt which can cause 
-            // 'auth/operation-not-allowed' if the project is set up for Email/Password only.
-            // If the user hasn't authenticated yet, the onAuthStateChanged listener will 
-            // trigger the openAuthModal('signIn') from the 'else' block.
 
         } catch (error) {
             updateConnectionStatus("FATAL: Initialization failed. See console.", true);
@@ -801,11 +795,9 @@ service cloud.firestore {
         } catch (error) {
             let msg = 'An unknown error occurred.';
             if (error.code === 'auth/email-already-in-use') { msg = 'This email is already registered. Try signing in.'; }
-            else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') { msg = 'Invalid email or password.'; }
+            else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') { msg = 'Invalid email or password.'; }
             else if (error.code === 'auth/weak-password') { msg = 'Password should be at least 6 characters.'; }
-            else if (error.code === 'auth/invalid-credential') { msg = 'Invalid email or password.'; }
             else if (error.code === 'auth/operation-not-allowed') { 
-                // This is the error we need to guide the user on
                 msg = 'Authentication operation not allowed. Please ensure "Email/Password" sign-in is ENABLED in your Firebase Console > Authentication > Sign-in method.'; 
             }
             else { console.error('Auth Error:', error); }
@@ -843,6 +835,7 @@ service cloud.firestore {
 
     // --- DATA HELPERS ---
     function normalizeRecord(item) {
+        // All fields are now explicitly coerced to safe defaults (empty string/array) if missing
         const zoren = (item.zoren ?? '').toString().trim();
         let oem = item.oem ?? [];
         if (typeof oem === 'string') {
@@ -879,6 +872,9 @@ service cloud.firestore {
      */
     function checkIfZorenExists(zoren, excludeId = null) {
         const normalizedZoren = zoren.trim().toLowerCase();
+        
+        // Deduplication check only runs if a non-empty ZOREN number is provided
+        if (normalizedZoren === '') return false;
         
         return parts.some(p => 
             p.zoren.trim().toLowerCase() === normalizedZoren && p.id !== excludeId
@@ -973,8 +969,8 @@ service cloud.firestore {
             card.innerHTML = `
                 <div class="flex flex-col justify-between card-header-container">
                     <div>
-                        <div class="text-sm font-extrabold text-gray-500 mb-2 uppercase">${highlightSearchTerm(item.category, q)}</div>
-                        <h3 class="card-zoren-no font-mono">${highlightSearchTerm(item.zoren, q)}</h3>
+                        <div class="text-sm font-extrabold text-gray-500 mb-2 uppercase">${highlightSearchTerm(item.category || '(NO CATEGORY)', q)}</div>
+                        <h3 class="card-zoren-no font-mono">${highlightSearchTerm(item.zoren || '(NO ZOREN)', q)}</h3>
                     </div>
                     <div class="card-actions flex gap-3 mt-4">
                         <button class="editBtn text-gray-600 hover:text-gray-800" title="Edit" data-id="${escapeHtml(item.id)}">
@@ -988,15 +984,15 @@ service cloud.firestore {
                 <div class="card-details-grid text-lg font-medium">
                     <div>
                         <div class="text-sm font-bold text-gray-500 uppercase">Car Maker:</div>
-                        <div class="text-gray-800">${highlightSearchTerm(item.car_maker, q)}</div>
+                        <div class="text-gray-800">${highlightSearchTerm(item.car_maker || 'N/A', q)}</div>
                     </div>
                     <div class="mt-4">
                         <div class="text-sm font-bold text-gray-500 uppercase">Applications:</div>
-                        <div class="text-gray-800">${highlightSearchTerm(item.applications, q)}</div>
+                        <div class="text-gray-800">${highlightSearchTerm(item.applications || 'N/A', q)}</div>
                     </div>
                     <div class="mt-4">
                         <div class="text-sm font-bold text-gray-500 uppercase">OEM No. / Interchange:</div>
-                        <div class="flex flex-wrap pt-1 min-h-[30px]">${oemTags}</div>
+                        <div class="flex flex-wrap pt-1 min-h-[30px]">${oemTags || 'N/A'}</div>
                     </div>
                 </div>
             `;
@@ -1037,42 +1033,18 @@ service cloud.firestore {
             getEl('zorenError')?.classList.add('hidden');
             getEl('carMakerError')?.classList.add('hidden');
             getEl('applicationsError')?.classList.add('hidden');
+            getEl('categoryError')?.classList.add('hidden');
         };
 
         clearErrors();
 
-        // --- DATA VALIDATION ---
-        let isValid = true;
-        // Regex allows alphanumeric characters and hyphens only
-        const zorenRegex = /^[a-zA-Z0-9-]+$/; 
-
-        if(!zoren || zoren.length < 4 || !zorenRegex.test(zoren)){ 
-            getEl('zorenError').textContent = 'ZOREN No. is required (min 4 chars) and must be alphanumeric/hyphen.';
-            getEl('zorenError').classList.remove('hidden');
-            isValid = false;
-        }
-        if(!category){ 
-            showConfirm('Error', 'Category is required', true);
-            isValid = false;
-        }
-        if(!car_maker){ 
-            getEl('carMakerError').textContent = 'Car Maker is required.';
-            getEl('carMakerError').classList.remove('hidden');
-            isValid = false;
-        }
-        if(!applications){ 
-            getEl('applicationsError').textContent = 'Applications field is required.';
-            getEl('applicationsError').classList.remove('hidden');
-            isValid = false;
-        }
-
-        if (!isValid) return;
-        // -----------------------
+        // --- VALIDATION REMOVED ---
+        // Fields are now optional. We only check for ZOREN deduplication if ZOREN is provided.
 
         // --- DEDUPLICATION CHECK ---
         const isDuplicate = checkIfZorenExists(zoren, editPartId);
 
-        if (isDuplicate) {
+        if (zoren !== '' && isDuplicate) {
             getEl('zorenError').textContent = `DEDUPLICATION ERROR: ZOREN No. "${zoren}" already exists in your inventory.`;
             getEl('zorenError').classList.remove('hidden');
             return;
@@ -1082,7 +1054,6 @@ service cloud.firestore {
         let oemRaw=getEl('inpOem')?.value.trim();
         let oemArr=[];
         if(oemRaw){ 
-            // Only split by comma; assume user enters CSV format
             oemArr=oemRaw.split(',').map(s=>s.trim()).filter(Boolean); 
         }
         
@@ -1097,7 +1068,6 @@ service cloud.firestore {
                 await addDoc(getPartsCollectionRef(), dataToSave);
             }
             modalAddEdit.classList.add('hidden');
-            // loadAndRenderParts() will be triggered by onSnapshot automatically
         } catch (error) {
             showConfirm('Error Saving Data', "Error saving data. Check console for details.", true);
             console.error("Error saving document: ", error);
@@ -1117,13 +1087,16 @@ service cloud.firestore {
         getEl('zorenError')?.classList.add('hidden');
         getEl('carMakerError')?.classList.add('hidden');
         getEl('applicationsError')?.classList.add('hidden');
-        getEl('deduplicationWarning').classList.toggle('hidden', !!item);
+        
+        // Show deduplication warning only
+        getEl('deduplicationWarning').classList.remove('hidden');
+
 
         getEl('modalTitle').textContent=item?'EDIT PART':'ADD PART';
         getEl('inpZoren').value=item?item.zoren:'';
-        getEl('inpZoren').disabled = !!item; // Disable ZOREN edit if editing to maintain unique ID integrity
+        // Disable ZOREN edit if editing to maintain unique ID integrity. This is crucial.
+        getEl('inpZoren').disabled = !!item; 
         
-        // Join the array for display in the input field
         getEl('inpOem').value=item?item.oem.join(', '):'';
         getEl('inpCarMaker').value=item?item.car_maker:'';
         getEl('inpApplications').value=item?item.applications:'';
@@ -1199,34 +1172,34 @@ service cloud.firestore {
     async function executeBatchUpload(records, replaceMode) {
         if (!currentUser) { throw new Error('Authentication is required.'); }
         
-        // --- BULK DEDUPLICATION & VALIDATION ---
-        const existingZorens = new Set(parts.map(p => p.zoren.trim().toLowerCase()));
+        // --- BULK DEDUPLICATION ---
+        const existingZorens = new Set(parts.map(p => p.zoren.trim().toLowerCase()).filter(z => z !== ''));
         let recordsToAdd = [];
         let duplicatesCount = 0;
-        let invalidCount = 0;
+        let validRecordsCount = 0;
 
         for (const record of records) {
-            const zoren = record.zoren.trim();
+            const zoren = record.zoren ? record.zoren.trim() : '';
             const normalizedZoren = zoren.toLowerCase();
 
-            // Validate fields
-            const zorenRegex = /^[a-zA-Z0-9-]+$/; 
-            if (!zoren || zoren.length < 4 || !zorenRegex.test(zoren) || !record.car_maker || !record.applications) {
-                invalidCount++;
-                continue;
-            }
+            validRecordsCount++; // Count all records as valid since all fields are optional
 
-            // Deduplication Check: Only add if ZOREN is new
-            if (replaceMode || !existingZorens.has(normalizedZoren)) {
-                recordsToAdd.push(record);
-                existingZorens.add(normalizedZoren); // Add new ZORENs to set if merging
+            // Deduplication Check: Only add if ZOREN is new AND non-empty
+            if (zoren !== '') {
+                 if (replaceMode || !existingZorens.has(normalizedZoren)) {
+                    recordsToAdd.push(record);
+                    existingZorens.add(normalizedZoren); // Add new ZORENs to set if merging
+                } else {
+                    duplicatesCount++;
+                }
             } else {
-                duplicatesCount++;
+                // Allow records with empty ZOREN to be added, but they won't participate in deduplication check later
+                recordsToAdd.push(record); 
             }
         }
 
         if (recordsToAdd.length === 0) {
-            throw new Error(`Import failed. ${invalidCount} invalid records, ${duplicatesCount} duplicates. No unique, valid records found to import.`);
+            throw new Error(`Import failed. ${duplicatesCount} duplicates ignored. No new records found to import.`);
         }
         // ------------------------------------------
 
@@ -1241,6 +1214,7 @@ service cloud.firestore {
         // Add new records
         recordsToAdd.forEach(record => {
             const newDocRef = doc(getPartsCollectionRef());
+            // Filter out 'id' if it somehow made its way in
             const { id, ...data } = record; 
             batch.set(newDocRef, data);
         });
@@ -1250,7 +1224,7 @@ service cloud.firestore {
         getEl('bulkTextarea').value=''; 
         modalBulk.classList.add('hidden'); 
         
-        return { added: recordsToAdd.length, duplicates: duplicatesCount, invalid: invalidCount };
+        return { added: recordsToAdd.length, duplicates: duplicatesCount };
     }
     
     async function handleBulkUpload(replaceMode) {
@@ -1282,10 +1256,6 @@ service cloud.firestore {
                 message = `SUCCESS: Replaced all records. Total added: ${results.added}.`;
             } else {
                 message = `SUCCESS: Merged ${results.added} new records. ${results.duplicates} duplicates ignored.`;
-            }
-
-            if (results.invalid > 0) {
-                message += ` (${results.invalid} records ignored due to missing required fields).`;
             }
 
             showConfirm('Upload Complete', message, true);
