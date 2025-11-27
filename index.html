@@ -554,9 +554,11 @@ service cloud.firestore {
     }
 
     // Corrected to point to the secure, private 'parts' collection under the user's ID.
-    function getPartsCollectionRef() {
-        return collection(db, getUserCollectionPath('parts'));
-    }
+    // NEW version for public data:
+function getPartsCollectionRef() {
+    // This makes the collection path /public_parts
+    return collection(db, 'public_parts'); 
+}
 
     function getCategoryDocRef() {
         return doc(db, getUserCollectionPath('categories'), 'list'); 
@@ -1219,3 +1221,4 @@ service cloud.firestore {
 
 </body>
 </html>
+
