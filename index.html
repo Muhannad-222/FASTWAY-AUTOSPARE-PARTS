@@ -3,10 +3,10 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>FastWay Inventory: iOS 26 Edition</title>
+    <title>FastWay Inventory: Neumorphism Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
-  <style>
+    <style>
         /* --- Option 2: Soft Clay/Neumorphism Aesthetic --- */
         :root {
             /* Palette: Soft Light Background, Light Shadows, Vibrant Accents */
@@ -183,6 +183,11 @@
             box-shadow: none !important;
             border: none !important;
         }
+        
+        /* Specific adjustments for dark text on light background */
+        .text-light-override {
+            color: var(--text-dark) !important;
+        }
 
     </style>
 </head>
@@ -191,29 +196,29 @@
 <div class="max-w-7xl mx-auto">
     <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center p-6 rounded-2xl">
         <div class="mb-4 md:mb-0">
-            <h1 class="text-5xl font-extrabold text-white leading-tight">INVENTORY PRO</h1>
-            <p class="text-xl font-bold text-gray-400 mt-1">FASTWAY PARTS CATALOG</p>
+            <h1 class="text-5xl font-extrabold text-gray-800 leading-tight">INVENTORY PRO</h1>
+            <p class="text-xl font-bold text-gray-600 mt-1">FASTWAY PARTS CATALOG</p>
         </div>
         <div class="flex flex-col items-end">
             <p id="authStatus" class="status-pill">AUTHENTICATING...</p>
             <p id="connectionLog" class="text-xs mt-1 text-gray-500">Starting initialization...</p>
-            <button id="btnManageCategories" class="ios-btn ios-btn-secondary mt-3 px-5 py-2 text-sm hidden">
+            <button id="btnManageCategories" class="neumo-btn neumo-btn-secondary mt-3 px-5 py-2 text-sm hidden">
                 Manage Categories
             </button>
         </div>
     </header>
 
-    <div id="rulesInstruction" class="hidden glass-panel p-6 border-red-500 border-2">
-        <p class="font-extrabold text-xl mb-2 text-red-400">🔴 CRITICAL ERROR: PERMISSION DENIED 🔴</p>
-        <p class="text-gray-300">Your application is authenticated, but the Firestore Security Rules are preventing it from reading data.</p>
-        <p class="mt-2 text-gray-300">To fix this, go to the Firebase Console > Firestore Database > Rules, and replace the existing rules with the code below.</p>
-        <pre id="rulesCode" class="bg-gray-800 text-yellow-300 p-4 rounded-lg mt-3 overflow-x-auto text-sm"></pre>
+    <div id="rulesInstruction" class="hidden neumo-panel p-6 border-red-500 border-2">
+        <p class="font-extrabold text-xl mb-2 text-red-600">🔴 CRITICAL ERROR: PERMISSION DENIED 🔴</p>
+        <p class="text-gray-700">Your application is authenticated, but the Firestore Security Rules are preventing it from reading data.</p>
+        <p class="mt-2 text-gray-700">To fix this, go to the Firebase Console > Firestore Database > Rules, and replace the existing rules with the code below.</p>
+        <pre id="rulesCode" class="bg-gray-200 text-yellow-700 p-4 rounded-lg mt-3 overflow-x-auto text-sm"></pre>
     </div>
 
     <section id="appContent" class="hidden">
-        <section class="mb-10 p-4 md:p-6 glass-panel flex flex-wrap gap-4 items-center">
-            <button id="btnAdd" class="ios-btn ios-btn-primary text-lg">+ NEW PART</button>
-            <button id="btnBulk" class="ios-btn ios-btn-secondary text-lg">BULK JSON</button>
+        <section class="mb-10 p-4 md:p-6 neumo-panel flex flex-wrap gap-4 items-center">
+            <button id="btnAdd" class="neumo-btn neumo-btn-primary text-lg">+ NEW PART</button>
+            <button id="btnBulk" class="neumo-btn neumo-btn-secondary text-lg">BULK JSON</button>
 
             <div class="flex-grow flex flex-wrap justify-end items-center gap-3">
                 <select id="categoryFilter" class="w-full md:w-48"></select>
@@ -226,20 +231,20 @@
                 </select>
             </div>
             
-            <button id="btnDownloadJson" class="ios-btn ios-btn-secondary bg-gray-600 text-white px-4 py-3">Export JSON</button>
-            <button id="btnExportCsv" class="ios-btn ios-btn-secondary bg-green-500 text-white px-4 py-3">Export CSV</button>
+            <button id="btnDownloadJson" class="neumo-btn neumo-btn-secondary bg-gray-400 text-light-override px-4 py-3">Export JSON</button>
+            <button id="btnExportCsv" class="neumo-btn neumo-btn-secondary bg-green-500 text-white px-4 py-3">Export CSV</button>
         </section>
 
         <section>
             <div id="partsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 </div>
 
-            <div class="mt-10 glass-panel p-4 flex flex-wrap gap-4 items-center justify-between text-white">
+            <div class="mt-10 neumo-panel p-4 flex flex-wrap gap-4 items-center justify-between text-gray-800">
                 <div class="text-base font-semibold" id="summaryText">0 RECORDS LOADED</div>
                 <div class="flex items-center gap-4">
-                    <button id="prevPage" class="ios-btn ios-btn-secondary px-5 py-2">PREVIOUS</button>
+                    <button id="prevPage" class="neumo-btn neumo-btn-secondary px-5 py-2">PREVIOUS</button>
                     <span id="pageInfo" class="px-3 text-lg font-extrabold"></span>
-                    <button id="nextPage" class="ios-btn ios-btn-secondary px-5 py-2">NEXT</button>
+                    <button id="nextPage" class="neumo-btn neumo-btn-secondary px-5 py-2">NEXT</button>
                 </div>
             </div>
         </section>
@@ -247,95 +252,95 @@
 </div>
 
 <div id="modalConfirm" class="hidden fixed inset-0 z-40 flex items-center justify-center">
-    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-80 backdrop-blur-lg"></div>
-    <div class="modal-glass z-50 w-full max-w-sm p-6 text-white border-yellow-400 border-t-2">
+    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
+    <div class="modal-neumo z-50 w-full max-w-sm p-6 text-gray-800 border-yellow-700 border-t-2">
         <h3 id="confirmTitle" class="text-2xl font-bold mb-4">CONFIRM ACTION</h3>
-        <p id="confirmMessage" class="text-gray-300 mb-6"></p>
+        <p id="confirmMessage" class="text-gray-600 mb-6"></p>
         <div class="flex justify-end gap-3">
-            <button id="btnConfirmCancel" class="ios-btn ios-btn-secondary px-5 py-2">CANCEL</button>
-            <button id="btnConfirmAction" class="ios-btn ios-btn-primary px-5 py-2 bg-red-600 text-white">CONFIRM</button>
+            <button id="btnConfirmCancel" class="neumo-btn neumo-btn-secondary px-5 py-2">CANCEL</button>
+            <button id="btnConfirmAction" class="neumo-btn neumo-btn-primary px-5 py-2 bg-red-600 text-white">CONFIRM</button>
         </div>
     </div>
 </div>
 
 <div id="modalAddEdit" class="hidden fixed inset-0 z-40 flex items-center justify-center">
-    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-80 backdrop-blur-lg"></div>
-    <div class="modal-glass z-50 w-full max-w-lg p-8 text-white border-yellow-400 border-t-4">
+    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
+    <div class="modal-neumo z-50 w-full max-w-lg p-8 text-gray-800 border-yellow-700 border-t-4">
         <h3 id="modalTitle" class="text-3xl font-extrabold mb-6">ADD PART</h3>
         <div class="space-y-5">
             <div>
-                <label class="block text-sm font-medium text-gray-300">Category <span class="text-red-400">*</span></label>
+                <label class="block text-sm font-medium text-gray-600">Category <span class="text-red-600">*</span></label>
                 <select id="inpCategory" class="w-full"></select>
-                <p id="categoryError" class="text-xs text-red-400 mt-1 hidden system-error">Category is required.</p>
+                <p id="categoryError" class="text-xs text-red-600 mt-1 hidden system-error">Category is required.</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-300">ZOREN No. <span class="text-red-400">*</span></label>
+                <label class="block text-sm font-medium text-gray-600">ZOREN No. <span class="text-red-600">*</span></label>
                 <input id="inpZoren" class="w-full" />
                 <p id="zorenError" class="mt-2 hidden system-error">ZOREN No. is required (min 4 chars) and must be alphanumeric/hyphen.</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-300">Car Maker <span class="text-red-400">*</span></label>
+                <label class="block text-sm font-medium text-gray-600">Car Maker <span class="text-red-600">*</span></label>
                 <input id="inpCarMaker" class="w-full" />
                 <p id="carMakerError" class="mt-2 hidden system-error">Car Maker is required.</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-300">Applications <span class="text-red-400">*</span></label>
+                <label class="block text-sm font-medium text-gray-600">Applications <span class="text-red-600">*</span></label>
                 <input id="inpApplications" class="w-full" />
                 <p id="applicationsError" class="mt-2 hidden system-error">Applications field is required.</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-300">OEM No. (comma separated)</label>
+                <label class="block text-sm font-medium text-gray-600">OEM No. (comma separated)</label>
                 <input id="inpOem" class="w-full" placeholder="31110-09000, E8678M" />
             </div>
         </div>
 
         <div class="mt-10 flex justify-end gap-3">
-            <button id="btnCancelModal" class="ios-btn ios-btn-secondary px-6 py-2.5">CANCEL</button>
-            <button id="btnSaveModal" class="ios-btn ios-btn-primary px-6 py-2.5">SAVE PART</button>
+            <button id="btnCancelModal" class="neumo-btn neumo-btn-secondary px-6 py-2.5">CANCEL</button>
+            <button id="btnSaveModal" class="neumo-btn neumo-btn-primary px-6 py-2.5">SAVE PART</button>
             </div>
         </div>
 </div>
 
 <div id="modalBulk" class="hidden fixed inset-0 z-40 flex items-center justify-center">
-    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-80 backdrop-blur-lg"></div>
-    <div class="modal-glass z-50 w-full max-w-3xl p-8 text-white border-orange-600 border-t-4">
+    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
+    <div class="modal-neumo z-50 w-full max-w-3xl p-8 text-gray-800 border-orange-600 border-t-4">
         <h3 class="text-3xl font-extrabold mb-6">BULK JSON UPLOAD</h3>
-        <p class="text-sm text-gray-300 mb-4">Paste JSON array or upload a .json file. Data is validated on upload.</p>
+        <p class="text-sm text-gray-600 mb-4">Paste JSON array or upload a .json file. Data is validated on upload.</p>
 
         <div class="space-y-5">
             <div>
-                <label class="block text-sm font-medium mb-1 text-gray-300">Paste JSON array</label>
-                <textarea id="bulkTextarea" rows="8" class="w-full font-mono shadow-inner border-gray-400 bg-gray-800 bg-opacity-50" placeholder='[{"zoren":"ZRM...","oem":["..."],"car_maker":"...","applications":"..."}]'></textarea>
+                <label class="block text-sm font-medium mb-1 text-gray-600">Paste JSON array</label>
+                <textarea id="bulkTextarea" rows="8" class="w-full font-mono shadow-inner border-gray-400 bg-gray-200 bg-opacity-50" placeholder='[{"zoren":"ZRM...","oem":["..."],"car_maker":"...","applications":"..."}]'></textarea>
             </div>
-            <div id="bulkCategorySelector" class="flex flex-col gap-2 p-5 glass-panel border-yellow-500 border-t-2">
+            <div id="bulkCategorySelector" class="flex flex-col gap-2 p-5 neumo-panel border-yellow-700 border-t-2">
                 <label class="block text-base font-bold">Category Assignment for uncategorized imports:</label>
                 <select id="bulkCategoryInput" class=""></select>
             </div>
         </div>
 
         <div class="mt-8 flex flex-wrap items-center gap-4">
-            <input id="bulkFileInput" type="file" accept=".json,application/json" class="text-sm font-semibold text-gray-300" />
-            <button id="btnLoadBulk" class="ios-btn ios-btn-secondary bg-gray-700 text-white px-5 py-2.5">Load & Merge</button>
-            <button id="btnReplaceBulk" class="ios-btn ios-btn-primary px-5 py-2.5 bg-red-600">REPLACE ALL INVENTORY</button>
-            <button id="btnCloseBulk" class="ml-auto ios-btn ios-btn-secondary px-5 py-2.5">CLOSE</button>
+            <input id="bulkFileInput" type="file" accept=".json,application/json" class="text-sm font-semibold text-gray-800" />
+            <button id="btnLoadBulk" class="neumo-btn neumo-btn-secondary bg-gray-400 text-light-override px-5 py-2.5">Load & Merge</button>
+            <button id="btnReplaceBulk" class="neumo-btn neumo-btn-primary px-5 py-2.5 bg-red-600">REPLACE ALL INVENTORY</button>
+            <button id="btnCloseBulk" class="ml-auto neumo-btn neumo-btn-secondary px-5 py-2.5">CLOSE</button>
         </div>
         </div>
 </div>
 
 <div id="modalCategoryManager" class="hidden fixed inset-0 z-40 flex items-center justify-center">
-    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-80 backdrop-blur-lg"></div>
-    <div class="modal-glass z-50 w-full max-w-md p-8 text-white border-gray-400 border-t-4">
+    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
+    <div class="modal-neumo z-50 w-full max-w-md p-8 text-gray-800 border-gray-600 border-t-4">
         <h3 class="text-3xl font-extrabold mb-6">CATEGORY MANAGER</h3>
         <div class="space-y-5">
             <div class="flex gap-3">
                 <input id="inpNewCategory" class="w-full" placeholder="e.g., Brake System" />
-                <button id="btnAddCategory" class="ios-btn ios-btn-primary bg-green-600 text-white px-5 py-2">ADD</button>
+                <button id="btnAddCategory" class="neumo-btn neumo-btn-primary bg-green-600 text-white px-5 py-2">ADD</button>
             </div>
-            <div id="categoryListContainer" class="max-h-64 overflow-y-auto border border-gray-700 rounded-xl p-4 space-y-3 glass-panel">
+            <div id="categoryListContainer" class="max-h-64 overflow-y-auto border border-gray-400 rounded-xl p-4 space-y-3 neumo-panel" style="box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);">
                 </div>
         </div>
         <div class="mt-8 flex justify-end">
-            <button id="btnCloseCategoryManager" class="ios-btn ios-btn-primary px-6 py-2.5">DONE</button>
+            <button id="btnCloseCategoryManager" class="neumo-btn neumo-btn-primary px-6 py-2.5">DONE</button>
         </div>
     </div>
 </div>
@@ -377,8 +382,8 @@
         const logEl = getEl('connectionLog');
         if (logEl) {
             logEl.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            // Updated color scheme for iOS aesthetic
-            logEl.style.color = isError ? '#F87171' : '#9CA3AF'; 
+            // Updated color scheme for Neumorphism aesthetic
+            logEl.style.color = isError ? '#DC2626' : '#6B7280'; // Red or Gray-500
         }
     }
 
@@ -394,7 +399,7 @@
 
         rulesInstruction.classList.remove('hidden');
         getEl('appContent').classList.remove('hidden');
-        getEl('partsContainer').innerHTML = `<p class="text-center text-red-400 p-8 text-xl font-bold">Error: ${errorMessage}. See instructions above.</p>`;
+        getEl('partsContainer').innerHTML = `<p class="text-center text-red-600 p-8 text-xl font-bold">Error: ${errorMessage}. See instructions above.</p>`;
         
         rulesCode.textContent = `
 rules_version = '2';
@@ -466,7 +471,7 @@ service cloud.firestore {
                 if (!currentUser) {
                     getEl('authStatus').textContent = `AUTH FAIL`;
                     getEl('appContent').classList.remove('hidden');
-                    getEl('partsContainer').innerHTML = '<p class="text-center text-red-400 p-8 text-xl font-bold">FATAL ERROR: Could not authenticate or load data. Check console.</p>';
+                    getEl('partsContainer').innerHTML = '<p class="text-center text-red-600 p-8 text-xl font-bold">FATAL ERROR: Could not authenticate or load data. Check console.</p>';
                 }
             }
         } catch (error) {
@@ -582,9 +587,9 @@ function getPartsCollectionRef() {
         const container = document.getElementById('categoryListContainer');
         // Updated styling for categories list (sleek background/text)
         container.innerHTML = categories.map((cat, index) => `
-            <div class="flex justify-between items-center p-3 bg-gray-900 bg-opacity-40 rounded-lg shadow-inner">
-                <span class="text-base font-semibold text-white">${escapeHtml(cat)}</span>
-                <button onclick="window.deleteCategoryHandler('${cat}')" class="text-red-400 hover:text-red-300 text-sm font-bold disabled:opacity-50" ${cat === 'Uncategorized' ? 'disabled' : ''}>REMOVE</button>
+            <div class="flex justify-between items-center p-3 bg-gray-200 rounded-lg shadow-inner">
+                <span class="text-base font-semibold text-gray-800">${escapeHtml(cat)}</span>
+                <button onclick="window.deleteCategoryHandler('${cat}')" class="text-red-600 hover:text-red-500 text-sm font-bold disabled:opacity-50" ${cat === 'Uncategorized' ? 'disabled' : ''}>REMOVE</button>
             </div>
         `).join('') || '<p class="text-center text-gray-500 text-sm italic">No categories defined.</p>';
     }
@@ -656,7 +661,7 @@ function getPartsCollectionRef() {
             console.error("Authentication Error:", error);
             getEl('authStatus').textContent = `AUTH FAIL`;
             getEl('appContent').classList.remove('hidden');
-            getEl('partsContainer').innerHTML = '<p class="text-center text-red-400 p-8 text-xl font-bold">FATAL ERROR: Could not authenticate user. Check console for details.</p>';
+            getEl('partsContainer').innerHTML = '<p class="text-center text-red-600 p-8 text-xl font-bold">FATAL ERROR: Could not authenticate user. Check console for details.</p>';
         }
     }
 
@@ -711,7 +716,7 @@ function getPartsCollectionRef() {
             } else {
                 updateConnectionStatus(`FATAL: Data stream interrupted. ${error.code}`, true);
                 console.error("Error setting up snapshot listener: ", error);
-                partsContainer.innerHTML = `<div><p class="text-xl text-center p-8 text-red-500 font-bold">ERROR: ${error.message}</p></div>`;
+                partsContainer.innerHTML = `<div><p class="text-xl text-center p-8 text-red-600 font-bold">ERROR: ${error.message}</p></div>`;
             }
         });
     }
@@ -752,29 +757,29 @@ function getPartsCollectionRef() {
             card.innerHTML = `
                 <div class="flex flex-col justify-between card-header-container">
                     <div>
-                        <div class="text-sm font-extrabold text-gray-400 mb-2 uppercase">${escapeHtml(item.category)}</div>
+                        <div class="text-sm font-extrabold text-gray-500 mb-2 uppercase">${escapeHtml(item.category)}</div>
                         <h3 class="card-zoren-no font-mono">${escapeHtml(item.zoren)}</h3>
                     </div>
                     <div class="card-actions flex gap-3 mt-4">
-                        <button class="editBtn text-gray-300 hover:text-white" title="Edit" data-index="${start+i}">
+                        <button class="editBtn text-gray-600 hover:text-gray-800" title="Edit" data-index="${start+i}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                         </button>
-                        <button class="delBtn text-red-400 hover:text-red-300" title="Delete" data-index="${start+i}">
+                        <button class="delBtn text-red-600 hover:text-red-500" title="Delete" data-index="${start+i}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>
                     </div>
                 </div>
                 <div class="card-details-grid text-lg font-medium">
                     <div>
-                        <div class="text-sm font-bold text-gray-400 uppercase">Car Maker:</div>
-                        <div class="text-white">${escapeHtml(item.car_maker)}</div>
+                        <div class="text-sm font-bold text-gray-500 uppercase">Car Maker:</div>
+                        <div class="text-gray-800">${escapeHtml(item.car_maker)}</div>
                     </div>
                     <div class="mt-4">
-                        <div class="text-sm font-bold text-gray-400 uppercase">Applications:</div>
-                        <div class="text-white">${escapeHtml(item.applications)}</div>
+                        <div class="text-sm font-bold text-gray-500 uppercase">Applications:</div>
+                        <div class="text-gray-800">${escapeHtml(item.applications)}</div>
                     </div>
                     <div class="mt-4">
-                        <div class="text-sm font-bold text-gray-400 uppercase">OEM No. / Interchange:</div>
+                        <div class="text-sm font-bold text-gray-500 uppercase">OEM No. / Interchange:</div>
                         <div class="flex flex-wrap pt-1 min-h-[30px]">${oemTags}</div>
                     </div>
                 </div>
@@ -1091,4 +1096,3 @@ function getPartsCollectionRef() {
 
 </body>
 </html>
-
