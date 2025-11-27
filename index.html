@@ -3,347 +3,230 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>FastWay Inventory: Neumorphic Edition</title>
+    <title>FastWay Inventory: iOS 26 Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Neumorphism Aesthetic */
+        /* iOS 26 Frosted Glass Aesthetic */
         :root {
-            /* Palette: Light, Soft Grays, Muted Accents */
-            --bg-primary: #e0e5ec; /* Soft Light Gray for the overall background */
-            --neumorphic-base: #e0e5ec; /* Base color for neumorphic elements */
-            --neumorphic-light-shadow: #ffffff; /* Light shadow for "out" effect */
-            --neumorphic-dark-shadow: #a3b1c6; /* Dark shadow for "out" effect */
-            --neumorphic-pressed-light-shadow: #ffffff; /* Light shadow for "in" (pressed) effect */
-            --neumorphic-pressed-dark-shadow: #b8c2d1; /* Dark shadow for "in" (pressed) effect */
-            
-            /* Muted accent colors */
-            --accent-green: #9fd3c7; /* Muted Green for Primary actions */
-            --accent-blue: #3f72af; /* Muted Blue for Secondary actions */
-            --accent-text: #36454F; /* Charcoal for main text */
-            --subtle-text: #6b7280; /* Gray for subtle text */
-            --status-online: #4CAF50; /* Green for online status */
-            --status-offline: #F44336; /* Red for offline status */
+            /* Palette: Dark Digital Background, Translucent White/Gray, Vibrant Accents */
+            --bg-primary: #111827; /* Near Black / Dark Digital Grid */
+            --accent-yellow: #FFC000; /* Glowing Yellow */
+            --accent-orange: #FF6A00; /* Glowing Orange */
+            --glass-bg: rgba(255, 255, 255, 0.1); /* Translucent White for Glass */
+            --glass-blur: blur(20px);
+            --text-light: #F9FAFB;
+            --text-subtle: #9CA3AF;
         }
 
         body { 
             background-color: var(--bg-primary); 
-            font-family: 'Sora', sans-serif; /* Soft, modern font */
-            color: var(--accent-text); /* Default text color */
+            font-family: 'Inter', sans-serif;
+            /* Placeholder for dynamic/animated background */
+            background-image: radial-gradient(circle at top right, rgba(255, 106, 0, 0.2) 0%, transparent 50%), 
+                              radial-gradient(circle at bottom left, rgba(255, 192, 0, 0.2) 0%, transparent 50%);
+            background-size: 150% 150%;
         }
 
-        /* --- Neumorphism Base Styles --- */
-        .neumorphic-panel {
-            background-color: var(--neumorphic-base);
-            border-radius: 1.5rem; /* Soft, rounded corners */
-            box-shadow: 
-                6px 6px 12px var(--neumorphic-dark-shadow),
-                -6px -6px 12px var(--neumorphic-light-shadow); /* Soft 'out' shadow */
-            transition: all 0.2s ease-in-out;
-        }
-
-        /* For 'pressed in' elements like inputs */
-        .neumorphic-inset {
-            background-color: var(--neumorphic-base);
-            border-radius: 1rem;
-            box-shadow: 
-                inset 3px 3px 6px var(--neumorphic-dark-shadow),
-                inset -3px -3px 6px var(--neumorphic-light-shadow); /* Soft 'in' shadow */
-            transition: all 0.2s ease-in-out;
+        /* --- Glassmorphism Base Styles --- */
+        .glass-panel {
+            background-color: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: 1.5rem; /* Smoother, modern corners */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle edge separation */
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4); /* Soft, floating shadow */
         }
         
         /* High-Contrast, Pill-Shaped Buttons */
-        .neo-btn {
-            font-weight: 500; /* Softer font weight */
+        .ios-btn {
+            transition: all 0.2s ease-out;
+            font-weight: 600;
             border-radius: 9999px; /* Pill shape */
             padding: 0.75rem 1.5rem;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
             border: none;
             letter-spacing: 0.01em;
-            background-color: var(--neumorphic-base); /* Base background */
-            box-shadow: 
-                4px 4px 8px var(--neumorphic-dark-shadow),
-                -4px -4px 8px var(--neumorphic-light-shadow); /* Soft 'out' shadow */
-            transition: all 0.2s ease-in-out;
-            color: var(--accent-text);
         }
 
-        .neo-btn:hover {
-            box-shadow: 
-                2px 2px 4px var(--neumorphic-dark-shadow),
-                -2px -2px 4px var(--neumorphic-light-shadow); /* Slightly less pronounced on hover */
+        .ios-btn:hover {
+            opacity: 0.9;
             transform: translateY(-1px);
         }
 
-        .neo-btn:active {
-            box-shadow: 
-                inset 2px 2px 5px var(--neumorphic-pressed-dark-shadow),
-                inset -2px -2px 5px var(--neumorphic-pressed-light-shadow); /* Pressed 'in' effect */
-            transform: translateY(1px);
-            color: var(--accent-text); /* Keep text color consistent */
+        .ios-btn-primary { 
+            background: linear-gradient(145deg, var(--accent-yellow), var(--accent-orange)); 
+            color: var(--bg-primary); 
         }
 
-        .neo-btn-primary { 
-            color: var(--accent-text); /* Primary buttons might have a subtle accent color or just stand out by depth */
-            background-color: var(--accent-green); /* Muted green for primary action */
-            box-shadow: 
-                4px 4px 8px rgba(0, 0, 0, 0.2), /* A bit stronger shadow for primary */
-                -4px -4px 8px var(--neumorphic-light-shadow);
-        }
-        .neo-btn-primary:active {
-            background-color: var(--accent-green);
-            box-shadow: 
-                inset 2px 2px 5px rgba(0, 0, 0, 0.3),
-                inset -2px -2px 5px var(--neumorphic-pressed-light-shadow);
+        .ios-btn-secondary { 
+            background-color: rgba(255, 255, 255, 0.2); 
+            color: var(--text-light); 
+            backdrop-filter: var(--glass-blur);
         }
 
-        .neo-btn-secondary { 
-            background-color: var(--neumorphic-base); 
-            color: var(--subtle-text); 
-        }
-
-        /* Status Pill Style (more subtle neumorphic feel) */
+        /* Status Pill Style */
         .status-pill {
-            background-color: var(--neumorphic-base);
-            color: var(--subtle-text);
+            background: rgba(var(--accent-yellow), 0.1);
+            color: var(--accent-yellow);
+            border: 1px solid var(--accent-yellow);
+            box-shadow: 0 0 8px var(--accent-yellow);
             border-radius: 9999px;
-            padding: 0.5rem 1.2rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            box-shadow: 
-                2px 2px 4px var(--neumorphic-dark-shadow),
-                -2px -2px 4px var(--neumorphic-light-shadow);
-            display: flex; /* Ensure inline-flex for proper content alignment */
-            align-items: center;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            font-family: 'SF Pro Text', sans-serif; /* Modern iOS font style */
         }
-        /* Add a small circle for status indicator */
-        .status-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 8px;
-            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2); /* Inset shadow for a subtle sphere effect */
-        }
-        #authStatus[data-status="authenticating"] .status-indicator { background-color: orange; }
-        #authStatus[data-status="authenticated"] .status-indicator { background-color: var(--status-online); }
-        #authStatus[data-status="auth-fail"] .status-indicator { background-color: var(--status-offline); }
 
-
-        /* Inventory Card (Neumorphic) */
+        /* Inventory Card (Layered Glass) */
         .part-card {
-            background-color: var(--neumorphic-base);
+            background-color: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 1.5rem;
-            box-shadow: 
-                8px 8px 16px var(--neumorphic-dark-shadow),
-                -8px -8px 16px var(--neumorphic-light-shadow); /* Deeper 'out' shadow for cards */
-            padding: 2.5rem; /* More padding for spacious feel */
-            display: flex; /* Use flexbox for single column on small screens, then grid */
-            flex-direction: column;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); 
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr;
             gap: 1.5rem;
-            color: var(--accent-text);
+            color: var(--text-light);
         }
 
         @media (min-width: 768px) {
             .part-card {
-                display: grid;
-                grid-template-columns: 1fr 2fr; /* Clearer column separation */
-                gap: 2rem; /* More space between columns */
+                grid-template-columns: 1fr 2.5fr;
             }
             .card-header-container {
-                /* No border, rely on spacing and typography */
+                border-right: 1px solid rgba(255, 255, 255, 0.2); /* Subtle separation */
+                padding-right: 2rem;
             }
         }
         
         .card-zoren-no {
-            font-size: 2.75rem; /* Slightly larger, more dominant */
-            font-weight: 700; /* Bolder */
-            color: var(--accent-blue); /* Muted blue for emphasis */
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--accent-orange);
+            text-shadow: 0 0 5px rgba(255, 106, 0, 0.5); /* Soft glow */
             line-height: 1;
         }
         
         .oem-tag {
-            background-color: var(--neumorphic-base);
-            color: var(--subtle-text);
-            padding: 0.3rem 0.8rem;
-            border-radius: 0.75rem; /* Rounded but not pill */
-            font-size: 0.8rem;
-            font-weight: 500;
+            background: linear-gradient(135deg, rgba(var(--accent-yellow), 0.8), rgba(var(--accent-yellow), 0.5));
+            color: var(--bg-primary);
+            padding: 0.3rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 700;
             margin-right: 0.5rem;
             margin-bottom: 0.5rem;
-            box-shadow: 
-                2px 2px 4px var(--neumorphic-dark-shadow),
-                -2px -2px 4px var(--neumorphic-light-shadow); /* Subtle neumorphic tag */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
-        /* Styling for inputs and selects (Neumorphic Inset) */
+        /* Styling for inputs and selects (Minimalist/Borderless) */
         input, select, textarea {
             border: none; 
-            border-radius: 1rem; /* Softer rounded corners */
-            padding: 0.85rem 1.2rem; /* More internal padding */
-            background-color: var(--neumorphic-base);
-            color: var(--accent-text);
-            font-weight: 400; /* Lighter font weight */
-            box-shadow: 
-                inset 3px 3px 6px var(--neumorphic-pressed-dark-shadow),
-                inset -3px -3px 6px var(--neumorphic-pressed-light-shadow); /* Inset shadow */
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            background-color: rgba(255, 255, 255, 0.15); /* Subtle translucent fill */
+            color: var(--text-light);
+            font-weight: 500;
             transition: all 0.2s;
         }
 
         input::placeholder, textarea::placeholder {
-            color: var(--subtle-text);
-            opacity: 0.7;
+            color: var(--text-subtle);
+            opacity: 0.8;
         }
 
         input:focus, select:focus, textarea:focus {
-            box-shadow: 
-                inset 2px 2px 5px var(--neumorphic-dark-shadow),
-                inset -2px -2px 5px var(--neumorphic-light-shadow),
-                0 0 0 2px var(--accent-green); /* Subtle focus ring */
+            background-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 0 0 2px var(--accent-yellow), inset 0 0 8px rgba(var(--accent-yellow), 0.5);
             outline: none;
-            background-color: var(--neumorphic-base); /* Ensure background stays consistent */
         }
 
-        /* Modal: Full neumorphic panel */
-        .modal-neumorphic { 
-            background-color: var(--neumorphic-base); 
+        /* Modal: Full glass panel */
+        .modal-glass { 
+            background-color: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(40px); 
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 2rem;
-            box-shadow: 
-                10px 10px 20px var(--neumorphic-dark-shadow),
-                -10px -10px 20px var(--neumorphic-light-shadow); /* Pronounced shadow for modals */
         }
         
-        /* Error Alert (Subtle Neumorphic) */
+        /* Error Alert (System Bubble Style) */
         .system-error {
-            background-color: var(--neumorphic-base);
-            color: var(--status-offline); /* Red for errors */
-            border-radius: 0.75rem;
-            padding: 0.6rem 1.2rem;
-            font-size: 0.85rem;
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #F87171; /* Red-400 */
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
             font-weight: 500;
-            box-shadow: 
-                2px 2px 4px var(--neumorphic-dark-shadow),
-                -2px -2px 4px var(--neumorphic-light-shadow);
+            box-shadow: 0 0 5px rgba(239, 68, 68, 0.7);
         }
         
         /* Remove old styles */
-        .glass-panel, .ios-btn, .ios-btn-primary, .ios-btn-secondary, .status-pill, .part-card {
+        .pro-btn, .pro-btn:active, .pro-btn-primary, .pro-btn-secondary, .pro-btn-danger, .stat-box {
             /* Deactivate old styles to avoid conflict */
-            background-color: initial !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            border: none !important;
             box-shadow: none !important;
-            background-image: none !important;
-            color: initial !important; /* Reset specific color directives */
+            border: none !important;
         }
 
-        /* Header specific */
-        header {
-            background-color: var(--neumorphic-base);
-            box-shadow: 
-                6px 6px 12px var(--neumorphic-dark-shadow),
-                -6px -6px 12px var(--neumorphic-light-shadow);
-            border-radius: 2rem;
-            padding: 2.5rem;
-        }
-
-        h1 {
-            font-weight: 700; /* Bolder for titles */
-            color: var(--accent-blue); /* Muted blue for main title */
-        }
-        header p {
-            color: var(--subtle-text);
-        }
-
-        /* Modal specific changes */
-        #modalConfirm .modal-neumorphic { border-top: 4px solid var(--accent-green); }
-        #modalAddEdit .modal-neumorphic { border-top: 4px solid var(--accent-blue); }
-        #modalBulk .modal-neumorphic { border-top: 4px solid var(--status-offline); } /* Using red for bulk operations as they can be destructive */
-        #modalCategoryManager .modal-neumorphic { border-top: 4px solid var(--subtle-text); }
-
-
-        /* Ensure content is visible against light background */
-        .text-white, .text-gray-300, .text-gray-400, .text-gray-500, .text-gray-800 {
-            color: var(--accent-text) !important;
-        }
-        /* Specific override for status pill, which might have a different default */
-        #authStatus { color: var(--subtle-text); }
-
-
-        #rulesInstruction {
-            border: 2px solid var(--status-offline); /* Red border for errors */
-            color: var(--accent-text);
-            background-color: var(--neumorphic-base);
-            box-shadow: 
-                6px 6px 12px var(--neumorphic-dark-shadow),
-                -6px -6px 12px var(--neumorphic-light-shadow);
-        }
-        #rulesInstruction p {
-            color: var(--accent-text);
-        }
-        #rulesCode {
-            background-color: #2c3e50; /* Darker background for code block */
-            color: #ecf0f1; /* Light text for code */
-            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
-        }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-6">
+<body class="min-h-screen text-gray-800 p-4 md:p-6">
 
 <div class="max-w-7xl mx-auto">
-    <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center p-6 rounded-2xl neumorphic-panel">
+    <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center p-6 rounded-2xl">
         <div class="mb-4 md:mb-0">
-            <h1 class="text-5xl font-extrabold leading-tight">INVENTORY PRO</h1>
-            <p class="text-xl font-bold mt-1">FASTWAY PARTS CATALOG</p>
+            <h1 class="text-5xl font-extrabold text-white leading-tight">INVENTORY PRO</h1>
+            <p class="text-xl font-bold text-gray-400 mt-1">FASTWAY PARTS CATALOG</p>
         </div>
         <div class="flex flex-col items-end">
-            <p id="authStatus" class="status-pill" data-status="authenticating">
-                <span class="status-indicator"></span>AUTHENTICATING...
-            </p>
-            <p id="connectionLog" class="text-xs mt-1">Starting initialization...</p>
-            <button id="btnManageCategories" class="neo-btn neo-btn-secondary mt-3 px-5 py-2 text-sm hidden">
+            <p id="authStatus" class="status-pill">AUTHENTICATING...</p>
+            <p id="connectionLog" class="text-xs mt-1 text-gray-500">Starting initialization...</p>
+            <button id="btnManageCategories" class="ios-btn ios-btn-secondary mt-3 px-5 py-2 text-sm hidden">
                 Manage Categories
             </button>
         </div>
     </header>
 
-    <div id="rulesInstruction" class="hidden neumorphic-panel p-6">
-        <p class="font-extrabold text-xl mb-2 text-red-500">🔴 CRITICAL ERROR: PERMISSION DENIED 🔴</p>
-        <p>Your application is authenticated, but the Firestore Security Rules are preventing it from reading data.</p>
-        <p class="mt-2">To fix this, go to the Firebase Console > Firestore Database > Rules, and replace the existing rules with the code below.</p>
+    <div id="rulesInstruction" class="hidden glass-panel p-6 border-red-500 border-2">
+        <p class="font-extrabold text-xl mb-2 text-red-400">🔴 CRITICAL ERROR: PERMISSION DENIED 🔴</p>
+        <p class="text-gray-300">Your application is authenticated, but the Firestore Security Rules are preventing it from reading data.</p>
+        <p class="mt-2 text-gray-300">To fix this, go to the Firebase Console > Firestore Database > Rules, and replace the existing rules with the code below.</p>
         <pre id="rulesCode" class="bg-gray-800 text-yellow-300 p-4 rounded-lg mt-3 overflow-x-auto text-sm"></pre>
     </div>
 
     <section id="appContent" class="hidden">
-        <section class="mb-10 p-4 md:p-6 neumorphic-panel flex flex-wrap gap-4 items-center">
-            <button id="btnAdd" class="neo-btn neo-btn-primary text-lg">+ NEW PART</button>
-            <button id="btnBulk" class="neo-btn neo-btn-secondary text-lg">BULK JSON</button>
+        <section class="mb-10 p-4 md:p-6 glass-panel flex flex-wrap gap-4 items-center">
+            <button id="btnAdd" class="ios-btn ios-btn-primary text-lg">+ NEW PART</button>
+            <button id="btnBulk" class="ios-btn ios-btn-secondary text-lg">BULK JSON</button>
 
             <div class="flex-grow flex flex-wrap justify-end items-center gap-3">
-                <select id="categoryFilter" class="neumorphic-inset w-full md:w-48"></select>
+                <select id="categoryFilter" class="w-full md:w-48"></select>
 
-                <input id="searchInput" type="search" placeholder="SEARCH (ZOREN, OEM, MAKER, APP)" class="neumorphic-inset w-full md:max-w-xs" />
-                <select id="perPage" class="neumorphic-inset w-24">
+                <input id="searchInput" type="search" placeholder="SEARCH (ZOREN, OEM, MAKER, APP)" class="w-full md:max-w-xs" />
+                <select id="perPage" class="w-24">
                     <option value="10">10 / Page</option>
                     <option value="25">25 / Page</option>
                     <option value="50">50 / Page</option>
                 </select>
             </div>
             
-            <button id="btnDownloadJson" class="neo-btn neo-btn-secondary px-4 py-3">Export JSON</button>
-            <button id="btnExportCsv" class="neo-btn neo-btn-secondary px-4 py-3">Export CSV</button>
+            <button id="btnDownloadJson" class="ios-btn ios-btn-secondary bg-gray-600 text-white px-4 py-3">Export JSON</button>
+            <button id="btnExportCsv" class="ios-btn ios-btn-secondary bg-green-500 text-white px-4 py-3">Export CSV</button>
         </section>
 
         <section>
             <div id="partsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 </div>
 
-            <div class="mt-10 neumorphic-panel p-4 flex flex-wrap gap-4 items-center justify-between">
+            <div class="mt-10 glass-panel p-4 flex flex-wrap gap-4 items-center justify-between text-white">
                 <div class="text-base font-semibold" id="summaryText">0 RECORDS LOADED</div>
                 <div class="flex items-center gap-4">
-                    <button id="prevPage" class="neo-btn neo-btn-secondary px-5 py-2">PREVIOUS</button>
+                    <button id="prevPage" class="ios-btn ios-btn-secondary px-5 py-2">PREVIOUS</button>
                     <span id="pageInfo" class="px-3 text-lg font-extrabold"></span>
-                    <button id="nextPage" class="neo-btn neo-btn-secondary px-5 py-2">NEXT</button>
+                    <button id="nextPage" class="ios-btn ios-btn-secondary px-5 py-2">NEXT</button>
                 </div>
             </div>
         </section>
@@ -351,94 +234,95 @@
 </div>
 
 <div id="modalConfirm" class="hidden fixed inset-0 z-40 flex items-center justify-center">
-    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30"></div> <div class="modal-neumorphic z-50 w-full max-w-sm p-6">
+    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-80 backdrop-blur-lg"></div>
+    <div class="modal-glass z-50 w-full max-w-sm p-6 text-white border-yellow-400 border-t-2">
         <h3 id="confirmTitle" class="text-2xl font-bold mb-4">CONFIRM ACTION</h3>
-        <p id="confirmMessage" class="mb-6"></p>
+        <p id="confirmMessage" class="text-gray-300 mb-6"></p>
         <div class="flex justify-end gap-3">
-            <button id="btnConfirmCancel" class="neo-btn neo-btn-secondary px-5 py-2">CANCEL</button>
-            <button id="btnConfirmAction" class="neo-btn neo-btn-primary px-5 py-2">CONFIRM</button>
+            <button id="btnConfirmCancel" class="ios-btn ios-btn-secondary px-5 py-2">CANCEL</button>
+            <button id="btnConfirmAction" class="ios-btn ios-btn-primary px-5 py-2 bg-red-600 text-white">CONFIRM</button>
         </div>
     </div>
 </div>
 
 <div id="modalAddEdit" class="hidden fixed inset-0 z-40 flex items-center justify-center">
-    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30"></div>
-    <div class="modal-neumorphic z-50 w-full max-w-lg p-8">
+    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-80 backdrop-blur-lg"></div>
+    <div class="modal-glass z-50 w-full max-w-lg p-8 text-white border-yellow-400 border-t-4">
         <h3 id="modalTitle" class="text-3xl font-extrabold mb-6">ADD PART</h3>
         <div class="space-y-5">
             <div>
-                <label class="block text-sm font-medium">Category <span class="text-red-500">*</span></label>
-                <select id="inpCategory" class="neumorphic-inset w-full"></select>
-                <p id="categoryError" class="text-xs mt-1 hidden system-error">Category is required.</p>
+                <label class="block text-sm font-medium text-gray-300">Category <span class="text-red-400">*</span></label>
+                <select id="inpCategory" class="w-full"></select>
+                <p id="categoryError" class="text-xs text-red-400 mt-1 hidden system-error">Category is required.</p>
             </div>
             <div>
-                <label class="block text-sm font-medium">ZOREN No. <span class="text-red-500">*</span></label>
-                <input id="inpZoren" class="neumorphic-inset w-full" />
+                <label class="block text-sm font-medium text-gray-300">ZOREN No. <span class="text-red-400">*</span></label>
+                <input id="inpZoren" class="w-full" />
                 <p id="zorenError" class="mt-2 hidden system-error">ZOREN No. is required (min 4 chars) and must be alphanumeric/hyphen.</p>
             </div>
             <div>
-                <label class="block text-sm font-medium">Car Maker <span class="text-red-500">*</span></label>
-                <input id="inpCarMaker" class="neumorphic-inset w-full" />
+                <label class="block text-sm font-medium text-gray-300">Car Maker <span class="text-red-400">*</span></label>
+                <input id="inpCarMaker" class="w-full" />
                 <p id="carMakerError" class="mt-2 hidden system-error">Car Maker is required.</p>
             </div>
             <div>
-                <label class="block text-sm font-medium">Applications <span class="text-red-500">*</span></label>
-                <input id="inpApplications" class="neumorphic-inset w-full" />
+                <label class="block text-sm font-medium text-gray-300">Applications <span class="text-red-400">*</span></label>
+                <input id="inpApplications" class="w-full" />
                 <p id="applicationsError" class="mt-2 hidden system-error">Applications field is required.</p>
             </div>
             <div>
-                <label class="block text-sm font-medium">OEM No. (comma separated)</label>
-                <input id="inpOem" class="neumorphic-inset w-full" placeholder="31110-09000, E8678M" />
+                <label class="block text-sm font-medium text-gray-300">OEM No. (comma separated)</label>
+                <input id="inpOem" class="w-full" placeholder="31110-09000, E8678M" />
             </div>
         </div>
 
         <div class="mt-10 flex justify-end gap-3">
-            <button id="btnCancelModal" class="neo-btn neo-btn-secondary px-6 py-2.5">CANCEL</button>
-            <button id="btnSaveModal" class="neo-btn neo-btn-primary px-6 py-2.5">SAVE PART</button>
+            <button id="btnCancelModal" class="ios-btn ios-btn-secondary px-6 py-2.5">CANCEL</button>
+            <button id="btnSaveModal" class="ios-btn ios-btn-primary px-6 py-2.5">SAVE PART</button>
             </div>
         </div>
 </div>
 
 <div id="modalBulk" class="hidden fixed inset-0 z-40 flex items-center justify-center">
-    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30"></div>
-    <div class="modal-neumorphic z-50 w-full max-w-3xl p-8">
+    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-80 backdrop-blur-lg"></div>
+    <div class="modal-glass z-50 w-full max-w-3xl p-8 text-white border-orange-600 border-t-4">
         <h3 class="text-3xl font-extrabold mb-6">BULK JSON UPLOAD</h3>
-        <p class="text-sm mb-4">Paste JSON array or upload a .json file. Data is validated on upload.</p>
+        <p class="text-sm text-gray-300 mb-4">Paste JSON array or upload a .json file. Data is validated on upload.</p>
 
         <div class="space-y-5">
             <div>
-                <label class="block text-sm font-medium mb-1">Paste JSON array</label>
-                <textarea id="bulkTextarea" rows="8" class="neumorphic-inset w-full font-mono" placeholder='[{"zoren":"ZRM...","oem":["..."],"car_maker":"...","applications":"..."}]'></textarea>
+                <label class="block text-sm font-medium mb-1 text-gray-300">Paste JSON array</label>
+                <textarea id="bulkTextarea" rows="8" class="w-full font-mono shadow-inner border-gray-400 bg-gray-800 bg-opacity-50" placeholder='[{"zoren":"ZRM...","oem":["..."],"car_maker":"...","applications":"..."}]'></textarea>
             </div>
-            <div id="bulkCategorySelector" class="flex flex-col gap-2 p-5 neumorphic-panel">
+            <div id="bulkCategorySelector" class="flex flex-col gap-2 p-5 glass-panel border-yellow-500 border-t-2">
                 <label class="block text-base font-bold">Category Assignment for uncategorized imports:</label>
-                <select id="bulkCategoryInput" class="neumorphic-inset"></select>
+                <select id="bulkCategoryInput" class=""></select>
             </div>
         </div>
 
         <div class="mt-8 flex flex-wrap items-center gap-4">
-            <input id="bulkFileInput" type="file" accept=".json,application/json" class="text-sm font-semibold" />
-            <button id="btnLoadBulk" class="neo-btn neo-btn-secondary px-5 py-2.5">Load & Merge</button>
-            <button id="btnReplaceBulk" class="neo-btn neo-btn-primary px-5 py-2.5">REPLACE ALL INVENTORY</button>
-            <button id="btnCloseBulk" class="ml-auto neo-btn neo-btn-secondary px-5 py-2.5">CLOSE</button>
+            <input id="bulkFileInput" type="file" accept=".json,application/json" class="text-sm font-semibold text-gray-300" />
+            <button id="btnLoadBulk" class="ios-btn ios-btn-secondary bg-gray-700 text-white px-5 py-2.5">Load & Merge</button>
+            <button id="btnReplaceBulk" class="ios-btn ios-btn-primary px-5 py-2.5 bg-red-600">REPLACE ALL INVENTORY</button>
+            <button id="btnCloseBulk" class="ml-auto ios-btn ios-btn-secondary px-5 py-2.5">CLOSE</button>
         </div>
         </div>
 </div>
 
 <div id="modalCategoryManager" class="hidden fixed inset-0 z-40 flex items-center justify-center">
-    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30"></div>
-    <div class="modal-neumorphic z-50 w-full max-w-md p-8">
+    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-80 backdrop-blur-lg"></div>
+    <div class="modal-glass z-50 w-full max-w-md p-8 text-white border-gray-400 border-t-4">
         <h3 class="text-3xl font-extrabold mb-6">CATEGORY MANAGER</h3>
         <div class="space-y-5">
             <div class="flex gap-3">
-                <input id="inpNewCategory" class="neumorphic-inset w-full" placeholder="e.g., Brake System" />
-                <button id="btnAddCategory" class="neo-btn neo-btn-primary px-5 py-2">ADD</button>
+                <input id="inpNewCategory" class="w-full" placeholder="e.g., Brake System" />
+                <button id="btnAddCategory" class="ios-btn ios-btn-primary bg-green-600 text-white px-5 py-2">ADD</button>
             </div>
-            <div id="categoryListContainer" class="max-h-64 overflow-y-auto neumorphic-inset p-4 space-y-3">
+            <div id="categoryListContainer" class="max-h-64 overflow-y-auto border border-gray-700 rounded-xl p-4 space-y-3 glass-panel">
                 </div>
         </div>
         <div class="mt-8 flex justify-end">
-            <button id="btnCloseCategoryManager" class="neo-btn neo-btn-primary px-6 py-2.5">DONE</button>
+            <button id="btnCloseCategoryManager" class="ios-btn ios-btn-primary px-6 py-2.5">DONE</button>
         </div>
     </div>
 </div>
@@ -480,8 +364,8 @@
         const logEl = getEl('connectionLog');
         if (logEl) {
             logEl.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            // Updated color scheme for Neumorphic aesthetic
-            logEl.style.color = isError ? 'var(--status-offline)' : 'var(--subtle-text)'; 
+            // Updated color scheme for iOS aesthetic
+            logEl.style.color = isError ? '#F87171' : '#9CA3AF'; 
         }
     }
 
@@ -497,7 +381,7 @@
 
         rulesInstruction.classList.remove('hidden');
         getEl('appContent').classList.remove('hidden');
-        getEl('partsContainer').innerHTML = `<p class="text-center text-red-500 p-8 text-xl font-bold">Error: ${errorMessage}. See instructions above.</p>`;
+        getEl('partsContainer').innerHTML = `<p class="text-center text-red-400 p-8 text-xl font-bold">Error: ${errorMessage}. See instructions above.</p>`;
         
         rulesCode.textContent = `
 rules_version = '2';
@@ -555,9 +439,7 @@ service cloud.firestore {
             if (user) {
                 currentUser = user;
                 // Updated status pill display
-                const authStatusEl = getEl('authStatus');
-                authStatusEl.setAttribute('data-status', 'authenticated');
-                authStatusEl.innerHTML = `<span class="status-indicator"></span>UID: ${user.uid.substring(0, 8)}... (Authenticated)`;
+                getEl('authStatus').textContent = `UID: ${user.uid.substring(0, 8)}... (Authenticated)`;
                 getEl('appContent').classList.remove('hidden');
                 getEl('btnManageCategories').classList.remove('hidden');
                 updateConnectionStatus("Authentication successful. Loading inventory...");
@@ -569,11 +451,9 @@ service cloud.firestore {
 
                 // If sign-in fails or still times out, display a non-functional state
                 if (!currentUser) {
-                    const authStatusEl = getEl('authStatus');
-                    authStatusEl.setAttribute('data-status', 'auth-fail');
-                    authStatusEl.innerHTML = `<span class="status-indicator"></span>AUTH FAIL`;
+                    getEl('authStatus').textContent = `AUTH FAIL`;
                     getEl('appContent').classList.remove('hidden');
-                    getEl('partsContainer').innerHTML = '<p class="text-center text-red-500 p-8 text-xl font-bold">FATAL ERROR: Could not authenticate or load data. Check console.</p>';
+                    getEl('partsContainer').innerHTML = '<p class="text-center text-red-400 p-8 text-xl font-bold">FATAL ERROR: Could not authenticate or load data. Check console.</p>';
                 }
             }
         } catch (error) {
@@ -599,4 +479,602 @@ service cloud.firestore {
         return new Promise(resolve => {
             confirmResolver = resolve;
             getEl('confirmTitle').textContent = title;
-            getEl('confirmMessage').textContent = message
+            getEl('confirmMessage').textContent = message;
+            getEl('btnConfirmCancel').classList.toggle('hidden', isAlert);
+            getEl('btnConfirmAction').textContent = isAlert ? 'OK' : 'CONFIRM';
+            getEl('modalConfirm').classList.remove('hidden');
+        });
+    }
+
+    getEl('btnConfirmCancel')?.addEventListener('click', () => {
+        getEl('modalConfirm').classList.add('hidden');
+        confirmResolver(false);
+    });
+
+    getEl('btnConfirmAction')?.addEventListener('click', () => {
+        getEl('modalConfirm').classList.add('hidden');
+        confirmResolver(true);
+    });
+
+    // --- FIREBASE PATH HELPERS ---
+    function getUserCollectionPath(collectionName) {
+        if (!currentUser || !currentUser.uid) {
+            throw new Error("User not authenticated. Cannot access Firestore.");
+        }
+        // Private Data path
+        return `artifacts/${appId}/users/${currentUser.uid}/${collectionName}`;
+    }
+
+    // Replace the function with this:
+function getPartsCollectionRef() {
+    // This points to the new path allowed by the rule 2
+    return collection(db, `artifacts/${appId}/inventory/shared_list/parts`);
+}
+
+    function getCategoryDocRef() {
+        return doc(db, getUserCollectionPath('categories'), 'list'); 
+    }
+
+    // --- CATEGORY MANAGEMENT LOGIC ---
+
+    async function loadCategories() {
+        if (!currentUser) return;
+        updateConnectionStatus("Loading categories...");
+        try {
+            const categoryDoc = await getDoc(getCategoryDocRef());
+            
+            if (categoryDoc.exists() && categoryDoc.data().list) {
+                categories = categoryDoc.data().list.filter(c => c && c.trim()).map(c => c.trim());
+                updateConnectionStatus(`Categories loaded (${categories.length}).`);
+            } else {
+                categories = ['Uncategorized', 'Fuel Injection', 'Brake System', 'Filters', 'Ignition'];
+                await saveCategories();
+                updateConnectionStatus("Default categories initialized.");
+            }
+        } catch (error) {
+             if (error.code === 'permission-denied') {
+                displaySecurityRulesError('Data load failed due to security rules');
+            } else {
+                updateConnectionStatus("Error: Failed to load categories.", true);
+                console.error("Error loading categories:", error);
+            }
+        }
+    }
+
+    async function saveCategories() {
+        if (!currentUser) return;
+        try {
+            const uniqueCategories = [...new Set(categories.map(c => c.trim()).filter(Boolean))];
+            await setDoc(getCategoryDocRef(), { list: uniqueCategories });
+            categories = uniqueCategories; 
+            renderCategorySelects(); 
+        } catch (error) {
+            updateConnectionStatus("Error saving categories.", true);
+            console.error("Error saving categories:", error);
+        }
+    }
+
+    async function deleteCategory(categoryToDelete) {
+        if (categoryToDelete === 'Uncategorized') return showConfirm('Error', 'Cannot delete the "Uncategorized" category.', true);
+        
+        const confirmed = await showConfirm('Confirm Deletion', `Are you sure you want to delete the category: ${categoryToDelete}?`);
+        if (!confirmed) return;
+        
+        categories = categories.filter(c => c !== categoryToDelete);
+        await saveCategories();
+        renderCategoryManagerList();
+    }
+
+    function renderCategoryManagerList() {
+        const container = document.getElementById('categoryListContainer');
+        // Updated styling for categories list (sleek background/text)
+        container.innerHTML = categories.map((cat, index) => `
+            <div class="flex justify-between items-center p-3 bg-gray-900 bg-opacity-40 rounded-lg shadow-inner">
+                <span class="text-base font-semibold text-white">${escapeHtml(cat)}</span>
+                <button onclick="window.deleteCategoryHandler('${cat}')" class="text-red-400 hover:text-red-300 text-sm font-bold disabled:opacity-50" ${cat === 'Uncategorized' ? 'disabled' : ''}>REMOVE</button>
+            </div>
+        `).join('') || '<p class="text-center text-gray-500 text-sm italic">No categories defined.</p>';
+    }
+    
+    // Expose to window for inline HTML onclick to work
+    window.deleteCategoryHandler = deleteCategory;
+
+    function renderCategorySelects(selectedCategory = '') {
+        const selects = [
+            document.getElementById('inpCategory'),
+            document.getElementById('bulkCategoryInput'),
+            document.getElementById('categoryFilter')
+        ];
+        
+        const standardOptions = categories.map(cat => 
+            `<option value="${escapeHtml(cat)}" ${cat === selectedCategory ? 'selected' : ''}>${escapeHtml(cat)}</option>`
+        ).join('');
+
+        const filterOptions = [
+            `<option value="">ALL CATEGORIES</option>`,
+            ...categories.map(cat => `<option value="${escapeHtml(cat)}" ${cat === selectedCategory ? 'selected' : ''}>${escapeHtml(cat)}</option>`)
+        ].join('');
+
+        selects.forEach(select => {
+            if (select) {
+                if (select.id === 'categoryFilter') {
+                    select.innerHTML = filterOptions;
+                    // Prevent setting onchange multiple times
+                    if (!select._initialized) {
+                         select.addEventListener('change', () => { page = 1; renderCards(); });
+                         select._initialized = true;
+                    }
+                } else {
+                    select.innerHTML = standardOptions;
+                }
+            }
+        });
+    }
+
+
+    // --- AUTHENTICATION & INITIALIZATION ---
+    // Note: The onAuthStateChanged listener is now primarily used within initApp for the initial status check.
+    // This separate function handles the actual sign-in if needed during the startup process.
+
+    async function signInUser() {
+        getEl('authStatus').textContent = 'PENDING SIGN-IN...';
+        updateConnectionStatus("Attempting anonymous sign-in...");
+        try {
+            if (initialAuthToken) {
+                const credential = await signInWithCustomToken(auth, initialAuthToken);
+                currentUser = credential.user;
+            } else {
+                const credential = await signInAnonymously(auth);
+                currentUser = credential.user;
+            }
+            // Once signed in, the rest of the app logic (loadCategories, loadAndRenderParts) will execute
+            // via the logic flow within initApp, ensuring UI elements are revealed only after success.
+            if (currentUser) {
+                getEl('authStatus').textContent = `UID: ${currentUser.uid.substring(0, 8)}... (Authenticated)`;
+                getEl('appContent').classList.remove('hidden');
+                getEl('btnManageCategories').classList.remove('hidden');
+                updateConnectionStatus("Sign-in successful. Proceeding to load data.");
+                await loadCategories();
+                loadAndRenderParts();
+            }
+
+        } catch (error) {
+            updateConnectionStatus(`AUTH FAIL: ${error.code}`, true);
+            console.error("Authentication Error:", error);
+            getEl('authStatus').textContent = `AUTH FAIL`;
+            getEl('appContent').classList.remove('hidden');
+            getEl('partsContainer').innerHTML = '<p class="text-center text-red-400 p-8 text-xl font-bold">FATAL ERROR: Could not authenticate user. Check console for details.</p>';
+        }
+    }
+
+
+    // --- DATA HELPERS ---
+    function normalizeRecord(item) {
+        const zoren = (item.zoren ?? '').toString().trim();
+        let oem = item.oem ?? [];
+        if (typeof oem === 'string') oem = oem.split(',').map(s=>s.trim()).filter(Boolean);
+        if (!Array.isArray(oem)) oem = [String(oem)];
+        const car_maker = (item.car_maker ?? '').toString().trim();
+        const applications = (item.applications ?? '').toString().trim();
+        const category = (item.category ?? 'Uncategorized').toString().trim(); 
+
+        return { zoren, oem, car_maker, applications, category };
+    }
+    
+    function escapeHtml(s){ return s? String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') : ''; }
+
+
+    // 1. READ (Load Data from Firestore)
+    function loadAndRenderParts() {
+        if (!currentUser) return;
+        
+        partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">LOADING INVENTORY...</p></div>';
+        updateConnectionStatus("Setting up real-time inventory listener...");
+        
+        if (partsSnapshotUnsubscribe) {
+            partsSnapshotUnsubscribe(); // Detach previous listener
+        }
+        
+        // Use onSnapshot for real-time updates
+        partsSnapshotUnsubscribe = onSnapshot(getPartsCollectionRef(), (snapshot) => {
+            parts = [];
+            snapshot.forEach(doc => {
+                try {
+                    const part = normalizeRecord(doc.data());
+                    part.id = doc.id;
+                    parts.push(part);
+                } catch (e) {
+                    console.error("Error normalizing part data:", doc.id, e);
+                }
+            });
+            updateConnectionStatus(`Inventory loaded successfully (${parts.length} parts).`);
+            renderCards();
+            if (parts.length === 0) {
+                partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">NO PARTS FOUND. ADD NEW INVENTORY.</p></div>';
+            }
+        }, (error) => {
+            if (error.code === 'permission-denied') {
+                displaySecurityRulesError('Data stream failed due to security rules');
+            } else {
+                updateConnectionStatus(`FATAL: Data stream interrupted. ${error.code}`, true);
+                console.error("Error setting up snapshot listener: ", error);
+                partsContainer.innerHTML = `<div><p class="text-xl text-center p-8 text-red-500 font-bold">ERROR: ${error.message}</p></div>`;
+            }
+        });
+    }
+
+    function renderCards() { 
+        const q = document.getElementById('searchInput')?.value.trim().toLowerCase() || '';
+        const selectedCategoryFilter = document.getElementById('categoryFilter')?.value || '';
+        perPage = parseInt(document.getElementById('perPage')?.value, 10) || 10;
+
+        let filtered = parts.filter(item => {
+            // 1. Category Filter Check
+            if (selectedCategoryFilter && item.category !== selectedCategoryFilter) {
+                return false;
+            }
+
+            // 2. Search Query Check
+            if (q) {
+                const text = (item.zoren+' '+item.oem.join(' ')+' '+item.car_maker+' '+item.applications+' '+item.category).toLowerCase();
+                return text.includes(q);
+            }
+            return true;
+        });
+
+        // Sort by ZOREN number
+        filtered.sort((a,b)=>a.zoren.localeCompare(b.zoren, undefined, {numeric:true}));
+
+        const total = filtered.length;
+        const pages = Math.max(1, Math.ceil(total/perPage));
+        page = Math.min(page, pages);
+        const start = (page-1)*perPage;
+        const pageItems = filtered.slice(start, start+perPage);
+
+        partsContainer.innerHTML = '';
+        pageItems.forEach((item,i)=>{
+            const oemTags = item.oem.map(oem => `<span class="oem-tag">${escapeHtml(oem)}</span>`).join('');
+            const card = document.createElement('div');
+            card.className = 'part-card';
+            card.innerHTML = `
+                <div class="flex flex-col justify-between card-header-container">
+                    <div>
+                        <div class="text-sm font-extrabold text-gray-400 mb-2 uppercase">${escapeHtml(item.category)}</div>
+                        <h3 class="card-zoren-no font-mono">${escapeHtml(item.zoren)}</h3>
+                    </div>
+                    <div class="card-actions flex gap-3 mt-4">
+                        <button class="editBtn text-gray-300 hover:text-white" title="Edit" data-index="${start+i}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        </button>
+                        <button class="delBtn text-red-400 hover:text-red-300" title="Delete" data-index="${start+i}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-details-grid text-lg font-medium">
+                    <div>
+                        <div class="text-sm font-bold text-gray-400 uppercase">Car Maker:</div>
+                        <div class="text-white">${escapeHtml(item.car_maker)}</div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="text-sm font-bold text-gray-400 uppercase">Applications:</div>
+                        <div class="text-white">${escapeHtml(item.applications)}</div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="text-sm font-bold text-gray-400 uppercase">OEM No. / Interchange:</div>
+                        <div class="flex flex-wrap pt-1 min-h-[30px]">${oemTags}</div>
+                    </div>
+                </div>
+            `;
+            partsContainer.appendChild(card);
+        });
+
+        document.getElementById('summaryText').textContent = `${total} RECORDS (${pageItems.length} VISIBLE)`;
+        document.getElementById('pageInfo').textContent = `PAGE ${page} / ${pages}`;
+        
+        getEl('prevPage').disabled = page === 1;
+        getEl('nextPage').disabled = page === pages;
+
+        Array.from(document.getElementsByClassName('editBtn')).forEach(b=>b.addEventListener('click', onEdit));
+        Array.from(document.getElementsByClassName('delBtn')).forEach(b=>b.addEventListener('click', onDelete));
+    }
+
+    // --- Utility to safely get elements ---
+    
+    // Event Listeners (Pagination/Search)
+    getEl('prevPage')?.addEventListener('click', ()=>{ page=Math.max(1,page-1); renderCards(); });
+    getEl('nextPage')?.addEventListener('click', ()=>{ page++; renderCards(); });
+    getEl('searchInput')?.addEventListener('input', ()=>{ page=1; renderCards(); });
+    getEl('perPage')?.addEventListener('change', ()=>{ page=1; renderCards(); });
+    
+    // 2. CREATE / UPDATE (Save to Firestore)
+    const modalAddEdit = getEl('modalAddEdit');
+    getEl('btnAdd')?.addEventListener('click', ()=>{ openAddModal(); renderCategorySelects(); });
+    getEl('btnCancelModal')?.addEventListener('click', ()=>modalAddEdit?.classList.add('hidden'));
+
+    getEl('btnSaveModal')?.addEventListener('click', async ()=>{
+        if (!currentUser) { showConfirm('Auth Error', 'Authentication is required.', true); return; }
+
+        const zoren = getEl('inpZoren')?.value.trim();
+        const category = getEl('inpCategory')?.value.trim();
+        const car_maker=getEl('inpCarMaker')?.value.trim();
+        const applications=getEl('inpApplications')?.value.trim();
+
+        // Helper function to clear all errors
+        const clearErrors = () => {
+            getEl('zorenError')?.classList.add('hidden');
+            getEl('carMakerError')?.classList.add('hidden');
+            getEl('applicationsError')?.classList.add('hidden');
+        };
+
+        clearErrors();
+
+        // --- DATA VALIDATION ---
+        let isValid = true;
+        const zorenRegex = /^[a-zA-Z0-9-]+$/; 
+
+        if(!zoren || zoren.length < 4 || !zorenRegex.test(zoren)){ 
+            getEl('zorenError').textContent = 'ZOREN No. is required (min 4 chars) and must be alphanumeric/hyphen.';
+            getEl('zorenError').classList.remove('hidden');
+            isValid = false;
+        }
+        if(!category){ 
+            showConfirm('Error', 'Category is required', true);
+            isValid = false;
+        }
+        if(!car_maker){ 
+            getEl('carMakerError').textContent = 'Car Maker is required.';
+            getEl('carMakerError').classList.remove('hidden');
+            isValid = false;
+        }
+        if(!applications){ 
+            getEl('applicationsError').textContent = 'Applications field is required.';
+            getEl('applicationsError').classList.remove('hidden');
+            isValid = false;
+        }
+
+        if (!isValid) return;
+        // -----------------------
+
+        let oemRaw=getEl('inpOem')?.value.trim();
+        let oemArr=[];
+        if(oemRaw){ 
+            try{ 
+                // Attempt to parse as JSON array first, then fallback to comma split
+                oemArr=oemRaw.startsWith('[')?JSON.parse(oemRaw):oemRaw.split(',').map(s=>s.trim()).filter(Boolean);
+            }catch{ 
+                oemArr=oemRaw.split(',').map(s=>s.trim()).filter(Boolean); 
+            } 
+        }
+        
+        const dataToSave = { zoren, oem: oemArr, car_maker, applications, category };
+
+        try {
+            if (editIndex >= 0) {
+                const partToUpdate = parts[editIndex];
+                await setDoc(doc(getPartsCollectionRef(), partToUpdate.id), dataToSave);
+            } else {
+                await addDoc(getPartsCollectionRef(), dataToSave);
+            }
+            modalAddEdit.classList.add('hidden');
+            // loadAndRenderParts() will be triggered by onSnapshot automatically
+        } catch (error) {
+            showConfirm('Error Saving Data', "Error saving data. Check console for details.", true);
+            console.error("Error saving document: ", error);
+        }
+    });
+
+    function openAddModal(item=null,index=-1){
+        editIndex=index;
+        // Clear errors on modal open
+        getEl('zorenError')?.classList.add('hidden');
+        getEl('carMakerError')?.classList.add('hidden');
+        getEl('applicationsError')?.classList.add('hidden');
+
+        getEl('modalTitle').textContent=item?'EDIT PART':'ADD PART';
+        getEl('inpZoren').value=item?item.zoren:'';
+        getEl('inpOem').value=item?item.oem.join(', '):'';
+        getEl('inpCarMaker').value=item?item.car_maker:'';
+        getEl('inpApplications').value=item?item.applications:'';
+        renderCategorySelects(item ? item.category : categories[0]);
+        modalAddEdit.classList.remove('hidden');
+    }
+
+    function onEdit(e){ 
+        const idx=parseInt(e.currentTarget.getAttribute('data-index'),10); 
+        if(!Number.isFinite(idx)) return; 
+        const part = parts.find(p => p.id === parts[idx].id); // Get from main array via ID check
+        openAddModal(part, idx);
+    }
+    
+    // 3. DELETE (Delete from Firestore)
+    async function onDelete(e){ 
+        if (!currentUser) { showConfirm('Auth Error', 'Authentication is required.', true); return; }
+        const idx=parseInt(e.currentTarget.getAttribute('data-index'),10); 
+        if(!Number.isFinite(idx)) return; 
+
+        const partToDelete = parts[idx];
+
+        const confirmed = await showConfirm('Confirm Deletion', `Permanently delete ZOREN No. ${partToDelete.zoren}? This action cannot be undone.`);
+        if (!confirmed) return;
+
+        try {
+            await deleteDoc(doc(getPartsCollectionRef(), partToDelete.id));
+            // loadAndRenderParts() will be triggered by onSnapshot automatically
+        } catch (error) {
+            showConfirm('Error Deleting', "Error deleting record. Check console for details.", true);
+            console.error("Error deleting document: ", error);
+        }
+    } 
+
+    // --- BULK UPLOAD LOGIC ---
+    // Bulk Modal Controls
+    const modalBulk=getEl('modalBulk');
+    getEl('btnBulk')?.addEventListener('click',()=>{ 
+        modalBulk.classList.remove('hidden'); 
+        getEl('bulkCategorySelector').classList.remove('hidden');
+        renderCategorySelects();
+    });
+    getEl('btnCloseBulk')?.addEventListener('click',()=>modalBulk.classList.add('hidden'));
+    
+    getEl('bulkFileInput')?.addEventListener('change',ev=>{
+        const f=ev.target.files[0]; 
+        if(!f) return; 
+        const reader=new FileReader();
+        reader.onload=e=>getEl('bulkTextarea').value=e.target.result; 
+        showConfirm('File Loaded', "JSON content loaded into the textarea. Click 'Load & Merge' or 'Replace All' to proceed.", true);
+    });
+    
+    // Centralized Batch Upload Function
+    async function executeBatchUpload(records, replaceMode) {
+        if (!currentUser) { throw new Error('Authentication is required.'); }
+        
+        // Basic Bulk Validation: Check if required fields exist in all records
+        const invalidRecords = records.filter(r => !r.zoren || r.zoren.length < 4 || !r.car_maker || !r.applications);
+        if (invalidRecords.length > 0) {
+            showConfirm('Validation Failed', `Bulk upload failed: ${invalidRecords.length} records are missing required fields (Zoren No. (min 4), Car Maker, or Applications). Please fix and retry.`, true);
+            return;
+        }
+
+        const batch = writeBatch(db);
+
+        if (replaceMode) {
+            // Delete all existing documents in the collection
+            const existingSnapshot = await getDocs(getPartsCollectionRef());
+            existingSnapshot.forEach(doc => { batch.delete(doc.ref); });
+        }
+        
+        records.forEach(record => {
+            const newDocRef = doc(getPartsCollectionRef());
+            batch.set(newDocRef, record);
+        });
+        
+        await batch.commit();
+        
+        getEl('bulkTextarea').value=''; 
+        modalBulk.classList.add('hidden'); 
+        // onSnapshot handles the re-render
+        return records.length;
+    }
+    
+    async function handleBulkUpload(replaceMode) {
+        const txt=getEl('bulkTextarea')?.value.trim(); 
+        if(!txt){ showConfirm('Input Empty', 'Bulk textarea is empty.', true); return; }
+        
+        if(replaceMode) {
+            const confirmed = await showConfirm('DANGER: REPLACE ALL', 'WARNING: Are you sure you want to delete ALL your existing data and replace it? This is PERMANENT.', false);
+            if (!confirmed) return;
+        }
+
+        try { 
+            const parsed=JSON.parse(txt); 
+            if(!Array.isArray(parsed)){ showConfirm('Invalid Format', 'JSON must be a root array of part objects.', true); return; }
+            
+            let recordsToImport = parsed.map(normalizeRecord);
+            const selectedCategory = getEl('bulkCategoryInput').value.trim();
+            
+            // Assign the selected category to any record that didn't have one
+            const finalRecords = recordsToImport.map(r => ({
+                ...r,
+                category: r.category === 'Uncategorized' ? selectedCategory : r.category
+            }));
+
+            const count = await executeBatchUpload(finalRecords, replaceMode);
+            if (count) {
+                const message = replaceMode 
+                    ? `SUCCESS: Replaced all records. Total: ${count}.`
+                    : `SUCCESS: Merged ${count} new records.`;
+                showConfirm('Upload Complete', message, true);
+            }
+
+        } catch(err){ 
+            showConfirm('Processing Error', 'Error during bulk operation. Check console for JSON parsing details.', true); 
+            console.error("Bulk upload error:", err); 
+        }
+    }
+
+    getEl('btnLoadBulk')?.addEventListener('click', () => handleBulkUpload(false)); // Merge
+    getEl('btnReplaceBulk')?.addEventListener('click', () => handleBulkUpload(true)); // Replace
+
+    // --- CATEGORY MANAGER MODAL LISTENERS ---
+    const modalCategoryManager = getEl('modalCategoryManager');
+    getEl('btnManageCategories')?.addEventListener('click', () => {
+        renderCategoryManagerList();
+        modalCategoryManager?.classList.remove('hidden');
+    });
+
+    getEl('btnCloseCategoryManager')?.addEventListener('click', () => {
+        modalCategoryManager?.classList.add('hidden');
+    });
+
+    getEl('btnAddCategory')?.addEventListener('click', () => {
+        const newCat = getEl('inpNewCategory')?.value.trim();
+        if (newCat && !categories.includes(newCat)) {
+            categories.push(newCat);
+            getEl('inpNewCategory').value = '';
+            saveCategories(); 
+            renderCategoryManagerList();
+        } else if (newCat) {
+            showConfirm('Error', 'Category already exists or is invalid.', true);
+        }
+    });
+
+    // --- EXPORT LOGIC ---
+
+    function createDownloadLink(data, filename, mimeType) {
+        const blob = new Blob([data], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    getEl('btnDownloadJson')?.addEventListener('click', () => {
+        const dataToExport = parts.map(p => ({
+            zoren: p.zoren,
+            car_maker: p.car_maker,
+            applications: p.applications,
+            oem: p.oem,
+            category: p.category
+        }));
+        const json = JSON.stringify(dataToExport, null, 2);
+        createDownloadLink(json, `inventory_export_${new Date().toISOString().slice(0, 10)}.json`, 'application/json');
+        showConfirm('Export Complete', 'Inventory data successfully exported as JSON.', true);
+    });
+
+    getEl('btnExportCsv')?.addEventListener('click', () => {
+        if (parts.length === 0) {
+            showConfirm('Export Error', 'No data to export.', true);
+            return;
+        }
+
+        const headers = ["ZOREN No.", "Car Maker", "Applications", "OEM No.", "Category"];
+        const rows = parts.map(p => [
+            p.zoren,
+            p.car_maker,
+            p.applications,
+            p.oem.join('; '), // Use semicolon to separate multiple OEM numbers
+            p.category
+        ]);
+
+        const csvContent = [
+            headers.map(h => `"${h}"`).join(','),
+            ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+        ].join('\n');
+
+        createDownloadLink(csvContent, `inventory_export_${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv');
+        showConfirm('Export Complete', 'Inventory data successfully exported as CSV.', true);
+    });
+
+    // --- Start App Initialization ---
+    // We call initApp once the document structure is loaded but before all imports are processed.
+    document.addEventListener('DOMContentLoaded', initApp);
+    // --------------------------------
+</script>
+
+</body>
+</html>
