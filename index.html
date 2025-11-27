@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FastWay Inventory: Neumorphism Edition</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
@@ -124,7 +125,7 @@
         }
         
         .oem-tag {
-            background: linear-gradient(135deg, rgba(var(--accent-yellow), 0.8), rgba(var(--accent-yellow), 0.5));
+            background: #D1D5DB; /* Tailwind Gray-300 - better contrast */
             color: var(--text-dark);
             padding: 0.3rem 1rem;
             border-radius: 9999px;
@@ -132,20 +133,29 @@
             font-weight: 700;
             margin-right: 0.5rem;
             margin-bottom: 0.5rem;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            box-shadow: inset 1px 1px 3px var(--shadow-dark), inset -1px -1px 3px var(--shadow-light);
         }
 
-        /* Styling for inputs and selects (Pressed/Inset Look) */
+        /* Styling for ALL inputs and selects */
         input, select, textarea {
             border: none; 
             border-radius: 1.5rem; /* Match panel curvature */
-            padding: 0.75rem 1.5rem;
+            padding: 0.9rem 1.75rem; 
             background-color: var(--bg-primary); 
             color: var(--text-dark);
             font-weight: 500;
             transition: all 0.2s;
             /* Inset Shadow for Pressed Input */
             box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        }
+        
+        /* Custom Styling for Modal Inputs (to make them look thicker/more substantial) */
+        #modalAddEdit input, 
+        #modalAddEdit select, 
+        #modalAddEdit textarea {
+            padding: 1rem 2rem; /* Increased padding */
+            font-size: 1.125rem; /* Larger font size */
+            font-weight: 600; /* Bolder text */
         }
 
         input::placeholder, textarea::placeholder {
@@ -157,6 +167,14 @@
             background-color: var(--bg-primary);
             box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light), 0 0 0 2px var(--accent-yellow); /* Focus ring */
             outline: none;
+        }
+        
+        /* Dedicated style for primary control inputs (Search/Filter) */
+        .neumo-control-input {
+            font-size: 1.125rem; /* Same larger font for consistency */
+            padding: 1rem 2rem; /* Substantial padding */
+            border-radius: 2rem; /* Softer edges */
+            font-weight: 600;
         }
 
         /* Modal: Retain Neumorphism on modal for consistency */
@@ -178,15 +196,18 @@
             box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
         }
         
-        /* Remove old styles */
-        .pro-btn, .pro-btn:active, .pro-btn-primary, .pro-btn-secondary, .pro-btn-danger, .stat-box {
-            box-shadow: none !important;
-            border: none !important;
-        }
-        
         /* Specific adjustments for dark text on light background */
         .text-light-override {
             color: var(--text-dark) !important;
+        }
+
+        /* --- Search Highlight Style --- */
+        .highlight {
+            background-color: #FACC15; /* Tailwind yellow-400 for high contrast */
+            color: black;
+            font-weight: 700;
+            padding: 1px 3px;
+            border-radius: 4px;
         }
 
     </style>
@@ -196,8 +217,9 @@
 <div class="max-w-7xl mx-auto">
     <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center p-6 rounded-2xl">
         <div class="mb-4 md:mb-0">
-            <h1 class="text-5xl font-extrabold text-gray-800 leading-tight">INVENTORY PRO</h1>
-            <p class="text-xl font-bold text-gray-600 mt-1">FASTWAY PARTS CATALOG</p>
+            <!-- BRANDING CHANGE CONFIRMED -->
+            <h1 class="text-5xl font-extrabold text-gray-800 leading-tight">FASTWAY AUTO SPAREPARTS</h1>
+            <p class="text-xl font-bold text-gray-600 mt-1">INVENTORY CATALOG</p>
         </div>
         <div class="flex flex-col items-end">
             <p id="authStatus" class="status-pill">AUTHENTICATING...</p>
@@ -216,23 +238,39 @@
     </div>
 
     <section id="appContent" class="hidden">
-        <section class="mb-10 p-4 md:p-6 neumo-panel flex flex-wrap gap-4 items-center">
-            <button id="btnAdd" class="neumo-btn neumo-btn-primary text-lg">+ NEW PART</button>
-            <button id="btnBulk" class="neumo-btn neumo-btn-secondary text-lg">BULK JSON</button>
+        
+        <!-- CONTROL PANEL (Neumorphism Inset) -->
+        <section class="mb-10 p-4 md:p-6 neumo-panel flex flex-col md:flex-row flex-wrap gap-4 items-center" 
+                 style="box-shadow: var(--neumo-pressed); padding: 1.5rem; border-radius: 2rem;">
+            
+            <!-- Left Action Buttons (Extruded) -->
+            <div class="flex flex-wrap gap-4 w-full md:w-auto md:min-w-[200px]">
+                <button id="btnAdd" class="neumo-btn neumo-btn-primary text-lg flex-grow">+ NEW PART</button>
+                <button id="btnBulk" class="neumo-btn neumo-btn-secondary text-lg flex-grow">BULK JSON</button>
+            </div>
 
-            <div class="flex-grow flex flex-wrap justify-end items-center gap-3">
-                <select id="categoryFilter" class="w-full md:w-48"></select>
-
-                <input id="searchInput" type="search" placeholder="SEARCH (ZOREN, OEM, MAKER, APP)" class="w-full md:max-w-xs" />
-                <select id="perPage" class="w-24">
+            <!-- Central Search/Filter/Pagination/Export (Integrated Inset Fields - Uses neumo-control-input class) -->
+            <div class="flex-grow flex flex-col md:flex-row items-center gap-4 w-full md:w-auto p-3 rounded-2xl bg-gray-300 bg-opacity-30">
+                
+                <!-- Filter and Search Fields (Wider and Taller) -->
+                <select id="categoryFilter" class="neumo-control-input flex-grow w-full md:w-60"></select>
+                <input id="searchInput" type="search" placeholder="SEARCH (ZOREN, OEM, MAKER, APP)" class="neumo-control-input flex-grow w-full md:flex-grow" />
+                
+                <!-- Per Page Selector (Narrower) -->
+                <select id="perPage" class="w-full md:w-32 neumo-control-input">
                     <option value="10">10 / Page</option>
                     <option value="25">25 / Page</option>
                     <option value="50">50 / Page</option>
+                    <option value="100">100 / Page</option>
+                    <option value="200">200 / Page</option>
                 </select>
             </div>
             
-            <button id="btnDownloadJson" class="neumo-btn neumo-btn-secondary bg-gray-400 text-light-override px-4 py-3">Export JSON</button>
-            <button id="btnExportCsv" class="neumo-btn neumo-btn-secondary bg-green-500 text-white px-4 py-3">Export CSV</button>
+            <!-- Export Buttons (Extruded) -->
+            <div class="flex flex-wrap gap-3 w-full md:w-auto md:justify-end">
+                <button id="btnDownloadJson" class="neumo-btn neumo-btn-secondary bg-gray-400 text-light-override px-4 py-3 flex-grow md:flex-none">Export JSON</button>
+                <button id="btnExportCsv" class="neumo-btn neumo-btn-secondary bg-green-500 text-light-override px-4 py-3 flex-grow md:flex-none">Export CSV</button>
+            </div>
         </section>
 
         <section>
@@ -258,18 +296,21 @@
         <p id="confirmMessage" class="text-gray-600 mb-6"></p>
         <div class="flex justify-end gap-3">
             <button id="btnConfirmCancel" class="neumo-btn neumo-btn-secondary px-5 py-2">CANCEL</button>
-            <button id="btnConfirmAction" class="neumo-btn neumo-btn-primary px-5 py-2 bg-red-600 text-white">CONFIRM</button>
+            <button id="btnConfirmAction" class="neumo-btn neumo-btn-primary px-5 py-2 bg-red-600 text-light-override">CONFIRM</button>
         </div>
     </div>
 </div>
 
+<!-- Modal size increased to max-w-3xl for the widest fields possible -->
 <div id="modalAddEdit" class="hidden fixed inset-0 z-40 flex items-center justify-center">
     <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"></div>
-    <div class="modal-neumo z-50 w-full max-w-lg p-8 text-gray-800 border-yellow-700 border-t-4">
-        <h3 id="modalTitle" class="text-3xl font-extrabold mb-6">ADD PART</h3>
+    <!-- max-w-3xl for wider fields -->
+    <div class="modal-neumo z-50 w-full max-w-3xl p-8 text-gray-800 border-yellow-700 border-t-4">
+        <h3 id="modalTitle" class="text-3xl font-extrabold mb-6">ADD/EDIT PART</h3>
         <div class="space-y-5">
             <div>
                 <label class="block text-sm font-medium text-gray-600">Category <span class="text-red-600">*</span></label>
+                <!-- Inputs are now substantially wider and thicker via CSS changes -->
                 <select id="inpCategory" class="w-full"></select>
                 <p id="categoryError" class="text-xs text-red-600 mt-1 hidden system-error">Category is required.</p>
             </div>
@@ -321,7 +362,7 @@
         <div class="mt-8 flex flex-wrap items-center gap-4">
             <input id="bulkFileInput" type="file" accept=".json,application/json" class="text-sm font-semibold text-gray-800" />
             <button id="btnLoadBulk" class="neumo-btn neumo-btn-secondary bg-gray-400 text-light-override px-5 py-2.5">Load & Merge</button>
-            <button id="btnReplaceBulk" class="neumo-btn neumo-btn-primary px-5 py-2.5 bg-red-600">REPLACE ALL INVENTORY</button>
+            <button id="btnReplaceBulk" class="neumo-btn neumo-btn-primary px-5 py-2.5 bg-red-600 text-light-override">REPLACE ALL INVENTORY</button>
             <button id="btnCloseBulk" class="ml-auto neumo-btn neumo-btn-secondary px-5 py-2.5">CLOSE</button>
         </div>
         </div>
@@ -334,7 +375,7 @@
         <div class="space-y-5">
             <div class="flex gap-3">
                 <input id="inpNewCategory" class="w-full" placeholder="e.g., Brake System" />
-                <button id="btnAddCategory" class="neumo-btn neumo-btn-primary bg-green-600 text-white px-5 py-2">ADD</button>
+                <button id="btnAddCategory" class="neumo-btn neumo-btn-primary bg-green-600 text-light-override px-5 py-2">ADD</button>
             </div>
             <div id="categoryListContainer" class="max-h-64 overflow-y-auto border border-gray-400 rounded-xl p-4 space-y-3 neumo-panel" style="box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);">
                 </div>
@@ -352,11 +393,9 @@
     import { getFirestore, doc, setDoc, addDoc, onSnapshot, collection, getDoc, getDocs, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // --- GLOBAL VARIABLES & INITIALIZATION ---
-
-    // 1. Get configuration from Canvas environment
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     
-    // User-provided configuration (must be manually set if __firebase_config is not available)
+    // User's explicit Firebase configuration 
     const userFirebaseConfig = {
         apiKey: "AIzaSyDMG67OjTem-qRC8S8NN58weeeHnZIGLW0",
         authDomain: "fastway-autospare-parts-shibi.firebaseapp.com",
@@ -382,7 +421,6 @@
         const logEl = getEl('connectionLog');
         if (logEl) {
             logEl.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            // Updated color scheme for Neumorphism aesthetic
             logEl.style.color = isError ? '#DC2626' : '#6B7280'; // Red or Gray-500
         }
     }
@@ -431,49 +469,27 @@ service cloud.firestore {
             db = getFirestore(app);
             updateConnectionStatus("Services initialized. Starting authentication check...");
             
-            let authResolved = false;
-            
-            // Set up a promise to resolve when auth state changes (success or fail)
-            const authPromise = new Promise(resolve => {
-                const unsubscribe = onAuthStateChanged(auth, (user) => {
-                    unsubscribe(); // Stop listening after the first state change
-                    authResolved = true;
-                    resolve(user);
-                });
+            // Set up listener for auth state changes
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUser = user;
+                    getEl('authStatus').textContent = `UID: ${user.uid.substring(0, 8)}... (Authenticated)`;
+                    getEl('appContent').classList.remove('hidden');
+                    getEl('btnManageCategories').classList.remove('hidden');
+                    updateConnectionStatus("Authentication successful. Loading inventory...");
+                    await loadCategories();
+                    loadAndRenderParts(); // Start listening to parts data
+                } else if (!currentUser) {
+                    // If no user is authenticated, attempt sign in
+                    await signInUser();
+                }
             });
 
-            // Set a timeout to resolve the promise if it takes too long
-            const timeoutPromise = new Promise(resolve => 
-                setTimeout(() => {
-                    if (!authResolved) {
-                        updateConnectionStatus("Authentication timed out (5s). Forcing UI visible with error message.", true);
-                        resolve(null); // Resolve with null to trigger fallback
-                    }
-                }, 5000)
-            );
-
-            const user = await Promise.race([authPromise, timeoutPromise]);
-
-            if (user) {
-                currentUser = user;
-                // Updated status pill display
-                getEl('authStatus').textContent = `UID: ${user.uid.substring(0, 8)}... (Authenticated)`;
-                getEl('appContent').classList.remove('hidden');
-                getEl('btnManageCategories').classList.remove('hidden');
-                updateConnectionStatus("Authentication successful. Loading inventory...");
-                await loadCategories();
-                loadAndRenderParts(); 
-            } else {
-                // Initial sign-in attempt if no user was found (or timed out)
+            // Initial check/sign-in attempt if no token is available or if auth state is pending
+            if (!auth.currentUser) {
                 await signInUser();
-
-                // If sign-in fails or still times out, display a non-functional state
-                if (!currentUser) {
-                    getEl('authStatus').textContent = `AUTH FAIL`;
-                    getEl('appContent').classList.remove('hidden');
-                    getEl('partsContainer').innerHTML = '<p class="text-center text-red-600 p-8 text-xl font-bold">FATAL ERROR: Could not authenticate or load data. Check console.</p>';
-                }
             }
+
         } catch (error) {
             updateConnectionStatus("FATAL: Initialization failed. See console.", true);
             console.error("Firebase Initialization/Startup Error:", error);
@@ -482,7 +498,8 @@ service cloud.firestore {
 
     // --- APP STATE ---
     let parts = [];
-    let editIndex = -1;
+    // Stores the Firestore document ID for editing/deleting
+    let editPartId = null; 
     let page = 1;
     let perPage = 10;
     let categories = [];
@@ -498,8 +515,20 @@ service cloud.firestore {
             confirmResolver = resolve;
             getEl('confirmTitle').textContent = title;
             getEl('confirmMessage').textContent = message;
+            // The CONFIRM button should be primary (red for deletion, yellow for standard)
+            const confirmBtn = getEl('btnConfirmAction');
+            
+            // Set CONFIRM button text/color based on alert status or title context
+            if (isAlert) {
+                confirmBtn.textContent = 'OK';
+                confirmBtn.classList.remove('bg-red-600');
+                confirmBtn.classList.add('neumo-btn-primary');
+            } else {
+                confirmBtn.textContent = 'CONFIRM';
+                confirmBtn.classList.add('bg-red-600');
+            }
+            
             getEl('btnConfirmCancel').classList.toggle('hidden', isAlert);
-            getEl('btnConfirmAction').textContent = isAlert ? 'OK' : 'CONFIRM';
             getEl('modalConfirm').classList.remove('hidden');
         });
     }
@@ -517,17 +546,17 @@ service cloud.firestore {
     // --- FIREBASE PATH HELPERS ---
     function getUserCollectionPath(collectionName) {
         if (!currentUser || !currentUser.uid) {
+            // This should ideally not happen if called after successful sign-in
             throw new Error("User not authenticated. Cannot access Firestore.");
         }
-        // Private Data path
+        // Private Data path: /artifacts/{appId}/users/{userId}/{collectionName}
         return `artifacts/${appId}/users/${currentUser.uid}/${collectionName}`;
     }
 
-    // Replace the function with this:
-function getPartsCollectionRef() {
-    // This points to the new path allowed by the rule 2
-    return collection(db, `artifacts/${appId}/inventory/shared_list/parts`);
-}
+    // Corrected to point to the secure, private 'parts' collection under the user's ID.
+    function getPartsCollectionRef() {
+        return collection(db, getUserCollectionPath('parts'));
+    }
 
     function getCategoryDocRef() {
         return doc(db, getUserCollectionPath('categories'), 'list'); 
@@ -542,13 +571,20 @@ function getPartsCollectionRef() {
             const categoryDoc = await getDoc(getCategoryDocRef());
             
             if (categoryDoc.exists() && categoryDoc.data().list) {
+                // Ensure array contains only valid, unique strings
                 categories = categoryDoc.data().list.filter(c => c && c.trim()).map(c => c.trim());
+                // Ensure 'Uncategorized' is always present
+                if (!categories.includes('Uncategorized')) {
+                    categories.unshift('Uncategorized');
+                }
                 updateConnectionStatus(`Categories loaded (${categories.length}).`);
             } else {
+                // Initial load: Set defaults and save them
                 categories = ['Uncategorized', 'Fuel Injection', 'Brake System', 'Filters', 'Ignition'];
                 await saveCategories();
                 updateConnectionStatus("Default categories initialized.");
             }
+            renderCategorySelects();
         } catch (error) {
              if (error.code === 'permission-denied') {
                 displaySecurityRulesError('Data load failed due to security rules');
@@ -562,7 +598,11 @@ function getPartsCollectionRef() {
     async function saveCategories() {
         if (!currentUser) return;
         try {
-            const uniqueCategories = [...new Set(categories.map(c => c.trim()).filter(Boolean))];
+            // Filter, trim, ensure uniqueness, and ensure 'Uncategorized' is first
+            let uniqueCategories = [...new Set(categories.map(c => c.trim()).filter(Boolean))];
+            uniqueCategories = uniqueCategories.filter(c => c !== 'Uncategorized');
+            uniqueCategories.unshift('Uncategorized');
+            
             await setDoc(getCategoryDocRef(), { list: uniqueCategories });
             categories = uniqueCategories; 
             renderCategorySelects(); 
@@ -575,12 +615,30 @@ function getPartsCollectionRef() {
     async function deleteCategory(categoryToDelete) {
         if (categoryToDelete === 'Uncategorized') return showConfirm('Error', 'Cannot delete the "Uncategorized" category.', true);
         
-        const confirmed = await showConfirm('Confirm Deletion', `Are you sure you want to delete the category: ${categoryToDelete}?`);
+        const confirmed = await showConfirm('Confirm Deletion', `Are you sure you want to delete the category: ${categoryToDelete}? All parts currently assigned to this category will be moved to "Uncategorized".`);
         if (!confirmed) return;
         
-        categories = categories.filter(c => c !== categoryToDelete);
-        await saveCategories();
-        renderCategoryManagerList();
+        // 1. Move all parts from the deleted category to 'Uncategorized'
+        const partsToUpdate = parts.filter(p => p.category === categoryToDelete);
+        const updateBatch = writeBatch(db);
+
+        partsToUpdate.forEach(part => {
+            const partRef = doc(getPartsCollectionRef(), part.id);
+            updateBatch.update(partRef, { category: 'Uncategorized' });
+        });
+        
+        try {
+            await updateBatch.commit();
+            
+            // 2. Remove category and save updated list
+            categories = categories.filter(c => c !== categoryToDelete);
+            await saveCategories();
+            renderCategoryManagerList();
+            showConfirm('Category Deleted', `Category "${categoryToDelete}" deleted. ${partsToUpdate.length} parts reassigned to "Uncategorized".`, true);
+        } catch (error) {
+            showConfirm('Update Error', `Failed to delete category and reassign parts. Check console.`, true);
+            console.error("Category deletion error:", error);
+        }
     }
 
     function renderCategoryManagerList() {
@@ -589,7 +647,7 @@ function getPartsCollectionRef() {
         container.innerHTML = categories.map((cat, index) => `
             <div class="flex justify-between items-center p-3 bg-gray-200 rounded-lg shadow-inner">
                 <span class="text-base font-semibold text-gray-800">${escapeHtml(cat)}</span>
-                <button onclick="window.deleteCategoryHandler('${cat}')" class="text-red-600 hover:text-red-500 text-sm font-bold disabled:opacity-50" ${cat === 'Uncategorized' ? 'disabled' : ''}>REMOVE</button>
+                <button onclick="window.deleteCategoryHandler('${escapeHtml(cat)}')" class="text-red-600 hover:text-red-500 text-sm font-bold disabled:opacity-50" ${cat === 'Uncategorized' ? 'disabled' : ''}>REMOVE</button>
             </div>
         `).join('') || '<p class="text-center text-gray-500 text-sm italic">No categories defined.</p>';
     }
@@ -631,31 +689,16 @@ function getPartsCollectionRef() {
 
 
     // --- AUTHENTICATION & INITIALIZATION ---
-    // Note: The onAuthStateChanged listener is now primarily used within initApp for the initial status check.
-    // This separate function handles the actual sign-in if needed during the startup process.
-
     async function signInUser() {
         getEl('authStatus').textContent = 'PENDING SIGN-IN...';
         updateConnectionStatus("Attempting anonymous sign-in...");
         try {
             if (initialAuthToken) {
-                const credential = await signInWithCustomToken(auth, initialAuthToken);
-                currentUser = credential.user;
+                await signInWithCustomToken(auth, initialAuthToken);
             } else {
-                const credential = await signInAnonymously(auth);
-                currentUser = credential.user;
+                await signInAnonymously(auth);
             }
-            // Once signed in, the rest of the app logic (loadCategories, loadAndRenderParts) will execute
-            // via the logic flow within initApp, ensuring UI elements are revealed only after success.
-            if (currentUser) {
-                getEl('authStatus').textContent = `UID: ${currentUser.uid.substring(0, 8)}... (Authenticated)`;
-                getEl('appContent').classList.remove('hidden');
-                getEl('btnManageCategories').classList.remove('hidden');
-                updateConnectionStatus("Sign-in successful. Proceeding to load data.");
-                await loadCategories();
-                loadAndRenderParts();
-            }
-
+            // onAuthStateChanged will handle the rest upon success
         } catch (error) {
             updateConnectionStatus(`AUTH FAIL: ${error.code}`, true);
             console.error("Authentication Error:", error);
@@ -668,10 +711,16 @@ function getPartsCollectionRef() {
 
     // --- DATA HELPERS ---
     function normalizeRecord(item) {
+        // Coerce to string/trim and ensure a default value
         const zoren = (item.zoren ?? '').toString().trim();
         let oem = item.oem ?? [];
-        if (typeof oem === 'string') oem = oem.split(',').map(s=>s.trim()).filter(Boolean);
-        if (!Array.isArray(oem)) oem = [String(oem)];
+        if (typeof oem === 'string') {
+            // Safely split and trim comma-separated strings
+            oem = oem.split(',').map(s=>s.trim()).filter(Boolean);
+        } else if (!Array.isArray(oem)) {
+            // Handle if it was null/undefined or an unexpected type
+            oem = [];
+        }
         const car_maker = (item.car_maker ?? '').toString().trim();
         const applications = (item.applications ?? '').toString().trim();
         const category = (item.category ?? 'Uncategorized').toString().trim(); 
@@ -681,10 +730,27 @@ function getPartsCollectionRef() {
     
     function escapeHtml(s){ return s? String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') : ''; }
 
+    /**
+     * Highlights all occurrences of the search query in the given text.
+     * @param {string} text The original string content.
+     * @param {string} query The search term.
+     * @returns {string} The HTML string with highlighted spans.
+     */
+    function highlightSearchTerm(text, query) {
+        if (!query) return escapeHtml(text);
+        const escapedText = escapeHtml(text);
+        // Create a RegExp that globally matches the query string (case-insensitive)
+        const regex = new RegExp(query, 'gi');
+        // Replace all matches with the matched term wrapped in a span
+        return escapedText.replace(regex, (match) => {
+            return `<span class="highlight">${match}</span>`;
+        });
+    }
+
 
     // 1. READ (Load Data from Firestore)
     function loadAndRenderParts() {
-        if (!currentUser) return;
+        if (!currentUser || !db) return;
         
         partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">LOADING INVENTORY...</p></div>';
         updateConnectionStatus("Setting up real-time inventory listener...");
@@ -694,37 +760,46 @@ function getPartsCollectionRef() {
         }
         
         // Use onSnapshot for real-time updates
-        partsSnapshotUnsubscribe = onSnapshot(getPartsCollectionRef(), (snapshot) => {
-            parts = [];
-            snapshot.forEach(doc => {
-                try {
-                    const part = normalizeRecord(doc.data());
-                    part.id = doc.id;
-                    parts.push(part);
-                } catch (e) {
-                    console.error("Error normalizing part data:", doc.id, e);
+        try {
+            partsSnapshotUnsubscribe = onSnapshot(getPartsCollectionRef(), (snapshot) => {
+                parts = [];
+                snapshot.forEach(doc => {
+                    try {
+                        const part = normalizeRecord(doc.data());
+                        // Ensure the Firestore ID is saved with the part object
+                        part.id = doc.id; 
+                        parts.push(part);
+                    } catch (e) {
+                        console.error("Error normalizing part data:", doc.id, e);
+                    }
+                });
+                updateConnectionStatus(`Inventory loaded successfully (${parts.length} parts).`);
+                renderCards();
+                if (parts.length === 0) {
+                    partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">NO PARTS FOUND. ADD NEW INVENTORY.</p></div>';
+                }
+            }, (error) => {
+                if (error.code === 'permission-denied') {
+                    displaySecurityRulesError('Data stream failed due to security rules');
+                } else {
+                    updateConnectionStatus(`FATAL: Data stream interrupted. ${error.code}`, true);
+                    console.error("Error setting up snapshot listener: ", error);
+                    partsContainer.innerHTML = `<div><p class="text-xl text-center p-8 text-red-600 font-bold">ERROR: ${error.message}</p></div>`;
                 }
             });
-            updateConnectionStatus(`Inventory loaded successfully (${parts.length} parts).`);
-            renderCards();
-            if (parts.length === 0) {
-                partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">NO PARTS FOUND. ADD NEW INVENTORY.</p></div>';
-            }
-        }, (error) => {
-            if (error.code === 'permission-denied') {
-                displaySecurityRulesError('Data stream failed due to security rules');
-            } else {
-                updateConnectionStatus(`FATAL: Data stream interrupted. ${error.code}`, true);
-                console.error("Error setting up snapshot listener: ", error);
-                partsContainer.innerHTML = `<div><p class="text-xl text-center p-8 text-red-600 font-bold">ERROR: ${error.message}</p></div>`;
-            }
-        });
+        } catch (e) {
+            console.error("Error accessing collection ref during onSnapshot setup:", e);
+        }
     }
 
     function renderCards() { 
-        const q = document.getElementById('searchInput')?.value.trim().toLowerCase() || '';
+        // Get the current search query, converting it to lowercase for matching
+        const q = document.getElementById('searchInput')?.value.trim();
+        const qLower = q ? q.toLowerCase() : '';
+
         const selectedCategoryFilter = document.getElementById('categoryFilter')?.value || '';
-        perPage = parseInt(document.getElementById('perPage')?.value, 10) || 10;
+        // Ensure perPage is set based on the current selection
+        perPage = parseInt(document.getElementById('perPage')?.value, 10) || 10; 
 
         let filtered = parts.filter(item => {
             // 1. Category Filter Check
@@ -733,38 +808,46 @@ function getPartsCollectionRef() {
             }
 
             // 2. Search Query Check
-            if (q) {
-                const text = (item.zoren+' '+item.oem.join(' ')+' '+item.car_maker+' '+item.applications+' '+item.category).toLowerCase();
-                return text.includes(q);
+            if (qLower) {
+                const searchString = `${item.zoren} ${item.oem.join(' ')} ${item.car_maker} ${item.applications} ${item.category}`.toLowerCase();
+                return searchString.includes(qLower);
             }
             return true;
         });
 
-        // Sort by ZOREN number
+        // Sort by ZOREN number (in-memory)
         filtered.sort((a,b)=>a.zoren.localeCompare(b.zoren, undefined, {numeric:true}));
 
         const total = filtered.length;
         const pages = Math.max(1, Math.ceil(total/perPage));
-        page = Math.min(page, pages);
+        // Reset page if necessary (e.g., filter/search changed the total count)
+        if (page > pages) page = pages;
+        page = Math.max(1, page); // Ensure page is at least 1
+        
         const start = (page-1)*perPage;
         const pageItems = filtered.slice(start, start+perPage);
 
         partsContainer.innerHTML = '';
         pageItems.forEach((item,i)=>{
-            const oemTags = item.oem.map(oem => `<span class="oem-tag">${escapeHtml(oem)}</span>`).join('');
+            // Highlight OEM tags before joining them
+            const oemTags = item.oem.map(oem => 
+                `<span class="oem-tag">${highlightSearchTerm(oem, q)}</span>`
+            ).join('');
+
             const card = document.createElement('div');
             card.className = 'part-card';
+            // Apply highlighting to all displayed fields
             card.innerHTML = `
                 <div class="flex flex-col justify-between card-header-container">
                     <div>
-                        <div class="text-sm font-extrabold text-gray-500 mb-2 uppercase">${escapeHtml(item.category)}</div>
-                        <h3 class="card-zoren-no font-mono">${escapeHtml(item.zoren)}</h3>
+                        <div class="text-sm font-extrabold text-gray-500 mb-2 uppercase">${highlightSearchTerm(item.category, q)}</div>
+                        <h3 class="card-zoren-no font-mono">${highlightSearchTerm(item.zoren, q)}</h3>
                     </div>
                     <div class="card-actions flex gap-3 mt-4">
-                        <button class="editBtn text-gray-600 hover:text-gray-800" title="Edit" data-index="${start+i}">
+                        <button class="editBtn text-gray-600 hover:text-gray-800" title="Edit" data-id="${escapeHtml(item.id)}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                         </button>
-                        <button class="delBtn text-red-600 hover:text-red-500" title="Delete" data-index="${start+i}">
+                        <button class="delBtn text-red-600 hover:text-red-500" title="Delete" data-id="${escapeHtml(item.id)}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>
                     </div>
@@ -772,11 +855,11 @@ function getPartsCollectionRef() {
                 <div class="card-details-grid text-lg font-medium">
                     <div>
                         <div class="text-sm font-bold text-gray-500 uppercase">Car Maker:</div>
-                        <div class="text-gray-800">${escapeHtml(item.car_maker)}</div>
+                        <div class="text-gray-800">${highlightSearchTerm(item.car_maker, q)}</div>
                     </div>
                     <div class="mt-4">
                         <div class="text-sm font-bold text-gray-500 uppercase">Applications:</div>
-                        <div class="text-gray-800">${escapeHtml(item.applications)}</div>
+                        <div class="text-gray-800">${highlightSearchTerm(item.applications, q)}</div>
                     </div>
                     <div class="mt-4">
                         <div class="text-sm font-bold text-gray-500 uppercase">OEM No. / Interchange:</div>
@@ -797,8 +880,6 @@ function getPartsCollectionRef() {
         Array.from(document.getElementsByClassName('delBtn')).forEach(b=>b.addEventListener('click', onDelete));
     }
 
-    // --- Utility to safely get elements ---
-    
     // Event Listeners (Pagination/Search)
     getEl('prevPage')?.addEventListener('click', ()=>{ page=Math.max(1,page-1); renderCards(); });
     getEl('nextPage')?.addEventListener('click', ()=>{ page++; renderCards(); });
@@ -807,7 +888,7 @@ function getPartsCollectionRef() {
     
     // 2. CREATE / UPDATE (Save to Firestore)
     const modalAddEdit = getEl('modalAddEdit');
-    getEl('btnAdd')?.addEventListener('click', ()=>{ openAddModal(); renderCategorySelects(); });
+    getEl('btnAdd')?.addEventListener('click', ()=>{ openAddModal(); });
     getEl('btnCancelModal')?.addEventListener('click', ()=>modalAddEdit?.classList.add('hidden'));
 
     getEl('btnSaveModal')?.addEventListener('click', async ()=>{
@@ -829,6 +910,7 @@ function getPartsCollectionRef() {
 
         // --- DATA VALIDATION ---
         let isValid = true;
+        // Regex allows alphanumeric characters and hyphens only
         const zorenRegex = /^[a-zA-Z0-9-]+$/; 
 
         if(!zoren || zoren.length < 4 || !zorenRegex.test(zoren)){ 
@@ -857,21 +939,18 @@ function getPartsCollectionRef() {
         let oemRaw=getEl('inpOem')?.value.trim();
         let oemArr=[];
         if(oemRaw){ 
-            try{ 
-                // Attempt to parse as JSON array first, then fallback to comma split
-                oemArr=oemRaw.startsWith('[')?JSON.parse(oemRaw):oemRaw.split(',').map(s=>s.trim()).filter(Boolean);
-            }catch{ 
-                oemArr=oemRaw.split(',').map(s=>s.trim()).filter(Boolean); 
-            } 
+            // Only split by comma; assume user enters CSV format
+            oemArr=oemRaw.split(',').map(s=>s.trim()).filter(Boolean); 
         }
         
         const dataToSave = { zoren, oem: oemArr, car_maker, applications, category };
 
         try {
-            if (editIndex >= 0) {
-                const partToUpdate = parts[editIndex];
-                await setDoc(doc(getPartsCollectionRef(), partToUpdate.id), dataToSave);
+            if (editPartId) {
+                // Update existing document using its stored ID
+                await setDoc(doc(getPartsCollectionRef(), editPartId), dataToSave);
             } else {
+                // Add new document
                 await addDoc(getPartsCollectionRef(), dataToSave);
             }
             modalAddEdit.classList.add('hidden');
@@ -882,8 +961,10 @@ function getPartsCollectionRef() {
         }
     });
 
-    function openAddModal(item=null,index=-1){
-        editIndex=index;
+    // Updated to pass the Part object and its Firestore ID.
+    function openAddModal(item=null, partId=null){ 
+        editPartId = partId; // Store the ID
+        
         // Clear errors on modal open
         getEl('zorenError')?.classList.add('hidden');
         getEl('carMakerError')?.classList.add('hidden');
@@ -891,32 +972,54 @@ function getPartsCollectionRef() {
 
         getEl('modalTitle').textContent=item?'EDIT PART':'ADD PART';
         getEl('inpZoren').value=item?item.zoren:'';
+        // Join the array for display in the input field
         getEl('inpOem').value=item?item.oem.join(', '):'';
         getEl('inpCarMaker').value=item?item.car_maker:'';
         getEl('inpApplications').value=item?item.applications:'';
-        renderCategorySelects(item ? item.category : categories[0]);
+        // Render selects and pre-select the category if item exists
+        renderCategorySelects(item ? item.category : categories[0]); 
         modalAddEdit.classList.remove('hidden');
     }
 
+    // --- NEW RELIABLE onEdit function ---
     function onEdit(e){ 
-        const idx=parseInt(e.currentTarget.getAttribute('data-index'),10); 
-        if(!Number.isFinite(idx)) return; 
-        const part = parts.find(p => p.id === parts[idx].id); // Get from main array via ID check
-        openAddModal(part, idx);
+        const partId = e.currentTarget.getAttribute('data-id');
+        if (!partId) return; 
+
+        // Find the part object using the guaranteed Firestore ID
+        const partToEdit = parts.find(p => p.id === partId); 
+
+        if (!partToEdit) {
+            showConfirm('Error', 'Could not find part to edit.', true);
+            return;
+        }
+
+        // Pass the actual part object and its Firestore ID
+        openAddModal(partToEdit, partToEdit.id);
     }
     
     // 3. DELETE (Delete from Firestore)
+    // --- NEW RELIABLE onDelete function ---
     async function onDelete(e){ 
         if (!currentUser) { showConfirm('Auth Error', 'Authentication is required.', true); return; }
-        const idx=parseInt(e.currentTarget.getAttribute('data-index'),10); 
-        if(!Number.isFinite(idx)) return; 
+        
+        // Get the guaranteed Firestore ID
+        const partId = e.currentTarget.getAttribute('data-id'); 
+        if (!partId) return; 
+        
+        // Find the part object using the ID
+        const partToDelete = parts.find(p => p.id === partId); 
 
-        const partToDelete = parts[idx];
+        if (!partToDelete || !partToDelete.id) {
+            showConfirm('Error', 'Could not identify part for deletion.', true);
+            return;
+        }
 
         const confirmed = await showConfirm('Confirm Deletion', `Permanently delete ZOREN No. ${partToDelete.zoren}? This action cannot be undone.`);
         if (!confirmed) return;
 
         try {
+            // Use the unique Firestore ID (partToDelete.id) for deletion
             await deleteDoc(doc(getPartsCollectionRef(), partToDelete.id));
             // loadAndRenderParts() will be triggered by onSnapshot automatically
         } catch (error) {
@@ -962,9 +1065,12 @@ function getPartsCollectionRef() {
             existingSnapshot.forEach(doc => { batch.delete(doc.ref); });
         }
         
+        // Add new records
         records.forEach(record => {
             const newDocRef = doc(getPartsCollectionRef());
-            batch.set(newDocRef, record);
+            // Filter out 'id' if it somehow made its way in
+            const { id, ...data } = record; 
+            batch.set(newDocRef, data);
         });
         
         await batch.commit();
@@ -991,7 +1097,7 @@ function getPartsCollectionRef() {
             let recordsToImport = parsed.map(normalizeRecord);
             const selectedCategory = getEl('bulkCategoryInput').value.trim();
             
-            // Assign the selected category to any record that didn't have one
+            // Assign the selected category to any record that didn't have one (category is 'Uncategorized' by default if not set)
             const finalRecords = recordsToImport.map(r => ({
                 ...r,
                 category: r.category === 'Uncategorized' ? selectedCategory : r.category
@@ -1025,16 +1131,33 @@ function getPartsCollectionRef() {
         modalCategoryManager?.classList.add('hidden');
     });
 
-    getEl('btnAddCategory')?.addEventListener('click', () => {
+    // --- Corrected btnAddCategory for Persistence ---
+    getEl('btnAddCategory')?.addEventListener('click', async () => {
         const newCat = getEl('inpNewCategory')?.value.trim();
-        if (newCat && !categories.includes(newCat)) {
-            categories.push(newCat);
-            getEl('inpNewCategory').value = '';
-            saveCategories(); 
-            renderCategoryManagerList();
-        } else if (newCat) {
-            showConfirm('Error', 'Category already exists or is invalid.', true);
+        
+        if (!newCat) {
+             showConfirm('Error', 'Category name cannot be empty.', true);
+             return;
         }
+        
+        if (categories.includes(newCat)) {
+            showConfirm('Error', 'Category already exists.', true);
+            return;
+        }
+
+        // 1. Add the new category to the local array
+        categories.push(newCat);
+        
+        // 2. Clear the input field
+        getEl('inpNewCategory').value = '';
+        
+        // 3. Save the updated list to Firestore (calls saveCategories and re-renders selects)
+        await saveCategories(); 
+        
+        // 4. Re-render the list in the Category Manager modal
+        renderCategoryManagerList();
+        
+        showConfirm('Category Added', `Category "${newCat}" has been added.`, true);
     });
 
     // --- EXPORT LOGIC ---
@@ -1089,7 +1212,7 @@ function getPartsCollectionRef() {
     });
 
     // --- Start App Initialization ---
-    // We call initApp once the document structure is loaded but before all imports are processed.
+    // Wait for the DOM content to be fully loaded before trying to initialize Firebase
     document.addEventListener('DOMContentLoaded', initApp);
     // --------------------------------
 </script>
