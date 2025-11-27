@@ -505,9 +505,11 @@ service cloud.firestore {
         return `artifacts/${appId}/users/${currentUser.uid}/${collectionName}`;
     }
 
-    function getPartsCollectionRef() {
-        return collection(db, getUserCollectionPath('parts'));
-    }
+    // Replace the function with this:
+function getPartsCollectionRef() {
+    // This points to the new path allowed by the rule 2
+    return collection(db, `artifacts/${appId}/inventory/shared_list/parts`);
+}
 
     function getCategoryDocRef() {
         return doc(db, getUserCollectionPath('categories'), 'list'); 
@@ -1076,3 +1078,4 @@ service cloud.firestore {
 
 </body>
 </html>
+
