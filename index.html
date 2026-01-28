@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FastWay Inventory: POS Edition</title>
+    <title>FastWay Inventory: Alert Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
@@ -68,6 +68,18 @@
         }
         
         .neumo-btn-secondary { color: var(--text-dark); }
+        
+        /* Red Alert Button State */
+        .neumo-btn-alert {
+            background: #FEE2E2;
+            color: #DC2626;
+            border: 1px solid #DC2626;
+        }
+        .neumo-btn-alert.active {
+            background: #DC2626;
+            color: white;
+            box-shadow: var(--neumo-pressed);
+        }
 
         .status-pill {
             background: linear-gradient(145deg, var(--accent-yellow), var(--accent-orange));
@@ -89,6 +101,39 @@
             gap: 1.5rem;
             color: var(--text-dark);
             border: none;
+            position: relative; /* For badge positioning */
+            overflow: hidden;   /* Clip the badge corner */
+            transition: all 0.3s;
+        }
+
+        /* LOW STOCK ALERT STYLES */
+        .part-card.low-stock {
+            border: 2px solid #FCA5A5; /* Light Red Border */
+        }
+        .part-card.critical-stock {
+            border: 3px solid #DC2626; /* Deep Red Border */
+            background-color: #FEF2F2; /* Very light red bg */
+        }
+        
+        .low-stock-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #DC2626;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 0.5rem 1.5rem;
+            border-bottom-left-radius: 1.5rem;
+            box-shadow: -2px 2px 5px rgba(0,0,0,0.1);
+            animation: pulse-red 2s infinite;
+            z-index: 10;
+        }
+        
+        @keyframes pulse-red {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
         }
 
         @media (min-width: 768px) {
@@ -184,7 +229,6 @@
             font-size: 1.1rem; font-weight: 800;
         }
         
-        /* New Sell Button Style */
         .btn-sell-one {
             width: 35px;
             height: 35px;
@@ -252,11 +296,15 @@
             <div class="flex-grow flex flex-col md:flex-row items-center gap-4 w-full md:w-auto p-3 rounded-2xl bg-gray-300 bg-opacity-30">
                 <select id="categoryFilter" class="neumo-control-input flex-grow w-full md:w-60"></select>
                 <input id="searchInput" type="search" placeholder="SEARCH (ZOREN, OEM, MAKER, APP)" class="neumo-control-input flex-grow w-full md:flex-grow" />
+                
+                <button id="btnToggleLowStock" class="neumo-btn neumo-btn-alert text-sm px-4 flex items-center gap-2">
+                    <span class="text-xl">⚠️</span> LOW STOCK ONLY
+                </button>
+                
                 <select id="perPage" class="w-full md:w-32 neumo-control-input">
                     <option value="10">10 / Page</option>
                     <option value="25">25 / Page</option>
                     <option value="50">50 / Page</option>
-                    <option value="100">100 / Page</option>
                 </select>
             </div>
             
@@ -433,6 +481,7 @@
 
     // --- GLOBAL VARIABLES & INITIALIZATION ---
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const LOW_STOCK_THRESHOLD = 5; // Alert when qty <= 5
     
     const userFirebaseConfig = {
         apiKey: "AIzaSyDMG67OjTem-qRC8S8NN58weeeHnZIGLW0",
@@ -524,6 +573,7 @@ service cloud.firestore {
     let currentUser = null; 
     let partsSnapshotUnsubscribe = null;
     const partsContainer = document.getElementById('partsContainer');
+    let showLowStockOnly = false; // New State
     
     let confirmResolver;
     
@@ -747,6 +797,9 @@ service cloud.firestore {
         perPage = parseInt(document.getElementById('perPage')?.value, 10) || 10; 
 
         let filtered = parts.filter(item => {
+            // Low Stock Toggle Filter
+            if (showLowStockOnly && item.quantity > LOW_STOCK_THRESHOLD) return false;
+            
             if (selectedCategoryFilter && item.category !== selectedCategoryFilter) return false;
             if (qLower) {
                 const searchString = `${item.zoren} ${item.oem.join(' ')} ${item.car_maker} ${item.applications} ${item.category}`.toLowerCase();
@@ -766,10 +819,26 @@ service cloud.firestore {
 
         partsContainer.innerHTML = '';
         pageItems.forEach((item,i)=>{
+            const isLowStock = item.quantity <= LOW_STOCK_THRESHOLD;
+            const isCritical = item.quantity <= 0;
+            
+            let cardClass = 'part-card';
+            let badgeHtml = '';
+            
+            if (isCritical) {
+                cardClass += ' critical-stock';
+                badgeHtml = '<div class="low-stock-badge">OUT OF STOCK</div>';
+            } else if (isLowStock) {
+                cardClass += ' low-stock';
+                badgeHtml = '<div class="low-stock-badge">LOW STOCK</div>';
+            }
+            
             const oemTags = item.oem.map(oem => `<span class="oem-tag">${highlightSearchTerm(oem, q)}</span>`).join('');
+            
             const card = document.createElement('div');
-            card.className = 'part-card';
+            card.className = cardClass;
             card.innerHTML = `
+                ${badgeHtml}
                 <div class="flex flex-col justify-between card-header-container">
                     <div>
                         <div class="text-sm font-extrabold text-gray-500 mb-2 uppercase">${highlightSearchTerm(item.category || '(NO CATEGORY)', q)}</div>
@@ -800,7 +869,7 @@ service cloud.firestore {
                         <div class="text-center">
                              <div class="price-label">Qty</div>
                              <div class="flex items-center justify-center gap-2">
-                                 <span class="price-value text-blue-800">${item.quantity || 0}</span>
+                                 <span class="price-value ${isLowStock ? 'text-red-600 font-black text-2xl' : 'text-blue-800'}">${item.quantity || 0}</span>
                                  <button class="btnSellOne btn-sell-one" title="Sell One (Decrease Stock)" data-id="${item.id}">-1</button>
                              </div>
                         </div>
@@ -831,9 +900,16 @@ service cloud.firestore {
 
         Array.from(document.getElementsByClassName('editBtn')).forEach(b=>b.addEventListener('click', onEdit));
         Array.from(document.getElementsByClassName('delBtn')).forEach(b=>b.addEventListener('click', onDelete));
-        // NEW EVENT LISTENER FOR QUICK SALE
         Array.from(document.getElementsByClassName('btnSellOne')).forEach(b=>b.addEventListener('click', onQuickSell));
     }
+    
+    // Toggle Low Stock Filter Listener
+    getEl('btnToggleLowStock')?.addEventListener('click', (e) => {
+        showLowStockOnly = !showLowStockOnly;
+        e.currentTarget.classList.toggle('active', showLowStockOnly);
+        page = 1;
+        renderCards();
+    });
     
     // --- NEW: QUICK SELL FUNCTIONALITY ---
     async function onQuickSell(e) {
