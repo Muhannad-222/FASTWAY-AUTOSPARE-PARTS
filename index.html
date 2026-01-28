@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FastWay Inventory: Alert Edition</title>
+    <title>FastWay Inventory: Critical Alert Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
@@ -481,7 +481,9 @@
 
     // --- GLOBAL VARIABLES & INITIALIZATION ---
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    const LOW_STOCK_THRESHOLD = 5; // Alert when qty <= 5
+    
+    // UPDATED: Alert only triggers at 1 or 0
+    const LOW_STOCK_THRESHOLD = 1; 
     
     const userFirebaseConfig = {
         apiKey: "AIzaSyDMG67OjTem-qRC8S8NN58weeeHnZIGLW0",
