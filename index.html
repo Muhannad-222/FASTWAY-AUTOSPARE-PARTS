@@ -3,24 +3,21 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FastWay Inventory: Expanded Edition</title>
+    <title>FastWay Inventory: POS Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
         /* --- Option 2: Soft Clay/Neumorphism Aesthetic --- */
         :root {
-            /* Palette: Soft Light Background, Light Shadows, Vibrant Accents */
-            --bg-primary: #E0E0E0; /* Soft Clay Background */
-            --accent-yellow: #FFC000; /* Glowing Yellow */
-            --accent-orange: #FF6A00; /* Glowing Orange */
-            --text-dark: #374151; /* Dark Text */
+            --bg-primary: #E0E0E0; 
+            --accent-yellow: #FFC000; 
+            --accent-orange: #FF6A00; 
+            --text-dark: #374151; 
             --text-subtle: #9CA3AF;
             
-            /* Neumorphism Base Shadows */
-            --shadow-light: #ffffff; /* Lighter shadow for top/left */
-            --shadow-dark: #b0b0b0; /* Darker shadow for bottom/right */
+            --shadow-light: #ffffff; 
+            --shadow-dark: #b0b0b0; 
             
-            /* Elevation Mixin */
             --neumo-elevated: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
             --neumo-pressed: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
         }
@@ -35,23 +32,20 @@
         /* --- Neumorphism Base Styles --- */
         .neumo-panel {
             background-color: var(--bg-primary);
-            border-radius: 2.5rem; /* Larger, softer corners for panels */
-            box-shadow: var(--neumo-elevated); /* Soft, elevated look */
+            border-radius: 2.5rem;
+            box-shadow: var(--neumo-elevated);
             padding: 2rem;
             transition: all 0.2s ease-in-out;
         }
 
-        /* High-Contrast/Extruded Buttons */
         .neumo-btn {
             transition: all 0.2s ease-in-out;
             font-weight: 600;
-            border-radius: 9999px; /* Pill shape */
+            border-radius: 9999px;
             padding: 0.75rem 1.5rem;
             border: none;
             letter-spacing: 0.01em;
             cursor: pointer;
-            
-            /* Inherit base background and apply elevation */
             background-color: var(--bg-primary); 
             box-shadow: var(--neumo-elevated);
         }
@@ -62,25 +56,19 @@
             transform: translateY(-1px);
         }
         
-        /* Pressed state (for user feedback) */
         .neumo-btn:active {
             box-shadow: var(--neumo-pressed);
             transform: translateY(0);
         }
 
         .neumo-btn-primary { 
-            /* Primary accent button, color overrides neumo look */
             background: linear-gradient(145deg, var(--accent-yellow), var(--accent-orange)); 
             color: var(--text-dark); 
-            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2), -4px -4px 10px rgba(255, 255, 255, 0.5); /* Stronger button shadow */
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2), -4px -4px 10px rgba(255, 255, 255, 0.5); 
         }
         
-        /* Secondary buttons get the soft clay look */
-        .neumo-btn-secondary { 
-            color: var(--text-dark); 
-        }
+        .neumo-btn-secondary { color: var(--text-dark); }
 
-        /* Status Pill Style (Keep some vibrance) */
         .status-pill {
             background: linear-gradient(145deg, var(--accent-yellow), var(--accent-orange));
             color: var(--text-dark);
@@ -91,26 +79,22 @@
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
         }
 
-        /* Inventory Card (Layered Neumorphism) */
         .part-card {
             background-color: var(--bg-primary);
             border-radius: 2rem;
-            /* Inset shadow for a "pressed" card look */
             box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); 
             padding: 2rem;
             display: grid;
             grid-template-columns: 1fr;
             gap: 1.5rem;
             color: var(--text-dark);
-            border: none; /* Remove border from old style */
+            border: none;
         }
 
         @media (min-width: 768px) {
-            .part-card {
-                grid-template-columns: 1fr 2.5fr;
-            }
+            .part-card { grid-template-columns: 1fr 2.5fr; }
             .card-header-container {
-                border-right: 1px solid var(--shadow-dark); /* Subtle separation line */
+                border-right: 1px solid var(--shadow-dark);
                 padding-right: 2rem;
             }
         }
@@ -119,12 +103,12 @@
             font-size: 2.5rem;
             font-weight: 900;
             color: var(--accent-orange);
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); /* Soft shadow for contrast */
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
             line-height: 1;
         }
         
         .oem-tag {
-            background: #D1D5DB; /* Tailwind Gray-300 - better contrast */
+            background: #D1D5DB;
             color: var(--text-dark);
             padding: 0.3rem 1rem;
             border-radius: 9999px;
@@ -135,49 +119,31 @@
             box-shadow: inset 1px 1px 3px var(--shadow-dark), inset -1px -1px 3px var(--shadow-light);
         }
 
-        /* Styling for ALL inputs and selects */
         input, select, textarea {
             border: none; 
-            border-radius: 1.5rem; /* Match panel curvature */
+            border-radius: 1.5rem;
             padding: 0.9rem 1.75rem; 
             background-color: var(--bg-primary); 
             color: var(--text-dark);
             font-weight: 500;
             transition: all 0.2s;
-            /* Inset Shadow for Pressed Input */
             box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
         }
         
-        /* Custom Styling for Modal Inputs (to make them look thicker/more substantial) */
-        #modalAddEdit input, 
-        #modalAddEdit select, 
-        #modalAddEdit textarea,
-        #modalAuth input {
-            padding: 1rem 2rem; /* Increased padding */
-            font-size: 1.125rem; /* Larger font size */
-            font-weight: 600; /* Bolder text */
-        }
-
-        input::placeholder, textarea::placeholder {
-            color: var(--text-subtle);
-            opacity: 1;
+        #modalAddEdit input, #modalAddEdit select, #modalAddEdit textarea, #modalAuth input {
+            padding: 1rem 2rem; font-size: 1.125rem; font-weight: 600;
         }
 
         input:focus, select:focus, textarea:focus {
             background-color: var(--bg-primary);
-            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light), 0 0 0 2px var(--accent-yellow); /* Focus ring */
+            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light), 0 0 0 2px var(--accent-yellow);
             outline: none;
         }
         
-        /* Dedicated style for primary control inputs (Search/Filter) */
         .neumo-control-input {
-            font-size: 1.125rem; /* Same larger font for consistency */
-            padding: 1rem 2rem; /* Substantial padding */
-            border-radius: 2rem; /* Softer edges */
-            font-weight: 600;
+            font-size: 1.125rem; padding: 1rem 2rem; border-radius: 2rem; font-weight: 600;
         }
 
-        /* Modal: Retain Neumorphism on modal for consistency */
         .modal-neumo { 
             background-color: var(--bg-primary); 
             border: 1px solid var(--shadow-light);
@@ -185,40 +151,22 @@
             box-shadow: var(--neumo-elevated);
         }
         
-        /* Error Alert (Contrasting) */
         .system-error {
-            background-color: #FEE2E2; /* Red-100 */
-            color: #DC2626; /* Red-600 */
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            font-weight: 500;
+            background-color: #FEE2E2; color: #DC2626;
+            border-radius: 0.5rem; padding: 0.5rem 1rem;
+            font-size: 0.875rem; font-weight: 500;
             box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
         }
         
-        /* Specific adjustments for dark text on light background */
-        .text-light-override {
-            color: var(--text-dark) !important;
-        }
+        .text-light-override { color: var(--text-dark) !important; }
 
-        /* --- Search Highlight Style --- */
         .highlight {
-            background-color: #FACC15; /* Tailwind yellow-400 for high contrast */
-            color: black;
-            font-weight: 700;
-            padding: 1px 3px;
-            border-radius: 4px;
+            background-color: #FACC15; color: black; font-weight: 700; padding: 1px 3px; border-radius: 4px;
         }
-        /* Custom styles for auth buttons */
-        #auth-buttons .neumo-btn-secondary {
-            background: var(--bg-primary);
-            box-shadow: var(--neumo-elevated);
-        }
-        #auth-buttons .neumo-btn-primary {
-            background: linear-gradient(145deg, var(--accent-yellow), var(--accent-orange));
-        }
+        
+        #auth-buttons .neumo-btn-secondary { background: var(--bg-primary); box-shadow: var(--neumo-elevated); }
+        #auth-buttons .neumo-btn-primary { background: linear-gradient(145deg, var(--accent-yellow), var(--accent-orange)); }
 
-        /* Price Tag Styling */
         .price-tag-group {
             background: #e0e0e0;
             border-radius: 1rem;
@@ -230,14 +178,33 @@
             border: 1px solid var(--shadow-light);
         }
         .price-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: #6B7280;
-            font-weight: 700;
+            font-size: 0.75rem; text-transform: uppercase; color: #6B7280; font-weight: 700;
         }
         .price-value {
-            font-size: 1.1rem;
-            font-weight: 800;
+            font-size: 1.1rem; font-weight: 800;
+        }
+        
+        /* New Sell Button Style */
+        .btn-sell-one {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: #DC2626;
+            background: #E0E0E0;
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+            transition: all 0.1s;
+        }
+        .btn-sell-one:active {
+            box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+            color: #991B1B;
+        }
+        .btn-sell-one:hover {
+            color: red;
         }
 
     </style>
@@ -259,14 +226,9 @@
                     <button id="btnOpenSignIn" class="neumo-btn neumo-btn-secondary px-5 py-2 text-sm">Sign In</button>
                     <button id="btnOpenSignUp" class="neumo-btn neumo-btn-primary px-5 py-2 text-sm">Sign Up</button>
                 </div>
-                
                 <div id="loggedInButtons" class="flex gap-2 hidden">
-                    <button id="btnManageCategories" class="neumo-btn neumo-btn-secondary px-5 py-2 text-sm">
-                        Manage Categories
-                    </button>
-                    <button id="btnLogout" class="neumo-btn neumo-btn-secondary px-5 py-2 text-sm">
-                        Logout
-                    </button>
+                    <button id="btnManageCategories" class="neumo-btn neumo-btn-secondary px-5 py-2 text-sm">Manage Categories</button>
+                    <button id="btnLogout" class="neumo-btn neumo-btn-secondary px-5 py-2 text-sm">Logout</button>
                 </div>
             </div>
         </div>
@@ -275,12 +237,10 @@
     <div id="rulesInstruction" class="hidden neumo-panel p-6 border-red-500 border-2">
         <p class="font-extrabold text-xl mb-2 text-red-600">🔴 CRITICAL ERROR: PERMISSION DENIED 🔴</p>
         <p class="text-gray-700">Your application is authenticated, but the Firestore Security Rules are preventing it from reading data.</p>
-        <p class="mt-2 text-gray-700">To fix this, go to the Firebase Console > Firestore Database > Rules, and replace the existing rules with the code below.</p>
         <pre id="rulesCode" class="bg-gray-200 text-yellow-700 p-4 rounded-lg mt-3 overflow-x-auto text-sm"></pre>
     </div>
 
     <section id="appContent" class="hidden">
-        
         <section class="mb-10 p-4 md:p-6 neumo-panel flex flex-col md:flex-row flex-wrap gap-4 items-center" 
                  style="box-shadow: var(--neumo-pressed); padding: 1.5rem; border-radius: 2rem;">
             
@@ -290,16 +250,13 @@
             </div>
 
             <div class="flex-grow flex flex-col md:flex-row items-center gap-4 w-full md:w-auto p-3 rounded-2xl bg-gray-300 bg-opacity-30">
-                
                 <select id="categoryFilter" class="neumo-control-input flex-grow w-full md:w-60"></select>
                 <input id="searchInput" type="search" placeholder="SEARCH (ZOREN, OEM, MAKER, APP)" class="neumo-control-input flex-grow w-full md:flex-grow" />
-                
                 <select id="perPage" class="w-full md:w-32 neumo-control-input">
                     <option value="10">10 / Page</option>
                     <option value="25">25 / Page</option>
                     <option value="50">50 / Page</option>
                     <option value="100">100 / Page</option>
-                    <option value="200">200 / Page</option>
                 </select>
             </div>
             
@@ -310,8 +267,7 @@
         </section>
 
         <section>
-            <div id="partsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                </div>
+            <div id="partsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-8"></div>
 
             <div class="mt-10 neumo-panel p-4 flex flex-wrap gap-4 items-center justify-between text-gray-800">
                 <div class="text-base font-semibold" id="summaryText">0 RECORDS LOADED</div>
@@ -434,8 +390,7 @@
                 <input id="inpNewCategory" class="w-full" placeholder="e.g., Brake System" />
                 <button id="btnAddCategory" class="neumo-btn neumo-btn-primary bg-green-600 text-light-override px-5 py-2">ADD</button>
             </div>
-            <div id="categoryListContainer" class="max-h-64 overflow-y-auto border border-gray-400 rounded-xl p-4 space-y-3 neumo-panel" style="box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);">
-                </div>
+            <div id="categoryListContainer" class="max-h-64 overflow-y-auto border border-gray-400 rounded-xl p-4 space-y-3 neumo-panel"></div>
         </div>
         <div class="mt-8 flex justify-end">
             <button id="btnCloseCategoryManager" class="neumo-btn neumo-btn-primary px-6 py-2.5">DONE</button>
@@ -473,19 +428,12 @@
 <script type="module">
     // --- FIREBASE IMPORTS (Modern Modular SDK v11.6.1) ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { 
-        getAuth, 
-        onAuthStateChanged, 
-        createUserWithEmailAndPassword, 
-        signInWithEmailAndPassword, 
-        signOut
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, addDoc, onSnapshot, collection, getDoc, getDocs, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, addDoc, onSnapshot, collection, getDoc, getDocs, deleteDoc, writeBatch, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // --- GLOBAL VARIABLES & INITIALIZATION ---
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     
-    // User's explicit Firebase configuration 
     const userFirebaseConfig = {
         apiKey: "AIzaSyDMG67OjTem-qRC8S8NN58weeeHnZIGLW0",
         authDomain: "fastway-autospare-parts-shibi.firebaseapp.com",
@@ -496,57 +444,39 @@
         measurementId: "G-JV6NF5FREJ"
     };
 
-    // Use environment config if available, otherwise use user's explicit config
     const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
     const firebaseConfig = Object.keys(envConfig).length > 0 ? envConfig : userFirebaseConfig;
 
-    // 2. Initialize Firebase App and Services
     let app, auth, db;
     
-    // Status update helper
     function updateConnectionStatus(message, isError = false) {
         const logEl = getEl('connectionLog');
         if (logEl) {
             logEl.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            logEl.style.color = isError ? '#DC2626' : '#6B7280'; // Red or Gray-500
+            logEl.style.color = isError ? '#DC2626' : '#6B7280';
         }
     }
 
-    // --- Utility to safely get elements ---
-    function getEl(id) {
-        return document.getElementById(id);
-    }
+    function getEl(id) { return document.getElementById(id); }
     
-    // --- Security Rules Handler ---
     function displaySecurityRulesError(errorMessage) {
         const rulesInstruction = getEl('rulesInstruction');
         const rulesCode = getEl('rulesCode');
-
         rulesInstruction.classList.remove('hidden');
-        getEl('appContent').classList.add('hidden'); // Hide main content on security error
+        getEl('appContent').classList.add('hidden');
         getEl('partsContainer').innerHTML = `<p class="text-center text-red-600 p-8 text-xl font-bold">Error: ${errorMessage}. See instructions above.</p>`;
-        
-        // Updated Rules to ensure private data access under /artifacts/{appId}/users/{userId}
         rulesCode.textContent = `
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // This function checks if the user is authenticated (logged in)
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    // This rule allows authenticated users to read and write ONLY within their own user path
+    function isAuthenticated() { return request.auth != null; }
     match /artifacts/{appId}/users/{userId}/{documents=**} {
       allow read, write: if isAuthenticated() && request.auth.uid == userId;
     }
   }
-}
-`;
+}`;
     }
 
-
-    // --- Core Initialization Function ---
     async function initApp() {
         updateConnectionStatus("Attempting Firebase initialization...");
         try {
@@ -555,41 +485,30 @@ service cloud.firestore {
             db = getFirestore(app);
             updateConnectionStatus("Services initialized. Starting authentication check...");
             
-            // Set up listener for auth state changes
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     currentUser = user;
                     const display = user.email ? user.email : `UID: ${user.uid.substring(0, 8)}...`;
                     getEl('authStatus').textContent = `${display} (Authenticated)`;
-                    
-                    // Show/Hide UI elements
                     getEl('appContent').classList.remove('hidden');
                     getEl('loggedInButtons').classList.remove('hidden');
                     getEl('loggedOutButtons').classList.add('hidden');
-
                     updateConnectionStatus("Authentication successful. Loading inventory...");
                     await loadCategories();
-                    loadAndRenderParts(); // Start listening to parts data
+                    loadAndRenderParts();
                 } else {
                     currentUser = null;
                     getEl('authStatus').textContent = `LOGGED OUT`;
-                    
-                    // Show/Hide UI elements
                     getEl('appContent').classList.add('hidden');
                     getEl('loggedInButtons').classList.add('hidden');
                     getEl('loggedOutButtons').classList.remove('hidden');
-
                     updateConnectionStatus("Please sign in or sign up to access inventory.", true);
                     partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">Please SIGN IN to view inventory.</p></div>';
-                      // Detach the old listener when user logs out
                     if (partsSnapshotUnsubscribe) { partsSnapshotUnsubscribe(); }
-                    
-                    // Automatically open sign-in modal if no one is logged in (optional check)
                     if (!getEl('modalAuth').classList.contains('hidden')) return;
                     openAuthModal('signIn');
                 }
             });
-
         } catch (error) {
             updateConnectionStatus("FATAL: Initialization failed. See console.", true);
             console.error("Firebase Initialization/Startup Error:", error);
@@ -606,7 +525,6 @@ service cloud.firestore {
     let partsSnapshotUnsubscribe = null;
     const partsContainer = document.getElementById('partsContainer');
     
-    // Global function for custom confirmation (replaces window.confirm/alert)
     let confirmResolver;
     
     function showConfirm(title, message, isAlert = false) {
@@ -614,9 +532,7 @@ service cloud.firestore {
             confirmResolver = resolve;
             getEl('confirmTitle').textContent = title;
             getEl('confirmMessage').textContent = message;
-            
             const confirmBtn = getEl('btnConfirmAction');
-            
             if (isAlert) {
                 confirmBtn.textContent = 'OK';
                 confirmBtn.classList.remove('bg-red-600');
@@ -625,7 +541,6 @@ service cloud.firestore {
                 confirmBtn.textContent = 'CONFIRM';
                 confirmBtn.classList.add('bg-red-600');
             }
-            
             getEl('btnConfirmCancel').classList.toggle('hidden', isAlert);
             getEl('modalConfirm').classList.remove('hidden');
         });
@@ -635,57 +550,33 @@ service cloud.firestore {
         getEl('modalConfirm').classList.add('hidden');
         confirmResolver(false);
     });
-
     getEl('btnConfirmAction')?.addEventListener('click', () => {
         getEl('modalConfirm').classList.add('hidden');
         confirmResolver(true);
     });
 
-    // --- FIREBASE PATH HELPERS ---
     function getUserCollectionPath(collectionName) {
-        if (!currentUser || !currentUser.uid) {
-            throw new Error("User not authenticated. Cannot access Firestore.");
-        }
-        // Private Data path: /artifacts/{appId}/users/{userId}/{collectionName}
+        if (!currentUser || !currentUser.uid) throw new Error("User not authenticated.");
         return `artifacts/${appId}/users/${currentUser.uid}/${collectionName}`;
     }
+    function getPartsCollectionRef() { return collection(db, getUserCollectionPath('parts')); }
+    function getCategoryDocRef() { return doc(db, getUserCollectionPath('categories'), 'list'); }
 
-    // Use the secure path for parts
-    function getPartsCollectionRef() {
-        return collection(db, getUserCollectionPath('parts')); 
-    }
-
-    // Use the secure path for categories list document
-    function getCategoryDocRef() {
-        return doc(db, getUserCollectionPath('categories'), 'list'); 
-    }
-
-    // --- CATEGORY MANAGEMENT LOGIC (unchanged functionality, secure paths used) ---
     async function loadCategories() {
         if (!currentUser) return;
-        updateConnectionStatus("Loading categories...");
         try {
             const categoryDoc = await getDoc(getCategoryDocRef());
-            
             if (categoryDoc.exists() && categoryDoc.data().list) {
                 categories = categoryDoc.data().list.filter(c => c && c.trim()).map(c => c.trim());
-                if (!categories.includes('Uncategorized')) {
-                    categories.unshift('Uncategorized');
-                }
-                updateConnectionStatus(`Categories loaded (${categories.length}).`);
+                if (!categories.includes('Uncategorized')) categories.unshift('Uncategorized');
             } else {
                 categories = ['Uncategorized', 'Fuel Injection', 'Brake System', 'Filters', 'Ignition'];
                 await saveCategories();
-                updateConnectionStatus("Default categories initialized.");
             }
             renderCategorySelects();
         } catch (error) {
-             if (error.code === 'permission-denied') {
-                 displaySecurityRulesError('Data load failed due to security rules');
-             } else {
-                 updateConnectionStatus("Error: Failed to load categories.", true);
-                 console.error("Error loading categories:", error);
-             }
+             if (error.code === 'permission-denied') displaySecurityRulesError('Data load failed due to security rules');
+             else console.error("Error loading categories:", error);
         }
     }
 
@@ -695,25 +586,19 @@ service cloud.firestore {
             let uniqueCategories = [...new Set(categories.map(c => c.trim()).filter(Boolean))];
             uniqueCategories = uniqueCategories.filter(c => c !== 'Uncategorized');
             uniqueCategories.unshift('Uncategorized');
-            
             await setDoc(getCategoryDocRef(), { list: uniqueCategories });
             categories = uniqueCategories; 
             renderCategorySelects(); 
-        } catch (error) {
-            updateConnectionStatus("Error saving categories.", true);
-            console.error("Error saving categories:", error);
-        }
+        } catch (error) { console.error("Error saving categories:", error); }
     }
 
     async function deleteCategory(categoryToDelete) {
-        if (categoryToDelete === 'Uncategorized') return showConfirm('Error', 'Cannot delete the "Uncategorized" category.', true);
-        
-        const confirmed = await showConfirm('Confirm Deletion', `Are you sure you want to delete the category: ${categoryToDelete}? All parts currently assigned to this category will be moved to "Uncategorized".`);
+        if (categoryToDelete === 'Uncategorized') return showConfirm('Error', 'Cannot delete "Uncategorized".', true);
+        const confirmed = await showConfirm('Confirm Deletion', `Delete category: ${categoryToDelete}? Parts will move to "Uncategorized".`);
         if (!confirmed) return;
         
         const partsToUpdate = parts.filter(p => p.category === categoryToDelete);
         const updateBatch = writeBatch(db);
-
         partsToUpdate.forEach(part => {
             const partRef = doc(getPartsCollectionRef(), part.id);
             updateBatch.update(partRef, { category: 'Uncategorized' });
@@ -721,15 +606,11 @@ service cloud.firestore {
         
         try {
             await updateBatch.commit();
-            
             categories = categories.filter(c => c !== categoryToDelete);
             await saveCategories();
             renderCategoryManagerList();
-            showConfirm('Category Deleted', `Category "${categoryToDelete}" deleted. ${partsToUpdate.length} parts reassigned to "Uncategorized".`, true);
-        } catch (error) {
-            showConfirm('Update Error', `Failed to delete category and reassign parts. Check console.`, true);
-            console.error("Category deletion error:", error);
-        }
+            showConfirm('Category Deleted', `Category deleted. ${partsToUpdate.length} parts reassigned.`, true);
+        } catch (error) { console.error("Category deletion error:", error); }
     }
 
     function renderCategoryManagerList() {
@@ -741,25 +622,12 @@ service cloud.firestore {
             </div>
         `).join('') || '<p class="text-center text-gray-500 text-sm italic">No categories defined.</p>';
     }
-    
-    // Expose to window for inline HTML onclick to work
     window.deleteCategoryHandler = deleteCategory;
 
     function renderCategorySelects(selectedCategory = '') {
-        const selects = [
-            document.getElementById('inpCategory'),
-            document.getElementById('bulkCategoryInput'),
-            document.getElementById('categoryFilter')
-        ];
-        
-        const standardOptions = categories.map(cat => 
-            `<option value="${escapeHtml(cat)}" ${cat === selectedCategory ? 'selected' : ''}>${escapeHtml(cat)}</option>`
-        ).join('');
-
-        const filterOptions = [
-            `<option value="">ALL CATEGORIES</option>`,
-            ...categories.map(cat => `<option value="${escapeHtml(cat)}" ${cat === selectedCategory ? 'selected' : ''}>${escapeHtml(cat)}</option>`)
-        ].join('');
+        const selects = [document.getElementById('inpCategory'), document.getElementById('bulkCategoryInput'), document.getElementById('categoryFilter')];
+        const standardOptions = categories.map(cat => `<option value="${escapeHtml(cat)}" ${cat === selectedCategory ? 'selected' : ''}>${escapeHtml(cat)}</option>`).join('');
+        const filterOptions = [`<option value="">ALL CATEGORIES</option>`, ...categories.map(cat => `<option value="${escapeHtml(cat)}" ${cat === selectedCategory ? 'selected' : ''}>${escapeHtml(cat)}</option>`)].join('');
 
         selects.forEach(select => {
             if (select) {
@@ -769,20 +637,15 @@ service cloud.firestore {
                          select.addEventListener('change', () => { page = 1; renderCards(); });
                          select._initialized = true;
                     }
-                } else {
-                    select.innerHTML = standardOptions;
-                }
+                } else select.innerHTML = standardOptions;
             }
         });
     }
 
-
-    // --- AUTHENTICATION LOGIC ---
-    let authMode = 'signIn'; // 'signIn' or 'signUp'
-
+    let authMode = 'signIn';
     function openAuthModal(mode) {
         authMode = mode;
-        getEl('authModalTitle').textContent = mode === 'signIn' ? 'Sign In to Your Account' : 'Create New Account';
+        getEl('authModalTitle').textContent = mode === 'signIn' ? 'Sign In' : 'Create New Account';
         getEl('btnAuthAction').textContent = mode === 'signIn' ? 'SIGN IN' : 'SIGN UP';
         getEl('btnToggleAuthMode').textContent = mode === 'signIn' ? 'Need an account? Sign Up' : 'Have an account? Sign In';
         getEl('authError').classList.add('hidden');
@@ -797,129 +660,65 @@ service cloud.firestore {
         const errorEl = getEl('authError');
         errorEl.classList.add('hidden');
 
-        if (!email || !password) {
-            errorEl.textContent = 'Email and password are required.';
-            errorEl.classList.remove('hidden');
-            return;
-        }
+        if (!email || !password) { errorEl.textContent = 'Email and password required.'; errorEl.classList.remove('hidden'); return; }
         
         getEl('btnAuthAction').disabled = true;
-        updateConnectionStatus(`Attempting ${authMode}...`);
-
         try {
-            if (authMode === 'signUp') {
-                await createUserWithEmailAndPassword(auth, email, password);
-            } else {
-                await signInWithEmailAndPassword(auth, email, password);
-            }
-            
-            // Success - onAuthStateChanged handles the UI update
+            if (authMode === 'signUp') await createUserWithEmailAndPassword(auth, email, password);
+            else await signInWithEmailAndPassword(auth, email, password);
             getEl('modalAuth').classList.add('hidden');
         } catch (error) {
-            let msg = 'An unknown error occurred.';
-            if (error.code === 'auth/email-already-in-use') { msg = 'This email is already registered. Try signing in.'; }
-            else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') { msg = 'Invalid email or password.'; }
-            else if (error.code === 'auth/weak-password') { msg = 'Password should be at least 6 characters.'; }
-            else if (error.code === 'auth/operation-not-allowed') { 
-                msg = 'Authentication operation not allowed. Please ensure "Email/Password" sign-in is ENABLED in your Firebase Console > Authentication > Sign-in method.'; 
-            }
-            else { console.error('Auth Error:', error); }
-            
+            let msg = 'Error.';
+            if (error.code === 'auth/email-already-in-use') msg = 'Email already registered.';
+            else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') msg = 'Invalid credentials.';
+            else if (error.code === 'auth/weak-password') msg = 'Password too weak.';
             errorEl.textContent = msg;
             errorEl.classList.remove('hidden');
-            updateConnectionStatus(`AUTH FAIL: ${error.code}`, true);
-        } finally {
-            getEl('btnAuthAction').disabled = false;
-        }
+        } finally { getEl('btnAuthAction').disabled = false; }
     }
 
     getEl('btnOpenSignIn')?.addEventListener('click', () => openAuthModal('signIn'));
     getEl('btnOpenSignUp')?.addEventListener('click', () => openAuthModal('signUp'));
     getEl('btnCloseAuthModal')?.addEventListener('click', () => getEl('modalAuth').classList.add('hidden'));
     getEl('btnAuthAction')?.addEventListener('click', handleAuthAction);
+    getEl('btnToggleAuthMode')?.addEventListener('click', () => openAuthModal(authMode === 'signIn' ? 'signUp' : 'signIn'));
     
-    getEl('btnToggleAuthMode')?.addEventListener('click', () => {
-        openAuthModal(authMode === 'signIn' ? 'signUp' : 'signIn');
-    });
-    
-    // Logout Handler
     getEl('btnLogout')?.addEventListener('click', async () => {
-        const confirmed = await showConfirm('Confirm Logout', 'Are you sure you want to log out?', false);
-        if (!confirmed) return;
-        
-        try {
-            await signOut(auth);
-            showConfirm('Logged Out', 'You have been successfully logged out.', true);
-        } catch (error) {
-            showConfirm('Logout Error', `Failed to log out: ${error.message}`, true);
-            console.error("Logout Error:", error);
-        }
+        if (await showConfirm('Confirm Logout', 'Are you sure?', false)) await signOut(auth);
     });
 
-    // --- DATA HELPERS ---
     function normalizeRecord(item) {
-        // All fields are now explicitly coerced to safe defaults (empty string/array) if missing
         const zoren = (item.zoren ?? '').toString().trim();
         let oem = item.oem ?? [];
-        if (typeof oem === 'string') {
-            oem = oem.split(',').map(s=>s.trim()).filter(Boolean);
-        } else if (!Array.isArray(oem)) {
-            oem = [];
-        }
+        if (typeof oem === 'string') oem = oem.split(',').map(s=>s.trim()).filter(Boolean);
+        else if (!Array.isArray(oem)) oem = [];
         const car_maker = (item.car_maker ?? '').toString().trim();
         const applications = (item.applications ?? '').toString().trim();
         const category = (item.category ?? 'Uncategorized').toString().trim(); 
-
-        // New Fields: Quantity, Cost, Selling
         const quantity = item.quantity ? Number(item.quantity) : 0;
         const costPrice = item.costPrice ? Number(item.costPrice) : 0;
         const sellingPrice = item.sellingPrice ? Number(item.sellingPrice) : 0;
-
         return { zoren, oem, car_maker, applications, category, quantity, costPrice, sellingPrice };
     }
     
     function escapeHtml(s){ return s? String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') : ''; }
-
-    /**
-     * Highlights all occurrences of the search query in the given text.
-     */
     function highlightSearchTerm(text, query) {
         if (!query) return escapeHtml(text);
         const escapedText = escapeHtml(text);
         const regex = new RegExp(query, 'gi');
-        return escapedText.replace(regex, (match) => {
-            return `<span class="highlight">${match}</span>`;
-        });
+        return escapedText.replace(regex, (match) => `<span class="highlight">${match}</span>`);
     }
 
-    /**
-     * Checks if a ZOREN No. already exists in the local `parts` array (our source of truth).
-     * @param {string} zoren The ZOREN number to check.
-     * @param {string | null} excludeId If editing, exclude the current document ID.
-     * @returns {boolean} True if a duplicate exists, false otherwise.
-     */
     function checkIfZorenExists(zoren, excludeId = null) {
         const normalizedZoren = zoren.trim().toLowerCase();
-        
-        // Deduplication check only runs if a non-empty ZOREN number is provided
         if (normalizedZoren === '') return false;
-        
-        return parts.some(p => 
-            p.zoren.trim().toLowerCase() === normalizedZoren && p.id !== excludeId
-        );
+        return parts.some(p => p.zoren.trim().toLowerCase() === normalizedZoren && p.id !== excludeId);
     }
 
-
-    // 1. READ (Load Data from Firestore)
     function loadAndRenderParts() {
         if (!currentUser || !db) return;
-        
         partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">LOADING INVENTORY...</p></div>';
-        updateConnectionStatus("Setting up real-time inventory listener...");
-        
-        if (partsSnapshotUnsubscribe) {
-            partsSnapshotUnsubscribe(); // Detach previous listener
-        }
+        if (partsSnapshotUnsubscribe) partsSnapshotUnsubscribe();
         
         try {
             partsSnapshotUnsubscribe = onSnapshot(getPartsCollectionRef(), (snapshot) => {
@@ -929,45 +728,26 @@ service cloud.firestore {
                         const part = normalizeRecord(doc.data());
                         part.id = doc.id; 
                         parts.push(part);
-                    } catch (e) {
-                        console.error("Error normalizing part data:", doc.id, e);
-                    }
+                    } catch (e) { console.error("Error normalizing part:", e); }
                 });
-                updateConnectionStatus(`Inventory loaded successfully (${parts.length} parts).`);
                 renderCards();
-                if (parts.length === 0) {
-                    partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">NO PARTS FOUND. ADD NEW INVENTORY.</p></div>';
-                }
+                if (parts.length === 0) partsContainer.innerHTML = '<div><p class="text-xl text-center p-8 text-gray-500 font-bold">NO PARTS FOUND.</p></div>';
             }, (error) => {
-                if (error.code === 'permission-denied') {
-                    displaySecurityRulesError('Data stream failed due to security rules');
-                } else {
-                    updateConnectionStatus(`FATAL: Data stream interrupted. ${error.code}`, true);
-                    console.error("Error setting up snapshot listener: ", error);
-                    partsContainer.innerHTML = `<div><p class="text-xl text-center p-8 text-red-600 font-bold">ERROR: ${error.message}</p></div>`;
-                }
+                if (error.code === 'permission-denied') displaySecurityRulesError('Data stream failed due to security rules');
+                else partsContainer.innerHTML = `<div><p class="text-xl text-center p-8 text-red-600 font-bold">ERROR: ${error.message}</p></div>`;
             });
-        } catch (e) {
-            console.error("Error accessing collection ref during onSnapshot setup:", e);
-        }
+        } catch (e) { console.error("Snapshot error:", e); }
     }
 
     function renderCards() { 
-        if (!currentUser) return; // Prevent rendering if not logged in
-        
+        if (!currentUser) return;
         const q = document.getElementById('searchInput')?.value.trim();
         const qLower = q ? q.toLowerCase() : '';
-
         const selectedCategoryFilter = document.getElementById('categoryFilter')?.value || '';
         perPage = parseInt(document.getElementById('perPage')?.value, 10) || 10; 
 
         let filtered = parts.filter(item => {
-            // 1. Category Filter Check
-            if (selectedCategoryFilter && item.category !== selectedCategoryFilter) {
-                return false;
-            }
-
-            // 2. Search Query Check
+            if (selectedCategoryFilter && item.category !== selectedCategoryFilter) return false;
             if (qLower) {
                 const searchString = `${item.zoren} ${item.oem.join(' ')} ${item.car_maker} ${item.applications} ${item.category}`.toLowerCase();
                 return searchString.includes(qLower);
@@ -975,23 +755,18 @@ service cloud.firestore {
             return true;
         });
 
-        // Sort by ZOREN number (in-memory)
         filtered.sort((a,b)=>a.zoren.localeCompare(b.zoren, undefined, {numeric:true}));
-
         const total = filtered.length;
         const pages = Math.max(1, Math.ceil(total/perPage));
         if (page > pages) page = pages;
-        page = Math.max(1, page); // Ensure page is at least 1
+        page = Math.max(1, page);
         
         const start = (page-1)*perPage;
         const pageItems = filtered.slice(start, start+perPage);
 
         partsContainer.innerHTML = '';
         pageItems.forEach((item,i)=>{
-            const oemTags = item.oem.map(oem => 
-                `<span class="oem-tag">${highlightSearchTerm(oem, q)}</span>`
-            ).join('');
-
+            const oemTags = item.oem.map(oem => `<span class="oem-tag">${highlightSearchTerm(oem, q)}</span>`).join('');
             const card = document.createElement('div');
             card.className = 'part-card';
             card.innerHTML = `
@@ -1024,7 +799,10 @@ service cloud.firestore {
                     <div class="price-tag-group">
                         <div class="text-center">
                              <div class="price-label">Qty</div>
-                             <div class="price-value text-blue-800">${item.quantity || 0}</div>
+                             <div class="flex items-center justify-center gap-2">
+                                 <span class="price-value text-blue-800">${item.quantity || 0}</span>
+                                 <button class="btnSellOne btn-sell-one" title="Sell One (Decrease Stock)" data-id="${item.id}">-1</button>
+                             </div>
                         </div>
                         <div class="text-center border-l border-gray-400 pl-4">
                              <div class="price-label">Cost</div>
@@ -1053,15 +831,38 @@ service cloud.firestore {
 
         Array.from(document.getElementsByClassName('editBtn')).forEach(b=>b.addEventListener('click', onEdit));
         Array.from(document.getElementsByClassName('delBtn')).forEach(b=>b.addEventListener('click', onDelete));
+        // NEW EVENT LISTENER FOR QUICK SALE
+        Array.from(document.getElementsByClassName('btnSellOne')).forEach(b=>b.addEventListener('click', onQuickSell));
+    }
+    
+    // --- NEW: QUICK SELL FUNCTIONALITY ---
+    async function onQuickSell(e) {
+        const id = e.currentTarget.getAttribute('data-id');
+        const part = parts.find(p => p.id === id);
+        if (!part) return;
+
+        if (part.quantity <= 0) {
+            showConfirm('Out of Stock', 'Quantity is already 0.', true);
+            return;
+        }
+
+        const newQty = part.quantity - 1;
+        
+        try {
+            const partRef = doc(db, getUserCollectionPath('parts'), id);
+            await updateDoc(partRef, { quantity: newQty });
+            // UI will update automatically via onSnapshot
+        } catch (err) {
+            console.error("Quick Sell Error:", err);
+            showConfirm('Error', 'Failed to update stock.', true);
+        }
     }
 
-    // Event Listeners (Pagination/Search)
     getEl('prevPage')?.addEventListener('click', ()=>{ page=Math.max(1,page-1); renderCards(); });
     getEl('nextPage')?.addEventListener('click', ()=>{ page++; renderCards(); });
     getEl('searchInput')?.addEventListener('input', ()=>{ page=1; renderCards(); });
     getEl('perPage')?.addEventListener('change', ()=>{ page=1; renderCards(); });
     
-    // 2. CREATE / UPDATE (Save to Firestore)
     const modalAddEdit = getEl('modalAddEdit');
     getEl('btnAdd')?.addEventListener('click', ()=>{ openAddModal(); });
     getEl('btnCancelModal')?.addEventListener('click', ()=>modalAddEdit?.classList.add('hidden'));
@@ -1073,145 +874,68 @@ service cloud.firestore {
         const category = getEl('inpCategory')?.value.trim();
         const car_maker=getEl('inpCarMaker')?.value.trim();
         const applications=getEl('inpApplications')?.value.trim();
-
-        // NEW: Get Pricing and Quantity inputs
         const quantity = Number(getEl('inpQuantity')?.value) || 0;
         const costPrice = Number(getEl('inpCostPrice')?.value) || 0;
         const sellingPrice = Number(getEl('inpSellingPrice')?.value) || 0;
 
-        // Helper function to clear all errors
-        const clearErrors = () => {
-            getEl('zorenError')?.classList.add('hidden');
-        };
+        getEl('zorenError')?.classList.add('hidden');
 
-        clearErrors();
-
-        // --- DEDUPLICATION CHECK ---
         const isDuplicate = checkIfZorenExists(zoren, editPartId);
-
         if (zoren !== '' && isDuplicate) {
-            getEl('zorenError').textContent = `DEDUPLICATION ERROR: ZOREN No. "${zoren}" already exists in your inventory.`;
+            getEl('zorenError').textContent = `DEDUPLICATION ERROR: ZOREN No. "${zoren}" already exists.`;
             getEl('zorenError').classList.remove('hidden');
             return;
         }
-        // ---------------------------
 
         let oemRaw=getEl('inpOem')?.value.trim();
-        let oemArr=[];
-        if(oemRaw){ 
-            oemArr=oemRaw.split(',').map(s=>s.trim()).filter(Boolean); 
-        }
+        let oemArr = oemRaw ? oemRaw.split(',').map(s=>s.trim()).filter(Boolean) : [];
         
-        // Add new fields to the data object
-        const dataToSave = { 
-            zoren, 
-            oem: oemArr, 
-            car_maker, 
-            applications, 
-            category,
-            quantity,
-            costPrice,
-            sellingPrice
-        };
+        const dataToSave = { zoren, oem: oemArr, car_maker, applications, category, quantity, costPrice, sellingPrice };
 
         try {
-            if (editPartId) {
-                // Update existing document using its stored ID
-                await setDoc(doc(getPartsCollectionRef(), editPartId), dataToSave);
-            } else {
-                // Add new document
-                await addDoc(getPartsCollectionRef(), dataToSave);
-            }
+            if (editPartId) await setDoc(doc(getPartsCollectionRef(), editPartId), dataToSave);
+            else await addDoc(getPartsCollectionRef(), dataToSave);
             modalAddEdit.classList.add('hidden');
-        } catch (error) {
-            showConfirm('Error Saving Data', "Error saving data. Check console for details.", true);
-            console.error("Error saving document: ", error);
-        }
+        } catch (error) { console.error("Error saving document: ", error); }
     });
 
-    // Updated to pass the Part object and its Firestore ID.
     function openAddModal(item=null, partId=null){ 
-        if (!currentUser) { 
-            showConfirm('Access Denied', 'Please sign in to add or edit parts.', true); 
-            return;
-        }
-        
-        editPartId = partId; // Store the ID
-        
-        // Clear errors on modal open
+        if (!currentUser) { showConfirm('Access Denied', 'Please sign in.', true); return; }
+        editPartId = partId; 
         getEl('zorenError')?.classList.add('hidden');
-        
-        // Show deduplication warning only
         getEl('deduplicationWarning').classList.remove('hidden');
-
         getEl('modalTitle').textContent=item?'EDIT PART':'ADD PART';
         getEl('inpZoren').value=item?item.zoren:'';
-        // Disable ZOREN edit if editing to maintain unique ID integrity. This is crucial.
         getEl('inpZoren').disabled = !!item; 
-        
         getEl('inpOem').value=item?item.oem.join(', '):'';
         getEl('inpCarMaker').value=item?item.car_maker:'';
         getEl('inpApplications').value=item?item.applications:'';
-        
-        // Populate new fields
         getEl('inpQuantity').value = item ? item.quantity : '';
         getEl('inpCostPrice').value = item ? item.costPrice : '';
         getEl('inpSellingPrice').value = item ? item.sellingPrice : '';
-
-        // Render selects and pre-select the category if item exists
         renderCategorySelects(item ? item.category : categories[0]); 
         modalAddEdit.classList.remove('hidden');
     }
 
-    // --- NEW RELIABLE onEdit function ---
     function onEdit(e){ 
         const partId = e.currentTarget.getAttribute('data-id');
-        if (!partId) return; 
-
-        // Find the part object using the guaranteed Firestore ID
         const partToEdit = parts.find(p => p.id === partId); 
-
-        if (!partToEdit) {
-            showConfirm('Error', 'Could not find part to edit.', true);
-            return;
-        }
-
-        // Pass the actual part object and its Firestore ID
-        openAddModal(partToEdit, partToEdit.id);
+        if (partToEdit) openAddModal(partToEdit, partToEdit.id);
     }
     
-    // 3. DELETE (Delete from Firestore)
     async function onDelete(e){ 
-        if (!currentUser) { showConfirm('Auth Error', 'Authentication is required.', true); return; }
-        
+        if (!currentUser) return;
         const partId = e.currentTarget.getAttribute('data-id'); 
-        if (!partId) return; 
-        
         const partToDelete = parts.find(p => p.id === partId); 
-
-        if (!partToDelete || !partToDelete.id) {
-            showConfirm('Error', 'Could not identify part for deletion.', true);
-            return;
-        }
-
-        const confirmed = await showConfirm('Confirm Deletion', `Permanently delete ZOREN No. ${partToDelete.zoren}? This action cannot be undone.`);
-        if (!confirmed) return;
-
-        try {
+        if (!partToDelete) return;
+        if (await showConfirm('Confirm Deletion', `Permanently delete ZOREN No. ${partToDelete.zoren}?`)) {
             await deleteDoc(doc(getPartsCollectionRef(), partToDelete.id));
-        } catch (error) {
-            showConfirm('Error Deleting', "Error deleting record. Check console for details.", true);
-            console.error("Error deleting document: ", error);
         }
     } 
 
-    // --- BULK UPLOAD LOGIC ---
     const modalBulk=getEl('modalBulk');
     getEl('btnBulk')?.addEventListener('click',()=>{ 
-        if (!currentUser) { 
-            showConfirm('Access Denied', 'Please sign in to perform bulk operations.', true); 
-            return;
-        }
+        if (!currentUser) { showConfirm('Access Denied', 'Please sign in.', true); return; }
         modalBulk.classList.remove('hidden'); 
         getEl('bulkCategorySelector').classList.remove('hidden');
         renderCategorySelects();
@@ -1223,145 +947,76 @@ service cloud.firestore {
         if(!f) return; 
         const reader=new FileReader();
         reader.onload=e=>getEl('bulkTextarea').value=e.target.result; 
-        showConfirm('File Loaded', "JSON content loaded into the textarea. Click 'Load & Merge' or 'Replace All' to proceed.", true);
+        showConfirm('File Loaded', "JSON loaded. Click 'Load & Merge' or 'Replace All'.", true);
     });
     
-    // Centralized Batch Upload Function
     async function executeBatchUpload(records, replaceMode) {
-        if (!currentUser) { throw new Error('Authentication is required.'); }
-        
-        // --- BULK DEDUPLICATION ---
+        if (!currentUser) throw new Error('Authentication required.');
         const existingZorens = new Set(parts.map(p => p.zoren.trim().toLowerCase()).filter(z => z !== ''));
         let recordsToAdd = [];
         let duplicatesCount = 0;
-        let validRecordsCount = 0;
 
         for (const record of records) {
             const zoren = record.zoren ? record.zoren.trim() : '';
             const normalizedZoren = zoren.toLowerCase();
-
-            validRecordsCount++; // Count all records as valid since all fields are optional
-
-            // Deduplication Check: Only add if ZOREN is new AND non-empty
             if (zoren !== '') {
                  if (replaceMode || !existingZorens.has(normalizedZoren)) {
                     recordsToAdd.push(record);
-                    existingZorens.add(normalizedZoren); // Add new ZORENs to set if merging
-                } else {
-                    duplicatesCount++;
-                }
-            } else {
-                // Allow records with empty ZOREN to be added, but they won't participate in deduplication check later
-                recordsToAdd.push(record); 
-            }
+                    existingZorens.add(normalizedZoren); 
+                } else duplicatesCount++;
+            } else recordsToAdd.push(record); 
         }
 
-        if (recordsToAdd.length === 0) {
-            throw new Error(`Import failed. ${duplicatesCount} duplicates ignored. No new records found to import.`);
-        }
-        // ------------------------------------------
-
+        if (recordsToAdd.length === 0) throw new Error(`Import failed. ${duplicatesCount} duplicates ignored.`);
         const batch = writeBatch(db);
-
         if (replaceMode) {
-            // Delete all existing documents in the collection
             const existingSnapshot = await getDocs(getPartsCollectionRef());
             existingSnapshot.forEach(doc => { batch.delete(doc.ref); });
         }
-        
-        // Add new records
         recordsToAdd.forEach(record => {
             const newDocRef = doc(getPartsCollectionRef());
-            // Filter out 'id' if it somehow made its way in
             const { id, ...data } = record; 
             batch.set(newDocRef, data);
         });
-        
         await batch.commit();
-        
         getEl('bulkTextarea').value=''; 
         modalBulk.classList.add('hidden'); 
-        
         return { added: recordsToAdd.length, duplicates: duplicatesCount };
     }
     
     async function handleBulkUpload(replaceMode) {
         const txt=getEl('bulkTextarea')?.value.trim(); 
-        if(!txt){ showConfirm('Input Empty', 'Bulk textarea is empty.', true); return; }
-        
-        if(replaceMode) {
-            const confirmed = await showConfirm('DANGER: REPLACE ALL', 'WARNING: Are you sure you want to delete ALL your existing data and replace it? This is PERMANENT.', false);
-            if (!confirmed) return;
-        }
+        if(!txt) return showConfirm('Input Empty', 'Bulk textarea is empty.', true);
+        if(replaceMode && !(await showConfirm('DANGER: REPLACE ALL', 'Delete ALL existing data and replace? This is PERMANENT.', false))) return;
 
         try { 
             const parsed=JSON.parse(txt); 
-            if(!Array.isArray(parsed)){ showConfirm('Invalid Format', 'JSON must be a root array of part objects.', true); return; }
-            
+            if(!Array.isArray(parsed)) return showConfirm('Invalid Format', 'JSON must be array.', true);
             let recordsToImport = parsed.map(normalizeRecord);
             const selectedCategory = getEl('bulkCategoryInput').value.trim();
-            
-            // Assign the selected category to any record that didn't have one
-            const finalRecords = recordsToImport.map(r => ({
-                ...r,
-                category: r.category === 'Uncategorized' ? selectedCategory : r.category
-            }));
-
+            const finalRecords = recordsToImport.map(r => ({ ...r, category: r.category === 'Uncategorized' ? selectedCategory : r.category }));
             const results = await executeBatchUpload(finalRecords, replaceMode);
-            
-            let message;
-            if (replaceMode) {
-                message = `SUCCESS: Replaced all records. Total added: ${results.added}.`;
-            } else {
-                message = `SUCCESS: Merged ${results.added} new records. ${results.duplicates} duplicates ignored.`;
-            }
-
-            showConfirm('Upload Complete', message, true);
-
+            showConfirm('Upload Complete', replaceMode ? `Replaced all. Added ${results.added}.` : `Merged ${results.added}. Ignored ${results.duplicates}.`, true);
         } catch(err){ 
-            showConfirm('Processing Error', `Error during bulk operation. ${err.message}`, true); 
-            console.error("Bulk upload error:", err); 
+            showConfirm('Processing Error', `Error: ${err.message}`, true); 
         }
     }
 
-    getEl('btnLoadBulk')?.addEventListener('click', () => handleBulkUpload(false)); // Merge
-    getEl('btnReplaceBulk')?.addEventListener('click', () => handleBulkUpload(true)); // Replace
+    getEl('btnLoadBulk')?.addEventListener('click', () => handleBulkUpload(false));
+    getEl('btnReplaceBulk')?.addEventListener('click', () => handleBulkUpload(true));
 
-    // --- CATEGORY MANAGER MODAL LISTENERS (unchanged) ---
     const modalCategoryManager = getEl('modalCategoryManager');
-    getEl('btnManageCategories')?.addEventListener('click', () => {
-        renderCategoryManagerList();
-        modalCategoryManager?.classList.remove('hidden');
-    });
-
-    getEl('btnCloseCategoryManager')?.addEventListener('click', () => {
-        modalCategoryManager?.classList.add('hidden');
-    });
-
+    getEl('btnManageCategories')?.addEventListener('click', () => { renderCategoryManagerList(); modalCategoryManager?.classList.remove('hidden'); });
+    getEl('btnCloseCategoryManager')?.addEventListener('click', () => { modalCategoryManager?.classList.add('hidden'); });
     getEl('btnAddCategory')?.addEventListener('click', async () => {
         const newCat = getEl('inpNewCategory')?.value.trim();
-        
-        if (!newCat) {
-             showConfirm('Error', 'Category name cannot be empty.', true);
-             return;
-        }
-        
-        if (categories.includes(newCat)) {
-            showConfirm('Error', 'Category already exists.', true);
-            return;
-        }
-
+        if (!newCat) return showConfirm('Error', 'Category name empty.', true);
+        if (categories.includes(newCat)) return showConfirm('Error', 'Category exists.', true);
         categories.push(newCat);
         getEl('inpNewCategory').value = '';
-        
         await saveCategories(); 
-        
         renderCategoryManagerList();
-        
-        showConfirm('Category Added', `Category "${newCat}" has been added.`, true);
     });
-
-    // --- EXPORT LOGIC ---
 
     function createDownloadLink(data, filename, mimeType) {
         const blob = new Blob([data], { type: mimeType });
@@ -1377,49 +1032,19 @@ service cloud.firestore {
 
     getEl('btnDownloadJson')?.addEventListener('click', () => {
         const dataToExport = parts.map(p => ({
-            zoren: p.zoren,
-            car_maker: p.car_maker,
-            applications: p.applications,
-            oem: p.oem,
-            category: p.category,
-            quantity: p.quantity,
-            costPrice: p.costPrice,
-            sellingPrice: p.sellingPrice
+            zoren: p.zoren, car_maker: p.car_maker, applications: p.applications, oem: p.oem, category: p.category, quantity: p.quantity, costPrice: p.costPrice, sellingPrice: p.sellingPrice
         }));
-        const json = JSON.stringify(dataToExport, null, 2);
-        createDownloadLink(json, `inventory_export_${new Date().toISOString().slice(0, 10)}.json`, 'application/json');
-        showConfirm('Export Complete', 'Inventory data successfully exported as JSON.', true);
+        createDownloadLink(JSON.stringify(dataToExport, null, 2), `inventory_export_${new Date().toISOString().slice(0, 10)}.json`, 'application/json');
     });
 
     getEl('btnExportCsv')?.addEventListener('click', () => {
-        if (parts.length === 0) {
-            showConfirm('Export Error', 'No data to export.', true);
-            return;
-        }
-
-        // Updated Headers to include Quantity, Cost, Selling
+        if (parts.length === 0) return showConfirm('Export Error', 'No data.', true);
         const headers = ["ZOREN No.", "Car Maker", "Applications", "OEM No.", "Category", "Quantity", "Cost Price", "Selling Price"];
-        const rows = parts.map(p => [
-            p.zoren,
-            p.car_maker,
-            p.applications,
-            p.oem.join('; '), // Use semicolon to separate multiple OEM numbers
-            p.category,
-            p.quantity,
-            p.costPrice,
-            p.sellingPrice
-        ]);
-
-        const csvContent = [
-            headers.map(h => `"${h}"`).join(','),
-            ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-        ].join('\n');
-
+        const rows = parts.map(p => [ p.zoren, p.car_maker, p.applications, p.oem.join('; '), p.category, p.quantity, p.costPrice, p.sellingPrice ]);
+        const csvContent = [ headers.map(h => `"${h}"`).join(','), ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')) ].join('\n');
         createDownloadLink(csvContent, `inventory_export_${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv');
-        showConfirm('Export Complete', 'Inventory data successfully exported as CSV.', true);
     });
 
-    // --- Start App Initialization ---
     document.addEventListener('DOMContentLoaded', initApp);
 </script>
 
